@@ -1,6 +1,44 @@
 version: 2
 updates:
+  # GitHub Actions: 週 1 回（月曜）、すべてまとめて 1 つの PR にする
+  # （PR が同時に何件も作られて gh-pages への push が競合した問題 #9 / #10 の緩和）
   - package-ecosystem: "github-actions"
-    directory: "/" # Location of package manifests
+    directory: "/"
     schedule:
-      interval: "weekly" # daily, weekly, monthly に設定可
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Tokyo"
+    open-pull-requests-limit: 1
+    groups:
+      actions:
+        patterns: ["*"]
+    commit-message:
+      prefix: "ci"
+    labels: ["dependencies", "github_actions"]
+
+  # npm: Actions と曜日をずらす（水曜）
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+      time: "09:00"
+      timezone: "Asia/Tokyo"
+    open-pull-requests-limit: 2
+    commit-message:
+      prefix: "chore"
+    labels: ["dependencies"]
+    groups:
+      # Playwright 本体と公式連携は、同じ PR にまとめる（VRT 画像に影響し得る単位。他の更新と混ぜない）
+      # ※ 自動 PR にはするが、自動マージはしない。VRT 差分が出たら /update-vrt の運用で対応する（CLAUDE.md 参照）
+      playwright:
+        patterns: ["@playwright/*", "@axe-core/playwright"]
+      # 影響の小さいものは minor / patch をまとめる。major は個別の PR になる
+      dev-tooling:
+        patterns: ["dotenv", "cross-env"]
+        update-types: ["minor", "patch"]
+    ignore:
+      # @types/node の major は、実行する Node のバージョン（CI は lts/*）に合わせて手動で更新する
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
