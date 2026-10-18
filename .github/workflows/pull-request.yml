@@ -91,7 +91,7 @@ jobs:
       # package-lock.json に変更がない限りダウンロード処理を短縮します
       - name: Cache Playwright Browsers
         id: playwright-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-pr-${{ hashFiles('**/package-lock.json') }}
