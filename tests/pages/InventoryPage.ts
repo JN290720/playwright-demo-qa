@@ -13,6 +13,8 @@ export class InventoryPage {
   readonly sortDropdown: Locator;      // 商品並び替え（ソート）セレクトボックス
   readonly cartBadge: Locator;         // カートアイコン右上にある購入件数の赤いバッジ
   readonly cartLink: Locator;          // ショッピングカートアイコンのリンク
+  readonly itemNames: Locator;         // 商品名の一覧（並び順の検証に使用）
+  readonly itemPrices: Locator;        // 商品価格の一覧（並び順の検証に使用）
 
   /**
    * コンストラクタ：ページ上の各要素を特定するためのロケータ（セレクター）を定義
@@ -27,6 +29,8 @@ export class InventoryPage {
     this.sortDropdown = page.locator('[data-test="product-sort-container"]');
     this.cartBadge = page.locator('.shopping_cart_badge');
     this.cartLink = page.locator('.shopping_cart_link');
+    this.itemNames = page.locator('.inventory_item_name');
+    this.itemPrices = page.locator('.inventory_item_price');
   }
 
   /**
