@@ -29,7 +29,7 @@ export default defineConfig({
   /* Retry on CI only */
   retries: isCI ? 2 : 0,
   /* 💡 CIでの並列実行ワーカー数：PC＋スマホの並列処理のため 2 ワーカーを指定 */
-  workers: isCI ? 2 : undefined,
+  workers: isCI ? 4 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: 'html',
   
