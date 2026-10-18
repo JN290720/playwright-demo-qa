@@ -29,6 +29,13 @@ test.describe('SauceDemo セキュリティ入力（インジェクション）�
   test('XSS（スクリプト注入）風文字列を入力してもスクリプトが実行されないこと', async ({ page }) => {
     const loginPage = new LoginPage(page);
 
+    // スクリプトが実行されると alert ダイアログが発生するため、発生したダイアログを記録しておく
+    const dialogMessages: string[] = [];
+    page.on('dialog', async (dialog) => {
+      dialogMessages.push(dialog.message());
+      await dialog.dismiss();
+    });
+
     // ログイン画面を開く
     await loginPage.goto();
 
@@ -36,7 +43,14 @@ test.describe('SauceDemo セキュリティ入力（インジェクション）�
     const xssPayload = '<script>alert("xss")</script>';
     await loginPage.login(xssPayload, 'secret_sauce');
 
-    // 【検証】画面クラッシュや意図しないアラート発火が起きず、エラーメッセージが表示されること
+    // 【検証】画面クラッシュせず、認証失敗のエラーメッセージが表示されること
     await expect(loginPage.errorMessage).toBeVisible();
+    await expect(loginPage.errorMessage).toContainText('Username and password do not match');
+
+    // 【検証】入力した文字列が script 要素として画面に挿入されていないこと
+    await expect(page.locator('[data-test="error"] script')).toHaveCount(0);
+
+    // 【検証】スクリプトが実行されていない（alert ダイアログが一度も発生していない）こと
+    expect(dialogMessages).toEqual([]);
   });
 });
