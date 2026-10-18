@@ -1,0 +1,103 @@
+name: Cleanup gh-pages Reports
+
+# gh-pages に溜まった古いテストレポートを整理します（#34）。
+#   ・pr-reports/<ブランチ名>/ のうち、対応する open な PR が無いもの
+#   ・main-test-<run_id>/ のうち、新しい順に <keep> 件より古いもの
+#
+# 安全のため、定期実行（schedule）は【常に dry-run】です（削除対象を Job Summary に出すだけ）。
+# 実際に削除するのは、手動実行（workflow_dispatch）で dry_run を false にしたときだけです。
+# ※ 削除は取り消せません（レポートの URL が 404 になります）。
+on:
+  schedule:
+    - cron: '0 18 * * 0' # 毎週日曜 18:00 UTC = 月曜 03:00 JST
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: '削除せず、対象を表示するだけにする（false で実際に削除）'
+        type: boolean
+        default: true
+      keep:
+        description: 'main-test-* を新しい順に何件残すか'
+        type: string
+        default: '10'
+
+permissions: {}
+
+concurrency:
+  group: cleanup-gh-pages
+  cancel-in-progress: false
+
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write      # gh-pages ブランチへの push（削除時のみ使用）
+      pull-requests: read  # open な PR の一覧取得
+    env:
+      # schedule は常に dry-run。workflow_dispatch で dry_run=false のときだけ実削除
+      DRY_RUN: ${{ (github.event_name == 'workflow_dispatch' && !inputs.dry_run) && 'false' || 'true' }}
+      KEEP: ${{ github.event_name == 'workflow_dispatch' && inputs.keep || '10' }}
+    steps:
+      - name: Checkout default branch (scripts)
+        uses: actions/checkout@v4
+        with:
+          path: src
+
+      - name: Checkout (gh-pages)
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: pages
+
+      - name: Collect open PR refs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api "repos/${GITHUB_REPOSITORY}/pulls?state=open&per_page=100" --paginate --jq '.[].head.ref' > open_refs.txt
+          echo "open な PR: $(wc -l < open_refs.txt) 件"
+
+      - name: Select reports to delete
+        run: |
+          set -euo pipefail
+          bash src/scripts/select-gh-pages-deletions.sh pages open_refs.txt "$KEEP" > deletions.txt
+          {
+            echo "## gh-pages の掃除（dry-run: ${DRY_RUN} / main-test 保持件数: ${KEEP}）"
+            echo
+            if [ -s deletions.txt ]; then
+              echo "削除対象: $(wc -l < deletions.txt) 件"
+              echo
+              echo '```'
+              cat deletions.txt
+              echo '```'
+            else
+              echo "削除対象はありません。"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Delete reports
+        if: env.DRY_RUN == 'false'
+        run: |
+          set -euo pipefail
+          if [ ! -s deletions.txt ]; then
+            echo "削除対象なし"
+            exit 0
+          fi
+          cd pages
+          while IFS= read -r path; do
+            case "$path" in ""|*..*|/*) echo "不正なパスはスキップ: $path"; continue;; esac
+            git rm -rq --ignore-unmatch -- "$path"
+          done < ../deletions.txt
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git commit -m "ci: 古いテストレポートを削除 [skip ci]"
+          for i in 1 2 3; do
+            if git push origin HEAD:gh-pages; then
+              exit 0
+            fi
+            echo "::warning::push attempt $i failed; rebase and retry"
+            git pull --rebase origin gh-pages
+          done
+          echo "::error::push failed after 3 attempts"
+          exit 1
