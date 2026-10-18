@@ -45,8 +45,6 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
 
     await expect(page).toHaveScreenshot('login-page-pc.png', {
       fullPage: true,
-      animations: 'disabled',
-      scale: 'css',
     });
   });
 
@@ -68,8 +66,6 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
 
       await expect(page).toHaveScreenshot('inventory-page-pc.png', {
         fullPage: true,
-        animations: 'disabled',
-        scale: 'css',
       });
     });
 
@@ -82,8 +78,6 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
 
       await expect(page).toHaveScreenshot('inventory-item-page-pc.png', {
         fullPage: true,
-        animations: 'disabled',
-        scale: 'css',
       });
     });
 
@@ -96,8 +90,6 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
 
       await expect(page).toHaveScreenshot('cart-page-pc.png', {
         fullPage: true,
-        animations: 'disabled',
-        scale: 'css',
       });
     });
 
@@ -111,8 +103,6 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
 
       await expect(page).toHaveScreenshot('checkout-step-one-pc.png', {
         fullPage: true,
-        animations: 'disabled',
-        scale: 'css',
       });
     });
 
@@ -130,8 +120,6 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
 
       await expect(page).toHaveScreenshot('checkout-step-two-pc.png', {
         fullPage: true,
-        animations: 'disabled',
-        scale: 'css',
       });
     });
 
@@ -150,8 +138,6 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
 
       await expect(page).toHaveScreenshot('checkout-complete-pc.png', {
         fullPage: true,
-        animations: 'disabled',
-        scale: 'css',
       });
     });
 
@@ -164,8 +150,6 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
 
       await expect(page).toHaveScreenshot('side-menu-pc.png', {
         fullPage: true,
-        animations: 'disabled',
-        scale: 'css',
       });
     });
 
