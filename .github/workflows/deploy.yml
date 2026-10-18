@@ -4,13 +4,16 @@ on:
   push:
     branches: [ main ]
 
+# 最小権限: 既定は読み取りのみ。Pages デプロイに必要な権限は Job 単位で付与する
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 jobs:
   deploy:
+    permissions:
+      contents: read
+      pages: write     # GitHub Pages へのデプロイ
+      id-token: write  # deploy-pages の OIDC 認証
     runs-on: ubuntu-latest
     environment:
       name: github-pages
