@@ -19,7 +19,8 @@ jobs:
     # デプロイがコケている場合は無駄なテスト実行を回避します
     # -------------------------------------------------------------------------
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    timeout-minutes: 60
+    # 通常は約 2〜3 分。ハング時に 1 時間待たずに気づけるよう 15 分に短縮（#19、ユーザー承認済み）
+    timeout-minutes: 15
     runs-on: ubuntu-latest
     
     steps:
