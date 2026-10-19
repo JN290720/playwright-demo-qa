@@ -85,8 +85,38 @@ jobs:
       # ステップ4: GitHub Pages へ全レポートを一括アップロード
       # -----------------------------------------------------------------------
       # 1回のデプロイアクションで2つのレポートを同時公開（Git Push のバッティング競合を回避）
-      - name: Deploy All Reports to GitHub Pages
+      # 💡 他のワークフローと gh-pages への push が競合する(cannot lock ref)ことがあるため、
+      # 失敗時のみランダム待機をはさんで最大 3 回まで再試行します。
+      - name: Deploy All Reports to GitHub Pages (attempt 1)
+        id: deploy-reports-1
         if: always()
+        continue-on-error: true
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./deploy-artifacts
+          keep_files: true
+
+      - name: Wait before retry (attempt 2)
+        if: always() && steps.deploy-reports-1.outcome == 'failure'
+        run: sleep $((RANDOM % 20 + 5))
+
+      - name: Deploy All Reports to GitHub Pages (attempt 2)
+        id: deploy-reports-2
+        if: always() && steps.deploy-reports-1.outcome == 'failure'
+        continue-on-error: true
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./deploy-artifacts
+          keep_files: true
+
+      - name: Wait before retry (attempt 3)
+        if: always() && steps.deploy-reports-2.outcome == 'failure'
+        run: sleep $((RANDOM % 20 + 5))
+
+      - name: Deploy All Reports to GitHub Pages (attempt 3)
+        if: always() && steps.deploy-reports-2.outcome == 'failure'
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}

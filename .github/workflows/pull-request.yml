@@ -174,8 +174,40 @@ jobs:
       # -----------------------------------------------------------------------
       # ステップ5: HTMLテストレポートの GitHub Pages デプロイ
       # -----------------------------------------------------------------------
-      - name: Deploy Playwright Report to GitHub Pages
+      # 💡 複数 PR が同時に走ると gh-pages への push が競合する(cannot lock ref)ため、
+      # 失敗時のみランダム待機をはさんで最大 3 回まで再試行します。
+      - name: Deploy Playwright Report to GitHub Pages (attempt 1)
+        id: deploy-report-1
         if: "always() && !contains(github.event.comment.body, '/update-vrt')"
+        continue-on-error: true
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./playwright-report
+          destination_dir: pr-reports/${{ steps.pr-branch.outputs.result }}
+          keep_files: true
+
+      - name: Wait before retry (attempt 2)
+        if: "always() && steps.deploy-report-1.outcome == 'failure'"
+        run: sleep $((RANDOM % 20 + 5))
+
+      - name: Deploy Playwright Report to GitHub Pages (attempt 2)
+        id: deploy-report-2
+        if: "always() && steps.deploy-report-1.outcome == 'failure'"
+        continue-on-error: true
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./playwright-report
+          destination_dir: pr-reports/${{ steps.pr-branch.outputs.result }}
+          keep_files: true
+
+      - name: Wait before retry (attempt 3)
+        if: "always() && steps.deploy-report-2.outcome == 'failure'"
+        run: sleep $((RANDOM % 20 + 5))
+
+      - name: Deploy Playwright Report to GitHub Pages (attempt 3)
+        if: "always() && steps.deploy-report-2.outcome == 'failure'"
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
