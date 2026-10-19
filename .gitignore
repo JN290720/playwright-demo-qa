@@ -21,3 +21,4 @@ blob-report/
 # ローカル（Windows / macOS）で生成された画像を誤ってコミットしないようにする
 *-win32.png
 *-darwin.png
+reports/

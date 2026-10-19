@@ -84,11 +84,21 @@ jobs:
       # ステップ2: 本番 URL に対する Playwright E2E テスト実行
       # -----------------------------------------------------------------------
       # 本番環境（ENV: prod）と本番ページ URL を環境変数で渡して全テストを検証します
+      # 💡 html に加えて json も出力し、flaky（リトライで通ったテスト）を可視化します（#37）
       - name: Run Playwright tests
         env:
           ENV: prod
           BASE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
-        run: npx playwright test
+          PLAYWRIGHT_JSON_OUTPUT_NAME: reports/results.json
+        run: npx playwright test --reporter=html,json
+
+      # 💡 flaky（リトライで通ったテスト）と失敗を抽出して、Job Summary に表示します（警告のみ。CI は失敗にしません）
+      - name: Summarize flaky tests
+        if: always()
+        run: |
+          mkdir -p reports
+          node scripts/summarize-flaky.js reports/results.json || true
+          if [ -f reports/summary.md ]; then cat reports/summary.md >> "$GITHUB_STEP_SUMMARY"; fi
 
       # -----------------------------------------------------------------------
       # ステップ3: GitHub Pages デプロイ用のフォルダ構造準備
@@ -173,5 +183,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: post-deploy-playwright-report
-          path: playwright-report/
+          path: |
+            playwright-report/
+            reports/
           retention-days: 7
