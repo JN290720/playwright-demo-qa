@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { CREDENTIALS } from './fixtures/users';
 
 // Staging 環境でネットワーク疑似エラーテストを実行
 test.beforeEach(async ({}, testInfo) => {
@@ -23,8 +24,8 @@ test.describe('SauceDemo Network Mocking & Resilience Tests', () => {
     });
 
     await page.goto('https://www.saucedemo.com/');
-    await page.locator('[data-test="username"]').fill('standard_user');
-    await page.locator('[data-test="password"]').fill('secret_sauce');
+    await page.locator('[data-test="username"]').fill(CREDENTIALS.standard.username);
+    await page.locator('[data-test="password"]').fill(CREDENTIALS.standard.password);
     await page.locator('[data-test="login-button"]').click();
 
     // 💡 検証: 画像が読み込めなくても画面タイトルや商品名テキスト、ボタンが正しく表示されていること
@@ -44,8 +45,8 @@ test.describe('SauceDemo Network Mocking & Resilience Tests', () => {
     });
 
     await page.goto('https://www.saucedemo.com/');
-    await page.locator('[data-test="username"]').fill('standard_user');
-    await page.locator('[data-test="password"]').fill('secret_sauce');
+    await page.locator('[data-test="username"]').fill(CREDENTIALS.standard.username);
+    await page.locator('[data-test="password"]').fill(CREDENTIALS.standard.password);
     await page.locator('[data-test="login-button"]').click();
 
     // 遅延があっても最終的にログイン後の商品一覧が表示されること（タイムアウト設定を拡張）
@@ -61,8 +62,8 @@ test.describe('SauceDemo Network Mocking & Resilience Tests', () => {
   // -------------------------------------------------------------
   test('P3: 商品一覧を表示後にオフラインになっても、既存描画が維持されること', async ({ page, context }) => {
     await page.goto('https://www.saucedemo.com/');
-    await page.locator('[data-test="username"]').fill('standard_user');
-    await page.locator('[data-test="password"]').fill('secret_sauce');
+    await page.locator('[data-test="username"]').fill(CREDENTIALS.standard.username);
+    await page.locator('[data-test="password"]').fill(CREDENTIALS.standard.password);
     await page.locator('[data-test="login-button"]').click();
     await page.locator('.title').waitFor({ state: 'visible' });
 

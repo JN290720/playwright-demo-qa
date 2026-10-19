@@ -1,4 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
+import { CREDENTIALS, SHIPPING_INFO } from './fixtures/users';
 
 // ビジュアル回帰テストは Staging 環境限定
 test.beforeEach(async ({}, testInfo) => {
@@ -54,8 +55,8 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
     // 各テスト前にログインを実行して商品一覧へ移動
     test.beforeEach(async ({ page }) => {
       await page.goto('https://www.saucedemo.com/');
-      await page.locator('[data-test="username"]').fill('standard_user');
-      await page.locator('[data-test="password"]').fill('secret_sauce');
+      await page.locator('[data-test="username"]').fill(CREDENTIALS.standard.username);
+      await page.locator('[data-test="password"]').fill(CREDENTIALS.standard.password);
       await page.locator('[data-test="login-button"]').click();
       await page.locator('.title').waitFor({ state: 'visible' });
     });
@@ -110,9 +111,9 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
     test('P6: 購入確認画面の見た目に変更がないこと (PC)', async ({ page }) => {
       await page.locator('.shopping_cart_link').click();
       await page.locator('[data-test="checkout"]').click();
-      await page.locator('[data-test="firstName"]').fill('Taro');
-      await page.locator('[data-test="lastName"]').fill('Yamada');
-      await page.locator('[data-test="postalCode"]').fill('123-4567');
+      await page.locator('[data-test="firstName"]').fill(SHIPPING_INFO.firstName);
+      await page.locator('[data-test="lastName"]').fill(SHIPPING_INFO.lastName);
+      await page.locator('[data-test="postalCode"]').fill(SHIPPING_INFO.postalCode);
       await page.locator('[data-test="continue"]').click();
       await page.locator('[data-test="finish"]').waitFor({ state: 'visible' });
 
@@ -127,9 +128,9 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
     test('P7: 購入完了画面の見た目に変更がないこと (PC)', async ({ page }) => {
       await page.locator('.shopping_cart_link').click();
       await page.locator('[data-test="checkout"]').click();
-      await page.locator('[data-test="firstName"]').fill('Taro');
-      await page.locator('[data-test="lastName"]').fill('Yamada');
-      await page.locator('[data-test="postalCode"]').fill('123-4567');
+      await page.locator('[data-test="firstName"]').fill(SHIPPING_INFO.firstName);
+      await page.locator('[data-test="lastName"]').fill(SHIPPING_INFO.lastName);
+      await page.locator('[data-test="postalCode"]').fill(SHIPPING_INFO.postalCode);
       await page.locator('[data-test="continue"]').click();
       await page.locator('[data-test="finish"]').click();
       await page.locator('[data-test="back-to-products"]').waitFor({ state: 'visible' });

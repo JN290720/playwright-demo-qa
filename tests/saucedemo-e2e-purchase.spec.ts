@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import { LoginPage } from './pages/LoginPage';
 import { InventoryPage } from './pages/InventoryPage';
 import { CheckoutPage } from './pages/CheckoutPage';
+import { CREDENTIALS, SHIPPING_INFO } from './fixtures/users';
 
 test.describe('SauceDemo 正常系 E2E（購入フロー）', () => {
   test('ログイン → 商品をカートへ追加 → 購入情報入力 → 金額確認 → 注文完了まで行えること', async ({ page }) => {
@@ -11,7 +12,7 @@ test.describe('SauceDemo 正常系 E2E（購入フロー）', () => {
 
     // 1. ログイン
     await loginPage.goto();
-    await loginPage.login('standard_user', 'secret_sauce');
+    await loginPage.loginAs(CREDENTIALS.standard);
     await expect(inventoryPage.title).toHaveText('Products');
 
     // 2. 商品を 2 件カートへ追加し、バッジの件数を確認
@@ -25,7 +26,7 @@ test.describe('SauceDemo 正常系 E2E（購入フロー）', () => {
 
     // 4. チェックアウトへ進み、購入者情報を入力
     await checkoutPage.checkoutButton.click();
-    await checkoutPage.fillShippingInfo('Taro', 'Yamada', '100-0001');
+    await checkoutPage.fillShippingInfo(SHIPPING_INFO.firstName, SHIPPING_INFO.lastName, SHIPPING_INFO.postalCode);
 
     // 5. 購入確認画面で、小計・税・合計が整合していることを検証
     //    （商品価格は動的に合算し、値の直書きによる壊れやすさを避ける）

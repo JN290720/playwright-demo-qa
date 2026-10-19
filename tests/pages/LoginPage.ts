@@ -1,4 +1,5 @@
 import { Page, Locator } from '@playwright/test';
+import type { Credentials } from '../fixtures/users';
 
 /**
  * SauceDemo のログイン画面（https://www.saucedemo.com/）を操作・検証するための Page Object クラス
@@ -47,6 +48,14 @@ export class LoginPage {
     await this.usernameInput.fill(username);
     await this.passwordInput.fill(password);
     await this.loginButton.click();
+  }
+
+  /**
+   * ユーザー情報（tests/fixtures/users.ts の CREDENTIALS）を使ってログインする
+   * @param user ユーザー名とパスワードのセット
+   */
+  async loginAs(user: Credentials) {
+    await this.login(user.username, user.password);
   }
 
   /**
