@@ -141,13 +141,26 @@ jobs:
       # -----------------------------------------------------------------------
       # ステップ3-A: 【通常時】Playwright テストの実行
       # -----------------------------------------------------------------------
-      # 明示的に --reporter=html を指定し、全プロジェクト(PC/スマホ/Safari)を網羅実行します
+      # 明示的に --reporter を指定し、全プロジェクト(PC/スマホ/Safari)を網羅実行します
+      # 💡 html に加えて json も出力し、flaky（リトライで通ったテスト）を可視化します（#37）。
+      #    ※ CLI の --reporter は config の reporter を上書きするため、ここで指定します
       - name: Run Playwright tests
         if: "!contains(github.event.comment.body, '/update-vrt')"
         id: run-tests
         env:
           ENV: staging
-        run: npx playwright test --reporter=html
+          PLAYWRIGHT_JSON_OUTPUT_NAME: reports/results.json
+        run: npx playwright test --reporter=html,json
+
+      # 💡 flaky（リトライで通ったテスト）と失敗を抽出して、Job Summary と PR コメントに表示します（警告のみ。CI は失敗にしません）
+      - name: Summarize flaky tests
+        if: "always() && !contains(github.event.comment.body, '/update-vrt')"
+        run: |
+          mkdir -p reports
+          if [ -f scripts/summarize-flaky.js ]; then
+            node scripts/summarize-flaky.js reports/results.json || true
+            if [ -f reports/summary.md ]; then cat reports/summary.md >> "$GITHUB_STEP_SUMMARY"; fi
+          fi
 
       # -----------------------------------------------------------------------
       # ステップ3-B: 【コマンド実行時】VRT（視覚テスト）スナップショット画像の自動更新
@@ -288,12 +301,19 @@ jobs:
               });
             } else {
               // 💡 通常テスト完了時の結果テーブル＆レポートURLコメント投稿処理（既存コメントは更新）
-              const status = '${{ steps.run-tests.outcome }}' === 'success' ? '✅ PASSED' : '❌ FAILED';
+              // 💡 flaky（リトライで通ったテスト）があれば警告表示にする（#37。CI は失敗にしない）
+              const fs = require('fs');
+              const readOr = (p, d) => (fs.existsSync(p) ? fs.readFileSync(p, 'utf8') : d);
+              const flakyCount = Number(readOr('reports/flaky-count.txt', '0')) || 0;
+              const flakySummary = readOr('reports/summary.md', '');
+              const testsOk = '${{ steps.run-tests.outcome }}' === 'success';
+              const status = !testsOk ? '❌ FAILED' : (flakyCount > 0 ? '⚠️ PASSED（flaky あり）' : '✅ PASSED');
               const reportUrl = `https://${context.repo.owner}.github.io/${context.repo.repo}/pr-reports/${encodeURIComponent('${{ steps.pr-branch.outputs.result }}')}/`;
               const body = `### 🎭 Playwright Test Results (PR Check)\n` +
                            `**Status:** ${status}\n` +
                            `**PR Branch:** \`${'${{ steps.pr-branch.outputs.result }}'}\` \n` +
                            `**📊 HTML Report:** [View Test Report](${reportUrl})\n\n` +
+                           (flakySummary ? `${flakySummary}\n` : '') +
                            `---\n` +
                            `📸 **VRT画像を更新したい場合:**\n` +
                            `コメント欄に \`/update-vrt\` と投稿すると、Linux環境のPC/スマホ/Safari最新画像を自動更新してPushします。`;
@@ -331,5 +351,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: pr-playwright-report
-          path: playwright-report/
+          path: |
+            playwright-report/
+            reports/
           retention-days: 7
