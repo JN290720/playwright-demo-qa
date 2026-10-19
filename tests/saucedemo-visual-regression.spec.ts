@@ -3,6 +3,14 @@ import type { Page } from '@playwright/test';
 import { CREDENTIALS, SHIPPING_INFO } from './fixtures/users';
 
 /**
+ * ページ全体を撮るか（PC・PC 上のモバイル表示は全体）。
+ * Android の実機の Chrome は、画面の大きさを変えられないため、全体の撮影が「スクロールしながらの貼り合わせ」になり、
+ * 固定ヘッダーが何度も写り込んで基準画像として不正確・不安定になる（#85 の検証で確認）。
+ * そのため Android では、画面に表示される範囲（ビューポート）を撮る。
+ */
+const FULL_PAGE = process.env.ANDROID !== '1';
+
+/**
  * 💡 レンダリング完了を 100% 待つためのカスタムヘルパー関数
  */
 async function waitForRenderComplete(page: Page) {
@@ -39,7 +47,7 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
     await waitForRenderComplete(page);
 
     await expect(page).toHaveScreenshot('login-page-pc.png', {
-      fullPage: true,
+      fullPage: FULL_PAGE,
     });
   });
 
@@ -60,7 +68,7 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
       await waitForRenderComplete(page);
 
       await expect(page).toHaveScreenshot('inventory-page-pc.png', {
-        fullPage: true,
+        fullPage: FULL_PAGE,
       });
     });
 
@@ -72,7 +80,7 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
       await waitForRenderComplete(page);
 
       await expect(page).toHaveScreenshot('inventory-item-page-pc.png', {
-        fullPage: true,
+        fullPage: FULL_PAGE,
       });
     });
 
@@ -84,7 +92,7 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
       await waitForRenderComplete(page);
 
       await expect(page).toHaveScreenshot('cart-page-pc.png', {
-        fullPage: true,
+        fullPage: FULL_PAGE,
       });
     });
 
@@ -97,7 +105,7 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
       await waitForRenderComplete(page);
 
       await expect(page).toHaveScreenshot('checkout-step-one-pc.png', {
-        fullPage: true,
+        fullPage: FULL_PAGE,
       });
     });
 
@@ -114,7 +122,7 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
       await waitForRenderComplete(page);
 
       await expect(page).toHaveScreenshot('checkout-step-two-pc.png', {
-        fullPage: true,
+        fullPage: FULL_PAGE,
       });
     });
 
@@ -132,7 +140,7 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
       await waitForRenderComplete(page);
 
       await expect(page).toHaveScreenshot('checkout-complete-pc.png', {
-        fullPage: true,
+        fullPage: FULL_PAGE,
       });
     });
 
@@ -144,7 +152,7 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
       await waitForRenderComplete(page);
 
       await expect(page).toHaveScreenshot('side-menu-pc.png', {
-        fullPage: true,
+        fullPage: FULL_PAGE,
       });
     });
 
