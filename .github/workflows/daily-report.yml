@@ -1,0 +1,38 @@
+name: Daily Report
+
+# 毎朝 8:00 JST に、本体 playwright-demo と QA playwright-demo-qa の状況を、
+# 日次レポート用の Issue（ラベル daily-report）にコメントとして自動投稿します（#13）。
+# 事実（CI の状況・PR・Issue・ラベル）は、scripts/daily-report.js が GitHub API から機械的に取得します。
+on:
+  schedule:
+    - cron: '0 23 * * *' # 23:00 UTC = 翌 8:00 JST（定時実行は数分〜十数分遅れることがあります）
+  workflow_dispatch:      # 手動実行（動作確認用）
+
+# 既定は全拒否。必要な権限だけを Job に付与します（Issue #33 の方針）
+permissions: {}
+
+concurrency:
+  group: daily-report
+  cancel-in-progress: false
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read       # スクリプトの取得
+      issues: write        # 日次レポート用 Issue の作成・コメント投稿
+      pull-requests: read  # PR の一覧・CI の状況の取得
+      actions: read        # ワークフローの実行状況の取得
+      checks: read         # PR の CI（check-runs）の取得
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Post daily report
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/daily-report.js --post
