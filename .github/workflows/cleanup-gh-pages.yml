@@ -76,6 +76,37 @@ jobs:
             fi
           } >> "$GITHUB_STEP_SUMMARY"
 
+      # 削除の前に、対象のレポートを tar.gz にして GitHub Release へ保存します（ユーザー判断 #34）。
+      # Release には保持期限がなく、あとからダウンロードできます。保存に失敗した場合は、削除を行いません。
+      # （なお、削除は通常のコミットなので、gh-pages の履歴にも内容が残ります）
+      - name: Archive reports to a GitHub Release (before deletion)
+        if: env.DRY_RUN == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if [ ! -s deletions.txt ]; then
+            echo "削除対象なし（アーカイブも不要）"
+            exit 0
+          fi
+          stamp="$(date -u +%Y%m%d-%H%M%S)"
+          tag="reports-archive-${stamp}"
+          mkdir -p archive
+          (cd pages && tar -czf "../archive/gh-pages-reports-${stamp}.tar.gz" -T ../deletions.txt)
+          ls -l archive
+          {
+            echo "削除前にアーカイブした gh-pages のテストレポート（${stamp} UTC）。"
+            echo
+            echo "含まれるディレクトリ:"
+            echo '```'
+            cat deletions.txt
+            echo '```'
+          } > archive/notes.md
+          gh release create "$tag" "archive/gh-pages-reports-${stamp}.tar.gz" \
+            --title "gh-pages レポートのアーカイブ (${stamp})" \
+            --notes-file archive/notes.md \
+            --prerelease
+
       - name: Delete reports
         if: env.DRY_RUN == 'false'
         run: |
