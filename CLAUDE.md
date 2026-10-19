@@ -28,6 +28,7 @@ Playwright による E2E テスト・ビジュアルレグレッションテス�
 ```
 npm ci
 npx playwright install --with-deps
+npm run test              # 環境指定なし(ENV 未指定は prod)で全テスト
 npm run test:stg          # ENV=staging で全テスト
 npm run test:prod         # ENV=prod で全テスト
 npx playwright test --ui  # UI モード(デバッグ用)
@@ -54,8 +55,7 @@ npx playwright show-report
 - ブランチ名は `種別/内容` の形式。種別は `feature` / `fix` / `ci` / `docs` / `refactor` / `test` / `chore`。
 - コミットメッセージは `種別: 概要`(日本語)。例: `ci: PRテストワークフローの修正`。
 - `main` に直接 push しない。必ずブランチを切って PR にする。
-- PR 本文は [PR テンプレート](.github/workflows/PULL_REQUEST_TEMPLATE.md) の見出し(概要 / 関連 Issue / 変更内容 / 動作確認)に沿って書く。
-  - 注意: テンプレートが `.github/workflows/` にあるため、GitHub の PR 作成画面には自動で反映されない。また、記載の `npm run test` は存在しない(`test:stg` / `test:prod` を使う)。
+- PR 本文は [PR テンプレート](.github/PULL_REQUEST_TEMPLATE.md) の見出し(概要 / 関連 Issue / 変更内容 / 動作確認)に沿って書く。
 - 1 つの PR では 1 つの目的だけを扱う。無関係な変更を混ぜない。
 
 ## 権限・シークレット

@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "test": "playwright test",
     "test:stg": "cross-env ENV=staging npx playwright test",
     "test:prod": "cross-env ENV=prod npx playwright test"
   },
