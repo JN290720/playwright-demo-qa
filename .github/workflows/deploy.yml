@@ -31,3 +31,28 @@ jobs:
     - name: Deploy to GitHub Pages
       id: deployment
       uses: actions/deploy-pages@v4
+
+  # 失敗の通知（#37、ユーザー承認済み）: デプロイが失敗したら GitHub Issue を作成（既にあればコメントを追記）。
+  # 成功に戻ったら、復旧を書いて閉じる。デプロイの権限（pages・id-token）を持たない、別の Job で行う（最小権限）。
+  notify:
+    needs: deploy
+    if: ${{ always() && (needs.deploy.result == 'success' || needs.deploy.result == 'failure') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read # scripts/notify-failure.js の取得
+      issues: write  # Issue の作成・コメント・クローズ
+    steps:
+    - uses: actions/checkout@v4
+    - name: Notify via Issue
+      env:
+        GH_TOKEN: ${{ github.token }}
+        MODE: ${{ needs.deploy.result == 'success' && 'recovery' || 'failure' }}
+        NOTIFY_LABEL: deploy-failure
+        NOTIFY_TITLE: '🚨 Deploy App が失敗しました (main)'
+        NOTIFY_BODY: |
+          デプロイ（Deploy App）の結果: **${{ needs.deploy.result }}**
+
+          - 実行: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          - コミット: ${{ github.sha }}
+      run: node scripts/notify-failure.js
