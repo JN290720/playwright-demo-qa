@@ -30,6 +30,8 @@ test.describe('SauceDemo 商品一覧（ソート）とカート操作', () => {
       const inventoryPage = new InventoryPage(page);
       await inventoryPage.selectSortOption(option);
 
+      // 並び順は、全商品名を取り出して、期待する順序と比較する（web-first assertion では、順序の比較ができないため例外）
+      // eslint-disable-next-line playwright/prefer-web-first-assertions
       const names = await inventoryPage.itemNames.allTextContents();
       expect(names.length).toBeGreaterThan(1);
       expect(names).toEqual([...names].sort(compare));
