@@ -1,0 +1,71 @@
+name: 相談（方針の判断）
+description: 人の判断が必要な事項を、案とあわせて相談する（人と AI のどちらが起票しても同じ形式）
+title: "相談: 判断してほしいことを一文で"
+labels: ["needs-user-decision"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        入力した内容は、`### 項目名` の見出しつきで Issue に保存されます。
+        **必ず推奨案を示してください。** 判断が出るまでの間、止める作業と先に進める作業も書きます。
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 優先度
+      description: "P0 緊急 / P1 高 / P2 中 / P3 低。起票後に同名のラベルも付けてください。"
+      options:
+        - P0
+        - P1
+        - P2
+        - P3
+    validations:
+      required: true
+  - type: dropdown
+    id: scope
+    attributes:
+      label: 対象リポジトリ
+      options:
+        - QA（playwright-demo-qa）
+        - 本体（playwright-demo）
+    validations:
+      required: true
+  - type: textarea
+    id: question
+    attributes:
+      label: 相談したいこと
+      description: 何を決めたいか。
+    validations:
+      required: true
+  - type: textarea
+    id: background
+    attributes:
+      label: 背景（事実）
+      description: 判断に必要な事実。
+    validations:
+      required: true
+  - type: textarea
+    id: options
+    attributes:
+      label: 選択肢
+      description: 案ごとの内容・長所・短所を表にする。
+      placeholder: |
+        | 案 | 内容 | 長所 | 短所 |
+        |---|---|---|---|
+        | A | | | |
+        | B | | | |
+    validations:
+      required: true
+  - type: textarea
+    id: recommendation
+    attributes:
+      label: 推奨
+      description: どれが良いと考えるか、その理由。
+    validations:
+      required: true
+  - type: textarea
+    id: until_decided
+    attributes:
+      label: 決まるまでの扱い
+      description: 決まるまで止める作業と、先に進める作業。
+    validations:
+      required: true
