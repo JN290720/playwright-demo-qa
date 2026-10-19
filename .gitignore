@@ -22,3 +22,7 @@ blob-report/
 *-win32.png
 *-darwin.png
 reports/
+
+# Android 実行（#85）の生成物
+playwright-report-android/
+android-final-screen.png
