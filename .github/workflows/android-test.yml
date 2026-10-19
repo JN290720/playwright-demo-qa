@@ -26,8 +26,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # イメージの種類によって、Chrome の有無や root の可否が違うため、両方を調べる
-        target: [ google_apis, google_apis_playstore ]
+        # google_apis（userdebug。root 可・Chrome 入り）で成功した（#85 / PR #86 の調査結果）。
+        # google_apis_playstore（user ビルド）は、Chrome の command line フラグを有効にできず、初回起動画面で止まるため使わない
+        target: [ google_apis ]
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
@@ -54,7 +55,7 @@ jobs:
           arch: x86_64
           profile: pixel_6
           disable-animations: true
-          script: bash scripts/android/run-on-emulator.sh
+          script: REPEAT=5 bash scripts/android/run-on-emulator.sh
 
       - name: Upload artifacts
         if: always()
