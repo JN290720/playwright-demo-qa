@@ -7,10 +7,10 @@ on:
     types:
       - completed
 
+# 最小権限: レポートを gh-pages ブランチへ push するための contents: write のみ
+# (Pages のデプロイ API / OIDC は使わないため pages・id-token は不要)
 permissions:
   contents: write
-  pages: write
-  id-token: write
 
 jobs:
   post-deploy-test:
