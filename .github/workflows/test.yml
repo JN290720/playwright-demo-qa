@@ -7,10 +7,12 @@ on:
     types:
       - completed
 
-# 最小権限: レポートを gh-pages ブランチへ push するための contents: write のみ
+# 最小権限: レポートを gh-pages ブランチへ push するための contents: write と、
+# 失敗を GitHub Issue で通知するための issues: write（#37、ユーザー承認済み）
 # (Pages のデプロイ API / OIDC は使わないため pages・id-token は不要)
 permissions:
   contents: write
+  issues: write
 
 jobs:
   post-deploy-test:
@@ -164,6 +166,34 @@ jobs:
           echo "## 🎭 Playwright Test Reports" >> $GITHUB_STEP_SUMMARY
           echo "🌟 **[最新のテストレポートを見る](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/main-deploy-report/)**" >> $GITHUB_STEP_SUMMARY
           echo "📜 **[今回の実行結果のみ見る (#${{ github.run_id }})](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/main-test-${{ github.run_id }}/)**" >> $GITHUB_STEP_SUMMARY
+
+      # -----------------------------------------------------------------------
+      # 失敗の通知（#37）: 失敗したら GitHub Issue を作成（既にあればコメントを追記）。成功に戻ったら復旧を書いて閉じる
+      # -----------------------------------------------------------------------
+      - name: Notify failure via Issue
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MODE: failure
+          NOTIFY_LABEL: post-deploy-failure
+          NOTIFY_TITLE: '🚨 Post-Deploy Test が失敗しました (main)'
+          NOTIFY_BODY: |
+            デプロイ後のテスト（Post-Deploy Test）が失敗しました。
+
+            - 実行: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            - コミット: ${{ github.event.workflow_run.head_sha }}
+            - テストレポート: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/main-test-${{ github.run_id }}/
+        run: node scripts/notify-failure.js
+
+      - name: Close failure issue on recovery
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MODE: recovery
+          NOTIFY_LABEL: post-deploy-failure
+          NOTIFY_BODY: |
+            Post-Deploy Test が成功しました（${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}）。
+        run: node scripts/notify-failure.js
 
       # -----------------------------------------------------------------------
       # ステップ6: テスト結果（HTMLレポート）のアーティファクト保存
