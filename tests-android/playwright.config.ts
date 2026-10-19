@@ -15,6 +15,8 @@ export default defineConfig({
   // Android で実行するのは、見た目の確認（VRT）と、購入フロー 1 件（動作確認）だけ
   testMatch: ['**/saucedemo-visual-regression.spec.ts', '**/saucedemo-e2e-purchase.spec.ts'],
   workers: 1, // 端末が 1 台のため
+  // 失敗したときの画面を成果物（test-results/）に残して、原因を調べられるようにする
+  use: { screenshot: 'only-on-failure' },
   timeout: 60_000,
   // 外部サイト（TodoMVC 等）への接続が一時的に遅れて 1 件失敗した実績があるため、リトライを 1 回だけ許可する。
   // リトライで通ったテストは、Job Summary に flaky として表示される（見逃さない。#37）

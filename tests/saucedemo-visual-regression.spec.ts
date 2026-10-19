@@ -146,8 +146,12 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
 
     // 8. サイドメニュー展開状態
     test('P8: サイドメニュー展開時の見た目に変更がないこと (PC)', async ({ page }) => {
-      await page.locator('#react-burger-menu-btn').click();
-      await page.locator('.bm-menu-wrap').waitFor({ state: 'visible' });
+      // Android の実機の Chrome では、タップが取りこぼされてメニューが開かないことがあった（#85）ため、
+      // 「ボタンを押す → メニューが表示される」までを、表示されるまで繰り返す
+      await expect(async () => {
+        await page.locator('#react-burger-menu-btn').click();
+        await expect(page.locator('.bm-menu-wrap')).toBeVisible({ timeout: 3_000 });
+      }).toPass({ timeout: 20_000 });
 
       await waitForRenderComplete(page);
 
