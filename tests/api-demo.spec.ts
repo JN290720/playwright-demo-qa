@@ -2,14 +2,6 @@ import { test, expect } from '@playwright/test';
 
 test.describe('API テストの各種パターン', () => {
 
-  // 💡 各テストの直前に環境変数をチェック
-  test.beforeEach(({}, testInfo) => {
-    // ENV_NAME が 'staging' でない場合はテストを自動スキップ
-    if (process.env.ENV_NAME !== 'staging') {
-      testInfo.skip(true, 'この API テストは Staging 環境限定です');
-    }
-  });
-
   // APIのベースURL（環境ファイルから取得、未設定ならデフォルト値を使用）
   const baseUrl = process.env.BASE_URL || 'https://jsonplaceholder.typicode.com';
 

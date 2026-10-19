@@ -28,12 +28,26 @@ Playwright による E2E テスト・ビジュアルレグレッションテス�
 ```
 npm ci
 npx playwright install --with-deps
-npm run test              # 環境指定なし(ENV 未指定は prod)で全テスト
-npm run test:stg          # ENV=staging で全テスト
-npm run test:prod         # ENV=prod で全テスト
+npm run test              # 環境指定なし(ENV 未指定は prod)。@prd タグ付きの主要機能のみ
+npm run test:stg          # ENV=staging。全テスト(フル検証)
+npm run test:prod         # ENV=prod。@prd タグ付きの主要機能のみ
 npx playwright test --ui  # UI モード(デバッグ用)
 npx playwright show-report
 ```
+
+### stg と prd の実行範囲(ユーザー判断 #45)
+
+テスト対象のデモサイトは 1 つで、環境ごとの対象は無い。**stg / prd は「テスト内容」で分ける**。
+
+| 環境 | どこで使う | 実行するテスト |
+|---|---|---|
+| **stg**（`ENV=staging`） | PR の CI（`pull-request.yml`） | **全テスト**（フル検証） |
+| **prd**（既定・`ENV=prod`） | デプロイ後（`test.yml` の Post-Deploy Test） | **`@prd` タグ付きの、必須の主要機能のみ** |
+
+- 切り分けは `playwright.config.ts` の `grep` で一括して行う（`ENV_NAME` が `staging` 以外なら `@prd` のみ）。**各 spec に `ENV_NAME` の判定を書かない**
+- prd で動かすテストには、`test.describe('...', { tag: '@prd' }, ...)` のように **`@prd` タグ**を付ける。現在の対象: 購入フロー（ログイン → 購入完了）、ログイン・カート追加、TodoMVC の基本機能
+- **タグの無いテストは、prd では実行されない**（破壊的・異常系、セキュリティ入力、a11y、VRT、network、API、ソート・カート、購入入力の検証など）。新しいテストは、既定では stg のみ
+- ローカルで、タグの無いテストを実行するときは `ENV=staging`（`npm run test:stg`）を付ける。付けないと「No tests found」になる
 
 ## テストの規約
 
@@ -84,7 +98,7 @@ QA リポジトリは、**失敗を安全に検知するための検証用プロ
 ## 権限・シークレット
 
 - ワークフローの `permissions` は最小限にする(Issue #33 の方針)。広げる必要がある場合は、理由をコメントに書く。
-- `.env.staging` / `.env.prod` は**機微な値を入れない設定用ファイル**(現在は `ENV_NAME` と `RUN_FULL_TESTS` のみ)。パスワード・トークンなどは追加せず、GitHub Secrets を使う。
+- `.env.staging` / `.env.prod` は**機微な値を入れない設定用ファイル**(現在は `ENV_NAME` のみ。未使用だった `RUN_FULL_TESTS` は削除した)。パスワード・トークンなどは追加せず、GitHub Secrets を使う。
 - `.env` はコミットしない。シークレットの値をログ・コメント・コミットに出力しない。
 
 ## Claude に作業を任せるとき

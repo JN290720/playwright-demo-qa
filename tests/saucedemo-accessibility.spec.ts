@@ -2,13 +2,6 @@ import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { CREDENTIALS, SHIPPING_INFO } from './fixtures/users';
 
-// アクセシビリティテストは Staging 環境限定
-test.beforeEach(async ({}, testInfo) => {
-  if (process.env.ENV_NAME !== 'staging') {
-    testInfo.skip(true, 'このテストは Staging 環境限定です');
-  }
-});
-
 test.describe('SauceDemo Accessibility (a11y) Tests', () => {
 
   // 1. ログインページ（公開ページ）
