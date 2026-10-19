@@ -23,6 +23,8 @@ Playwright による E2E テスト・ビジュアルレグレッションテス�
 - `playwright.config.ts`: プロジェクトは `desktop-chrome` / `mobile-chrome`。`desktop-safari` は PR 以外(main など)のみ
 - `.github/workflows/`: `pull-request.yml` / `deploy.yml` / `test.yml` / `claude.yml`
 
+  - 同時実行（`concurrency`）: PR のテストは、同じ PR への新しい push で**古い実行をキャンセル**する。コメントの実行（`/update-vrt`）は、コメントごとに独立したグループで、キャンセルしない。Deploy / Post-Deploy は、キャンセルせず同時に 1 つだけ実行する
+
 ## コマンド
 
 ```

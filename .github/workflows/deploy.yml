@@ -8,6 +8,11 @@ on:
 permissions:
   contents: read
 
+# 💡 デプロイは途中でキャンセルしません。同時には 1 つだけ実行します（#33）
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
 jobs:
   deploy:
     permissions:
