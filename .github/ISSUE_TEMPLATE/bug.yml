@@ -1,0 +1,76 @@
+name: 不具合報告
+description: テストの失敗・CI の不具合・想定外の挙動を報告する（人と AI のどちらが起票しても同じ形式）
+title: "bug: 起きていることを一文で"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        入力した内容は、`### 項目名` の見出しつきで Issue に保存されます。
+        **シークレットの値（トークンなど）が含まれていないか確認してください。**
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 優先度
+      description: "P0 緊急 / P1 高 / P2 中 / P3 低。起票後に同名のラベルも付けてください。"
+      options:
+        - P0
+        - P1
+        - P2
+        - P3
+    validations:
+      required: true
+  - type: dropdown
+    id: scope
+    attributes:
+      label: 対象リポジトリ
+      options:
+        - QA（playwright-demo-qa）
+        - 本体（playwright-demo）
+    validations:
+      required: true
+  - type: textarea
+    id: symptom
+    attributes:
+      label: 起きていること
+      description: 何が失敗したか。エラーメッセージの要点。
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期待していたこと
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 再現手順
+      placeholder: |
+        1.
+        2.
+    validations:
+      required: true
+  - type: dropdown
+    id: where
+    attributes:
+      label: 発生した場所
+      options:
+        - GitHub Actions
+        - ローカル
+    validations:
+      required: true
+  - type: input
+    id: project
+    attributes:
+      label: ブラウザ・プロジェクト
+      placeholder: desktop-chrome / mobile-chrome / desktop-safari
+  - type: input
+    id: run_url
+    attributes:
+      label: 実行 URL（Actions の場合）
+      placeholder: https://github.com/JN290720/playwright-demo-qa/actions/runs/...
+  - type: textarea
+    id: analysis
+    attributes:
+      label: 分かっていること（ログ・原因の見立て）
+      description: 失敗したステップ名、ログの該当箇所。事実と推測を分けて書く。

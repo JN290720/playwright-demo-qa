@@ -1,0 +1,73 @@
+name: 改善提案
+description: テスト・CI・ドキュメントなどの改善を提案する（人と AI のどちらが起票しても同じ形式）
+title: "種別: 改善内容を一文で"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        入力した内容は、`### 項目名` の見出しつきで Issue に保存されます。人も AI（Claude）も同じ見出しで読み書きできます。
+        **事実と推測を分けて書いてください。** ユーザーの判断が要る点は、必ず「判断が必要な点」に書きます。
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 優先度
+      description: "P0 緊急（障害・セキュリティ事故）/ P1 高 / P2 中 / P3 低。起票後に同名のラベルも付けてください。"
+      options:
+        - P0
+        - P1
+        - P2
+        - P3
+    validations:
+      required: true
+  - type: dropdown
+    id: scope
+    attributes:
+      label: 対象リポジトリ
+      description: "本体 `playwright-demo` と QA `playwright-demo-qa` の課題は混ぜません。"
+      options:
+        - QA（playwright-demo-qa）
+        - 本体（playwright-demo）
+    validations:
+      required: true
+  - type: textarea
+    id: summary
+    attributes:
+      label: 概要
+      description: 何を改善したいか。一文で。
+    validations:
+      required: true
+  - type: textarea
+    id: facts
+    attributes:
+      label: 現状（事実）
+      description: 調べて分かったこと。ログ・URL・数字・コマンドの結果など。推測は含めない。
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 提案
+      description: 具体的な対応案。複数案があるときは、長所・短所を表にする。
+    validations:
+      required: true
+  - type: textarea
+    id: done
+    attributes:
+      label: 完了条件
+      description: "チェックリスト形式（`- [ ] ...`）で書く。"
+      placeholder: "- [ ] "
+    validations:
+      required: true
+  - type: textarea
+    id: decisions
+    attributes:
+      label: 判断が必要な点（ユーザーへ）
+      description: 人が決める必要があることだけ。推奨案を併記する。なければ「なし」。
+      placeholder: "- [ ] （判断してほしいこと）→ 推奨: "
+    validations:
+      required: true
+  - type: textarea
+    id: related
+    attributes:
+      label: 関連 Issue / PR
+      description: "`#12`、`JN290720/playwright-demo#34` のように書く。"
