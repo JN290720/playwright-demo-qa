@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures/test';
 import { TodoPage } from './pages/TodoPage';
 
 test.describe('TodoMVC アプリの基本機能テスト', { tag: '@prd' }, () => {
