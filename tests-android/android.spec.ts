@@ -14,7 +14,15 @@ const test = base.extend<{ page: Page }>({
     const [device] = await android.devices();
     await device.shell('am force-stop com.android.chrome');
     const context = await device.launchBrowser();
+    // 実機の Chrome は、テスト間でプロフィール（Cookie・localStorage）が残る。
+    // 前のテストのログイン状態やカートが影響しないよう、最初に消す（繰り返し実行で 2 回目以降が失敗した対策）
+    await context.clearCookies();
     const page = await context.newPage();
+    await page.goto('https://www.saucedemo.com/');
+    await page.evaluate(() => {
+      localStorage.clear();
+      sessionStorage.clear();
+    });
     await use(page);
     await context.close();
     await device.close();
