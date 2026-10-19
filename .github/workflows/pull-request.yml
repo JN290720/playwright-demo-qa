@@ -104,6 +104,16 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # 💡 型チェックと lint（#21、ユーザー承認済み）: ブラウザの取得やテスト実行の前に、早く失敗させます。
+      #    lint は、原則すべて error（no-networkidle のみ warn。warn では失敗にしない）。/update-vrt の実行時は不要
+      - name: Type check
+        if: "!contains(github.event.comment.body, '/update-vrt')"
+        run: npm run typecheck
+
+      - name: Lint
+        if: "!contains(github.event.comment.body, '/update-vrt')"
+        run: npm run lint
+
       # 💡 Playwright のブラウザバイナリ（~/.cache/ms-playwright）をキャッシュ
       # package-lock.json に変更がない限りダウンロード処理を短縮します
       - name: Cache Playwright Browsers
