@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { LoginPage } from './pages/LoginPage';
 import { InventoryPage } from './pages/InventoryPage';
+import { CREDENTIALS } from './fixtures/users';
 
 test.describe('SauceDemo 破壊的・異常系テストスイート（全12ケース）', () => {
   test.beforeEach(async ({ page }) => {
@@ -19,7 +20,7 @@ test.describe('SauceDemo 破壊的・異常系テストスイート（全12ケ�
 
   test('P2: パスワードのみ未入力でログイン試行時にエラーが表示されること', async ({ page }) => {
     const loginPage = new LoginPage(page);
-    await loginPage.login('standard_user', '');
+    await loginPage.login(CREDENTIALS.standard.username, '');
 
     // パスワード未入力時のバリデーションエラー表示を確認
     await expect(loginPage.errorMessage).toBeVisible();
@@ -28,7 +29,7 @@ test.describe('SauceDemo 破壊的・異常系テストスイート（全12ケ�
 
   test('P3: 存在しない無効なユーザー情報でエラーが表示されること', async ({ page }) => {
     const loginPage = new LoginPage(page);
-    await loginPage.login('invalid_user', 'wrong_password');
+    await loginPage.loginAs(CREDENTIALS.invalid);
 
     // 認証失敗時のエラーメッセージを表示を確認
     await expect(loginPage.errorMessage).toBeVisible();
@@ -37,7 +38,7 @@ test.describe('SauceDemo 破壊的・異常系テストスイート（全12ケ�
 
   test('P4: 凍結（ロックアウト）されたユーザーでエラーが表示されること', async ({ page }) => {
     const loginPage = new LoginPage(page);
-    await loginPage.login('locked_out_user', 'secret_sauce');
+    await loginPage.loginAs(CREDENTIALS.lockedOut);
 
     // ロックアウトユーザー専用のエラーメッセージを確認
     await expect(loginPage.errorMessage).toBeVisible();
@@ -48,7 +49,7 @@ test.describe('SauceDemo 破壊的・異常系テストスイート（全12ケ�
     const loginPage = new LoginPage(page);
     
     // SauceDemoは余白の自動トリムを行わない仕様のため認証失敗となることを検証
-    await loginPage.login(' standard_user ', 'secret_sauce');
+    await loginPage.login(` ${CREDENTIALS.standard.username} `, CREDENTIALS.standard.password);
 
     await expect(loginPage.errorMessage).toBeVisible();
     await expect(loginPage.errorMessage).toContainText('Username and password do not match any user in this service');
@@ -67,7 +68,7 @@ test.describe('SauceDemo 破壊的・異常系テストスイート（全12ケ�
 
   test('P7: ログアウト操作後にブラウザの「戻る」ボタンを押しても認証保護されること', async ({ page }) => {
     const loginPage = new LoginPage(page);
-    await loginPage.login('standard_user', 'secret_sauce');
+    await loginPage.loginAs(CREDENTIALS.standard);
     
     // サイドバーメニューからログアウトを実行
     await page.click('#react-burger-menu-btn');
@@ -87,7 +88,7 @@ test.describe('SauceDemo 破壊的・異常系テストスイート（全12ケ�
 
   test('P9: 商品を追加するとカートバッジが1件になり、同じ商品を二重に追加できないこと（ボタンが Remove に変わる）', async ({ page }) => {
     const loginPage = new LoginPage(page);
-    await loginPage.login('standard_user', 'secret_sauce');
+    await loginPage.loginAs(CREDENTIALS.standard);
 
     const inventoryPage = new InventoryPage(page);
     await inventoryPage.addItemToCart('add-to-cart-sauce-labs-backpack');
@@ -103,7 +104,7 @@ test.describe('SauceDemo 破壊的・異常系テストスイート（全12ケ�
 
   test('P10: 商品一覧のソート機能（価格の安い順）が正しく並び変わること', async ({ page }) => {
     const loginPage = new LoginPage(page);
-    await loginPage.login('standard_user', 'secret_sauce');
+    await loginPage.loginAs(CREDENTIALS.standard);
 
     const inventoryPage = new InventoryPage(page);
     await inventoryPage.selectSortOption('lohi');
@@ -117,7 +118,7 @@ test.describe('SauceDemo 破壊的・異常系テストスイート（全12ケ�
 
   test('P11: チェックアウト画面で未入力のまま送信した場合、フォームバリデーションエラーが出ること', async ({ page }) => {
     const loginPage = new LoginPage(page);
-    await loginPage.login('standard_user', 'secret_sauce');
+    await loginPage.loginAs(CREDENTIALS.standard);
 
     await page.goto('https://www.saucedemo.com/checkout-step-one.html');
     await page.click('[data-test="continue"]');

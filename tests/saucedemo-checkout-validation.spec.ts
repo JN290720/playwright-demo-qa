@@ -1,6 +1,7 @@
 import { test, expect, Page } from '@playwright/test';
 import { LoginPage } from './pages/LoginPage';
 import { InventoryPage } from './pages/InventoryPage';
+import { CREDENTIALS, SHIPPING_INFO } from './fixtures/users';
 
 // 購入手続きの入力検証と、保護されたページへの未認証アクセス（認可）の検証（#55）
 
@@ -16,7 +17,7 @@ async function goToCheckoutStepOne(page: Page) {
   const loginPage = new LoginPage(page);
   const inventoryPage = new InventoryPage(page);
   await loginPage.goto();
-  await loginPage.login('standard_user', 'secret_sauce');
+  await loginPage.loginAs(CREDENTIALS.standard);
   await inventoryPage.addItemToCart('add-to-cart-sauce-labs-backpack');
   await inventoryPage.cartLink.click();
   await page.locator('[data-test="checkout"]').click();
@@ -26,9 +27,9 @@ async function goToCheckoutStepOne(page: Page) {
 test.describe('SauceDemo 購入手続き入力の異常系（項目ごとの欠落）', () => {
   // 入力欄の検証は、First Name → Last Name → Postal Code の順に行われる
   const cases = [
-    { label: 'First Name が未入力', first: '', last: 'Yamada', zip: '100-0001', message: 'First Name is required' },
-    { label: 'Last Name が未入力', first: 'Taro', last: '', zip: '100-0001', message: 'Last Name is required' },
-    { label: 'Postal Code が未入力', first: 'Taro', last: 'Yamada', zip: '', message: 'Postal Code is required' },
+    { label: 'First Name が未入力', first: '', last: SHIPPING_INFO.lastName, zip: SHIPPING_INFO.postalCode, message: 'First Name is required' },
+    { label: 'Last Name が未入力', first: SHIPPING_INFO.firstName, last: '', zip: SHIPPING_INFO.postalCode, message: 'Last Name is required' },
+    { label: 'Postal Code が未入力', first: SHIPPING_INFO.firstName, last: SHIPPING_INFO.lastName, zip: '', message: 'Postal Code is required' },
   ];
 
   for (const { label, first, last, zip, message } of cases) {
@@ -81,7 +82,7 @@ test.describe('SauceDemo 保護されたページへの未認証アクセス（�
   test('ログアウトしたあと、カートや購入手続きのページに直接アクセスしても、保護されていること', async ({ page }) => {
     const loginPage = new LoginPage(page);
     await loginPage.goto();
-    await loginPage.login('standard_user', 'secret_sauce');
+    await loginPage.loginAs(CREDENTIALS.standard);
     await page.locator('#react-burger-menu-btn').click();
     await page.locator('#logout_sidebar_link').click();
     await expect(page).toHaveURL('https://www.saucedemo.com/');

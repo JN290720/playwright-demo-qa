@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { CREDENTIALS, SHIPPING_INFO } from './fixtures/users';
 
 // アクセシビリティテストは Staging 環境限定
 test.beforeEach(async ({}, testInfo) => {
@@ -27,8 +28,8 @@ test.describe('SauceDemo Accessibility (a11y) Tests', () => {
     // 各テスト前にログインを実行
     test.beforeEach(async ({ page }) => {
       await page.goto('https://www.saucedemo.com/');
-      await page.locator('[data-test="username"]').fill('standard_user');
-      await page.locator('[data-test="password"]').fill('secret_sauce');
+      await page.locator('[data-test="username"]').fill(CREDENTIALS.standard.username);
+      await page.locator('[data-test="password"]').fill(CREDENTIALS.standard.password);
       await page.locator('[data-test="login-button"]').click();
       await page.locator('.title').waitFor({ state: 'visible' });
     });
@@ -86,9 +87,9 @@ test.describe('SauceDemo Accessibility (a11y) Tests', () => {
       await page.locator('.shopping_cart_link').click();
       await page.locator('[data-test="checkout"]').click();
       // 入力欄を埋めて次へ進む
-      await page.locator('[data-test="firstName"]').fill('Taro');
-      await page.locator('[data-test="lastName"]').fill('Yamada');
-      await page.locator('[data-test="postalCode"]').fill('123-4567');
+      await page.locator('[data-test="firstName"]').fill(SHIPPING_INFO.firstName);
+      await page.locator('[data-test="lastName"]').fill(SHIPPING_INFO.lastName);
+      await page.locator('[data-test="postalCode"]').fill(SHIPPING_INFO.postalCode);
       await page.locator('[data-test="continue"]').click();
       await page.locator('[data-test="finish"]').waitFor({ state: 'visible' });
 

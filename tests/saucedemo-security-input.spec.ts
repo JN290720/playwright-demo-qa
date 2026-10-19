@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { LoginPage } from './pages/LoginPage';
+import { CREDENTIALS } from './fixtures/users';
 
 // SauceDemo のログインフォームに対するセキュリティ・インジェクション攻撃テストスイート
 test.describe('SauceDemo セキュリティ入力（インジェクション）検証', () => {
@@ -41,7 +42,7 @@ test.describe('SauceDemo セキュリティ入力（インジェクション）�
 
     // XSS 攻撃用ペイロード（<script>タグ）を入力してログイン試行
     const xssPayload = '<script>alert("xss")</script>';
-    await loginPage.login(xssPayload, 'secret_sauce');
+    await loginPage.login(xssPayload, CREDENTIALS.standard.password);
 
     // 【検証】画面クラッシュせず、認証失敗のエラーメッセージが表示されること
     await expect(loginPage.errorMessage).toBeVisible();

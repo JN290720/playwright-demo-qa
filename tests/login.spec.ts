@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import { LoginPage } from './pages/LoginPage';
 import { InventoryPage } from './pages/InventoryPage';
 import { TodoPage } from './pages/TodoPage';
+import { CREDENTIALS } from './fixtures/users';
 
 // =================================================================
 // パターン 1: Todoアプリの基本操作（リストへの追加・完了チェック・削除）
@@ -39,7 +40,7 @@ test.describe('パターン2: ログインとショッピングカート操作',
 
     // Eコマースの自動テスト練習用サイト SauceDemo への移動 & ログイン実行
     await loginPage.goto();
-    await loginPage.login('standard_user', 'secret_sauce');
+    await loginPage.loginAs(CREDENTIALS.standard);
 
     // 2. 商品一覧ページへ遷移したか確認
     await expect(page).toHaveURL('https://www.saucedemo.com/inventory.html');
@@ -62,7 +63,7 @@ test.describe('パターン3: フォームのエラーハンドリング', () =>
     await loginPage.goto();
 
     // ロックアウトされたユーザー情報でログインを試みる
-    await loginPage.login('locked_out_user', 'secret_sauce');
+    await loginPage.loginAs(CREDENTIALS.lockedOut);
 
     // エラーメッセージ要素が表示され、特定のテキストを含んでいるか検証
     await expect(loginPage.errorMessage).toBeVisible();
@@ -83,7 +84,7 @@ test.describe('パターン4: スマホ表示のテスト', () => {
     await loginPage.goto();
 
     // ログイン
-    await loginPage.login('standard_user', 'secret_sauce');
+    await loginPage.loginAs(CREDENTIALS.standard);
 
     // モバイルサイズ時に左上のメニューボタン（ハンバーガーアイコン）が存在するか検証
     await expect(loginPage.menuButton).toBeVisible();

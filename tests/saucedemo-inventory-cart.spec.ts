@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { LoginPage } from './pages/LoginPage';
 import { InventoryPage } from './pages/InventoryPage';
+import { CREDENTIALS } from './fixtures/users';
 
 // ユーザー判断（#16）: このテストは stg 環境のフル検証に含め、prd（Post-Deploy）では実行しない
 test.beforeEach(async ({}, testInfo) => {
@@ -16,7 +17,7 @@ test.describe('SauceDemo 商品一覧（ソート）とカート操作', () => {
   test.beforeEach(async ({ page }) => {
     const loginPage = new LoginPage(page);
     await loginPage.goto();
-    await loginPage.login('standard_user', 'secret_sauce');
+    await loginPage.loginAs(CREDENTIALS.standard);
   });
 
   // ソート 4 種を、期待する並び順と照らして検証（件数が 1 件以上あることも担保する）
