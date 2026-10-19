@@ -3,13 +3,6 @@ import { LoginPage } from './pages/LoginPage';
 import { InventoryPage } from './pages/InventoryPage';
 import { CREDENTIALS } from './fixtures/users';
 
-// ユーザー判断（#16）: このテストは stg 環境のフル検証に含め、prd（Post-Deploy）では実行しない
-test.beforeEach(async ({}, testInfo) => {
-  if (process.env.ENV_NAME !== 'staging') {
-    testInfo.skip(true, 'このテストは Staging 環境限定です');
-  }
-});
-
 // 「$29.99」のような価格表示を数値へ変換する
 const toNumber = (text: string) => parseFloat(text.replace('$', ''));
 

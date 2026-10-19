@@ -1,13 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { CREDENTIALS } from './fixtures/users';
 
-// Staging 環境でネットワーク疑似エラーテストを実行
-test.beforeEach(async ({}, testInfo) => {
-  if (process.env.ENV_NAME !== 'staging') {
-    testInfo.skip(true, 'このテストは Staging 環境限定です');
-  }
-});
-
 test.describe('SauceDemo Network Mocking & Resilience Tests', () => {
 
   // -------------------------------------------------------------

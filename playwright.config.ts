@@ -17,11 +17,18 @@ console.log(`[Playwright Config] 読み込んだ環境: .env.${env} / ENV_NAME=$
 const isCI = !!process.env.CI;
 const isPR = process.env.GITHUB_EVENT_NAME === 'pull_request';
 
+// 💡 テストの実行範囲（#45、ユーザー判断）: 対象のデモサイトは 1 つで、stg / prd は「テスト内容」で分ける。
+//    stg = フルで検証 / prd = 必須の主要機能（@prd タグ付き）のみ。
+//    各 spec に ENV_NAME のスキップ判定を書く代わりに、ここの grep で一括して絞る。
+const isStaging = process.env.ENV_NAME === 'staging';
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
   testDir: './tests',
+  /* stg（ENV=staging）は全テスト。prd（既定）は @prd タグ付きの主要機能のみ。新しいテストを prd でも動かす場合は、describe / test に { tag: '@prd' } を付ける */
+  grep: isStaging ? undefined : /@prd/,
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */

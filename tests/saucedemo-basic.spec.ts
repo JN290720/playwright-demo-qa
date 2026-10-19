@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { TodoPage } from './pages/TodoPage';
 
-test.describe('TodoApp 基本機能テスト（正常系）', () => {
+test.describe('TodoApp 基本機能テスト（正常系）', { tag: '@prd' }, () => {
   test.beforeEach(async ({ page }) => {
     const todoPage = new TodoPage(page);
     await todoPage.goto();

@@ -1,13 +1,6 @@
 import { test, expect, Page } from '@playwright/test';
 import { CREDENTIALS, SHIPPING_INFO } from './fixtures/users';
 
-// ビジュアル回帰テストは Staging 環境限定
-test.beforeEach(async ({}, testInfo) => {
-  if (process.env.ENV_NAME !== 'staging') {
-    testInfo.skip(true, 'このテストは Staging 環境限定です');
-  }
-});
-
 /**
  * 💡 レンダリング完了を 100% 待つためのカスタムヘルパー関数
  */

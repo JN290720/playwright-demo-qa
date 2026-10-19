@@ -4,14 +4,6 @@ import { CREDENTIALS } from './fixtures/users';
 
 // SauceDemo のログインフォームに対するセキュリティ・インジェクション攻撃テストスイート
 test.describe('SauceDemo セキュリティ入力（インジェクション）検証', () => {
-  // 各テスト実行前に Staging 環境かどうかを判定するフック処理
-  test.beforeEach(({}, testInfo) => {
-    // 環境変数 ENV_NAME が 'staging' でない場合はテスト実行を安全にスキップ
-    if (process.env.ENV_NAME !== 'staging') {
-      testInfo.skip(true, 'このテストは Staging 環境限定です');
-    }
-  });
-
   test('SQLインジェクション風文字列でログインを試みても認証をバイパスできないこと', async ({ page }) => {
     const loginPage = new LoginPage(page);
 
