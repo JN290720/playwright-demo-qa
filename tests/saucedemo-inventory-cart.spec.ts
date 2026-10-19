@@ -96,7 +96,10 @@ test.describe('SauceDemo 商品一覧（ソート）とカート操作', () => {
 
     await inventoryPage.itemNames.first().click();
     await expect(page).toHaveURL(/inventory-item\.html\?id=\d+/);
-    await expect(page.locator('[data-test="inventory-item-name"]')).toHaveText(firstName);
+    // URL は先に変わり、一覧の DOM が一瞬残る。一覧の商品名も data-test="inventory-item-name" を使うため
+    // （6 件に一致して strict mode violation になる）、詳細ページにしか無い要素を待ってから比較する（#71）
+    await expect(page.locator('.inventory_details_container')).toBeVisible();
+    await expect(page.locator('.inventory_details_name')).toHaveText(firstName);
 
     await page.locator('[data-test="back-to-products"]').click();
     await expect(page).toHaveURL(/inventory\.html/);
