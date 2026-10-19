@@ -1,12 +1,21 @@
 name: Android Emulator Test
 
-# Android エミュレータ上の Chrome（実機の Chrome）で、`@prd` タグ付きの主要機能テストを実行する（#85）。
+# Android エミュレータ上の Chrome（実機の Chrome）で、見た目の確認（VRT = 画面のスクリーンショットを基準画像と比べて、
+# 見た目の変化を検知するテスト）と、購入フロー 1 件の動作確認を実行する（#85）。
 # PR ごとには実行しない（起動を含めて数分かかるため）。夜間と、手動実行のときだけ動く。
 # このファイルや Android 関連のファイルを変更した PR でも動く（変更の検証用。失敗の通知は送らない）。
+#
+# 【基準画像の更新】手動実行（workflow_dispatch）で update_snapshots を true にして、更新したいブランチを選ぶ。
+# CI のエミュレータで撮り直した画像を、そのブランチにコミットする（PR の /update-vrt と同じ考え方）。main では実行できない。
 on:
   schedule:
     - cron: '0 18 * * *' # 毎日 03:00 JST
   workflow_dispatch:
+    inputs:
+      update_snapshots:
+        description: '基準画像（Android 用）を撮り直して、選んだブランチにコミットする（main では不可）'
+        type: boolean
+        default: false
   pull_request:
     branches: [ main ]
     paths:
@@ -14,6 +23,7 @@ on:
       - 'scripts/android/**'
       - 'tests-android/**'
       - 'tests/fixtures/test.ts'
+      - 'tests/saucedemo-visual-regression.spec.ts'
 
 # 最小権限: 既定は読み取りのみ。失敗の通知（Issue）に必要な権限は Job で付与する
 permissions:
@@ -59,7 +69,7 @@ jobs:
           arch: x86_64
           profile: pixel_6
           disable-animations: true
-          script: bash scripts/android/run-on-emulator.sh
+          script: UPDATE_SNAPSHOTS=${{ inputs.update_snapshots && '1' || '0' }} bash scripts/android/run-on-emulator.sh
 
       # 💡 flaky（リトライで通ったテスト）と失敗を抽出して、Job Summary に表示する（Android はリトライなしなので、失敗として表示される）
       - name: Summarize results
@@ -94,6 +104,7 @@ jobs:
             Android Emulator Test が成功しました（${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}）。
         run: node scripts/notify-failure.js
 
+      # test-results/ には、見た目が変わったときの「基準・今回・差分」の画像が入る（原因の調査用）
       - name: Upload artifacts
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -102,6 +113,47 @@ jobs:
           path: |
             playwright-report-android/
             reports/
+            test-results/
             android-final-screen.png
           if-no-files-found: ignore
           retention-days: 7
+
+      # 基準画像の更新のときだけ、撮り直した画像を、次の Job（コミット用）へ渡す
+      - name: Upload updated snapshots
+        if: ${{ inputs.update_snapshots }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: android-snapshots
+          path: tests-android/snapshots/
+          if-no-files-found: error
+          retention-days: 1
+
+  # 撮り直した基準画像を、選んだブランチにコミットする。
+  # エミュレータの Job（上）には書き込み権限を与えず、コミットだけを別の Job に分ける（最小権限）
+  commit-snapshots:
+    if: ${{ inputs.update_snapshots && github.ref_name != 'main' }}
+    needs: android
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: android-snapshots
+          path: tests-android/snapshots/
+
+      - name: Commit updated snapshots
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tests-android/snapshots/
+          if git diff --cached --quiet; then
+            echo "基準画像に変更はありません"
+            exit 0
+          fi
+          # [skip ci]: 自動コミットでテストが再実行されないようにする（PR の /update-vrt と同じ）
+          git commit -m "test: Android の VRT 基準画像を更新する [skip ci]"
+          git push

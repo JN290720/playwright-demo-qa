@@ -24,7 +24,9 @@ adb shell 'settings put global window_animation_scale 0; settings put global tra
 
 echo "== playwright test =="
 # REPEAT: 同じテストを繰り返して、安定性（flaky の有無）を確認する
-timeout 900 npx playwright test -c tests-android/playwright.config.ts --repeat-each="${REPEAT:-1}"
+UPDATE_ARG=""
+if [ "${UPDATE_SNAPSHOTS:-0}" = "1" ]; then UPDATE_ARG="--update-snapshots=all"; echo "基準画像を撮り直します（--update-snapshots）"; fi
+timeout 900 npx playwright test -c tests-android/playwright.config.ts --repeat-each="${REPEAT:-1}" $UPDATE_ARG
 code=$?
 echo "playwright exit code: $code"
 echo "== screen at the end =="
