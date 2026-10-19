@@ -10,7 +10,7 @@
 - **Runtime:** Node.js (LTS)
 - **CI/CD:** GitHub Actions
 - **Hosting:** GitHub Pages
-- **Testing Scope:** PC (`desktop-chrome`) & スマホ (`mobile-chrome`) 環境のマルチ対応
+- **Testing Scope:** PC (`desktop-chrome`) & スマホ (`mobile-chrome`) 環境のマルチ対応（`main` 側のテストでは Safari (`desktop-safari`) も実行）
 
 ---
 
@@ -49,18 +49,22 @@ npx playwright show-report
 
 ## 🔄 CI/CD パイプライン (GitHub Actions)
 
-本リポジトリでは、用途に応じて 2 つのワークフローを自動実行しています。
+本リポジトリでは、用途に応じて 4 つのワークフローを自動実行しています。
 
 | ワークフロー名 | 発火タイミング | 役割 |
 | :--- | :--- | :--- |
-| **PR Test & VRT Update** (`pull-request.yml`) | • **PR作成・更新時:** 事前検証テスト（PC/スマホ）を実行し、PR画面へ結果コメントを投稿<br>• **`/update-vrt` コメント時:** Linux環境でVRT画像を再撮影・自動コミット（※テスト実行はスキップ） | 事前検証テスト（PC/スマホ）の実行と PR 画面への結果自動コメント、および VRT 画像の自動更新 |
-| **Deploy & Post-Deploy Test** (`test.yml`) | `main` ブランチへの Push / Merge 時 | GitHub Pages へのデプロイと、**公開後の本番 URL に対する自動 E2E テスト実行** |
+| **PR Test & VRT Update** (`pull-request.yml`) | • **PR作成・更新時:** 事前検証テスト（PC/スマホ）を実行し、PR画面へ結果コメントを投稿<br>• **`/update-vrt` コメント時:** Linux環境でVRT画像を再撮影・自動コミット（※テスト実行はスキップ。リポジトリの OWNER / MEMBER / COLLABORATOR のコメントのみ有効） | 事前検証テスト（PC/スマホ）の実行と PR 画面への結果自動コメント、および VRT 画像の自動更新 |
+| **Deploy App** (`deploy.yml`) | `main` ブランチへの Push / Merge 時 | GitHub Pages へのデプロイ |
+| **Post-Deploy Test** (`test.yml`) | `Deploy App` の**成功後**（`workflow_run`） | `ENV=prod` で E2E テストを実行（Safari も含む）し、テストレポートを `gh-pages` ブランチへ公開。※ `ENV_NAME` が `staging` でないとスキップされるテストがある |
+| **Claude Code** (`claude.yml`) | Issue / PR のコメント・レビュー・Issue 本文で `@claude` とメンションされた時 | Claude による調査・提案・実装。ワークフロー（`.github/workflows/`）の変更とマージは行えない |
+
+> テストレポートは、`main` の最新が `main-deploy-report/`、PR ごとのものが `pr-reports/<ブランチ名>/` に公開されます（`gh-pages` ブランチ）。
 
 ---
 
 ## 🎭 VRT (Visual Regression Testing) 運用ガイド
 
-当リポジトリでは、Playwright を用いた画面の見た目崩れ検知（VRT）を導入しており、**PC (`desktop-chrome`)** と **スマホ (`mobile-chrome`)** の双方を検証対象としています。
+当リポジトリでは、Playwright を用いた画面の見た目崩れ検知（VRT）を導入しており、**PC (`desktop-chrome`)** と **スマホ (`mobile-chrome`)** の双方を検証対象としています（`main` 側では Safari (`desktop-safari`) の画像も使います。`/update-vrt` は 3 つとも更新します）。
 
 ### 🔄 通常の開発フロー
 1. 機能追加やデザイン変更を行った後、PR（Pull Request）を作成します。
