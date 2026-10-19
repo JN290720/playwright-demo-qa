@@ -85,9 +85,11 @@ async function actionsSection() {
   const dir = '.github/workflows';
   const used = new Map(); // "owner/repo" -> Set(ref)
   for (const f of fs.readdirSync(dir).filter((x) => x.endsWith('.yml'))) {
-    for (const m of fs.readFileSync(path.join(dir, f), 'utf8').matchAll(/uses:\s*([\w.-]+\/[\w.-]+)@([\w.-]+)/g)) {
+    // 例: `uses: actions/checkout@<40桁の SHA> # v6.0.3`（SHA 固定 + バージョンのコメント）/ `uses: actions/checkout@v4`（メジャー指定）
+    for (const m of fs.readFileSync(path.join(dir, f), 'utf8').matchAll(/uses:\s*([\w.-]+\/[\w.-]+)@([\w.-]+)(?:[ \t]*#[ \t]*(v?\d+\.\d+\.\d+))?/g)) {
       if (!used.has(m[1])) used.set(m[1], new Set());
-      used.get(m[1]).add(m[2]);
+      // SHA 固定のときは、コメントのバージョンを「現在の版」として扱う
+      used.get(m[1]).add(/^[0-9a-f]{40}$/.test(m[2]) && m[3] ? `${m[3]}|${m[2]}` : m[2]);
     }
   }
   const rows = [];
@@ -99,9 +101,11 @@ async function actionsSection() {
     } catch {
       /* 取得できないものは空 */
     }
-    for (const ref of [...refs].sort()) {
-      const major = String(ref).match(/^v?(\d+)$/);
-      const cur = major ? `${major[1]}.0.0` : ref;
+    for (const entry of [...refs].sort()) {
+      const [pinnedVersion, sha] = entry.includes('|') ? entry.split('|') : [null, null];
+      const ref = pinnedVersion ? `${pinnedVersion}（${sha.slice(0, 7)}）` : entry; // 表示用
+      const major = pinnedVersion ? null : String(entry).match(/^v?(\d+)$/);
+      const cur = pinnedVersion ? pinnedVersion : major ? `${major[1]}.0.0` : entry;
       const { candidate, newestMajor } = pickCandidate(cur, releases);
       rows.push({ repo, ref, candidate: candidate?.v.raw, candidateDate: candidate?.date, newestMajor: newestMajor?.v.raw, isFloatingMajor: !!major });
     }
