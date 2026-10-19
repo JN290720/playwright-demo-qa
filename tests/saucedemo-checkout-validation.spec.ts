@@ -4,6 +4,13 @@ import { InventoryPage } from './pages/InventoryPage';
 
 // 購入手続きの入力検証と、保護されたページへの未認証アクセス（認可）の検証（#55）
 
+// ユーザー判断（#55）: このテストは stg 環境のフル検証に含め、prd（Post-Deploy）では実行しない
+test.beforeEach(async ({}, testInfo) => {
+  if (process.env.ENV_NAME !== 'staging') {
+    testInfo.skip(true, 'このテストは Staging 環境限定です');
+  }
+});
+
 /** ログインして、商品を 1 件カートに入れ、購入手続き入力画面まで進める */
 async function goToCheckoutStepOne(page: Page) {
   const loginPage = new LoginPage(page);
