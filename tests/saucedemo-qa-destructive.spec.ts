@@ -71,8 +71,8 @@ test.describe('SauceDemo 破壊的・異常系テストスイート（全12ケ�
     await loginPage.loginAs(CREDENTIALS.standard);
     
     // サイドバーメニューからログアウトを実行
-    await page.click('#react-burger-menu-btn');
-    await page.click('#logout_sidebar_link');
+    await page.locator('#react-burger-menu-btn').click();
+    await page.locator('#logout_sidebar_link').click();
 
     // ブラウザバックしても商品ページに戻れず保護されているか確認
     await page.goBack();
@@ -121,7 +121,7 @@ test.describe('SauceDemo 破壊的・異常系テストスイート（全12ケ�
     await loginPage.loginAs(CREDENTIALS.standard);
 
     await page.goto('https://www.saucedemo.com/checkout-step-one.html');
-    await page.click('[data-test="continue"]');
+    await page.locator('[data-test="continue"]').click();
 
     // チェックアウトフォームのバリデーションエラーを確認
     await expect(page.locator('[data-test="error"]')).toBeVisible();
