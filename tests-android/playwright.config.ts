@@ -11,6 +11,8 @@ export default defineConfig({
   workers: 1, // 端末が 1 台のため
   timeout: 60_000,
   expect: { timeout: 15_000 },
-  retries: 0, // flaky を見逃さないため、リトライなし（#37）
+  // 外部サイト（TodoMVC）への接続が一時的に遅れて 1 件失敗した実績があるため、リトライを 1 回だけ許可する。
+  // リトライで通ったテストは、Job Summary に flaky として表示される（見逃さない。#37）
+  retries: 1,
   reporter: [['list'], ['html', { outputFolder: '../playwright-report-android', open: 'never' }], ['json', { outputFile: '../reports/android-results.json' }]],
 });
