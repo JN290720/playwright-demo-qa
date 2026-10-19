@@ -85,7 +85,7 @@ test.describe('SauceDemo 破壊的・異常系テストスイート（全12ケ�
     await expect(loginPage.passwordInput).toHaveAttribute('type', 'password');
   });
 
-  test('P9: カートに同じ商品を複数回追加しても、カートバッジが正しく1件としてカウントされること', async ({ page }) => {
+  test('P9: 商品を追加するとカートバッジが1件になり、同じ商品を二重に追加できないこと（ボタンが Remove に変わる）', async ({ page }) => {
     const loginPage = new LoginPage(page);
     await loginPage.login('standard_user', 'secret_sauce');
 
@@ -93,6 +93,11 @@ test.describe('SauceDemo 破壊的・異常系テストスイート（全12ケ�
     await inventoryPage.addItemToCart('add-to-cart-sauce-labs-backpack');
 
     // カートバッジの件数が 1 であることを確認
+    await expect(inventoryPage.cartBadge).toHaveText('1');
+
+    // 「Add to cart」ボタンが消え、「Remove」ボタンに切り替わる（＝同じ商品を再度追加する操作ができない）
+    await expect(page.locator('[data-test="add-to-cart-sauce-labs-backpack"]')).toHaveCount(0);
+    await expect(page.locator('[data-test="remove-sauce-labs-backpack"]')).toBeVisible();
     await expect(inventoryPage.cartBadge).toHaveText('1');
   });
 
@@ -126,6 +131,10 @@ test.describe('SauceDemo 破壊的・異常系テストスイート（全12ケ�
     // 完了画面への不正直リンクアクセス時の拒否状態を確認
     await page.goto('https://www.saucedemo.com/checkout-complete.html');
     const loginPage = new LoginPage(page);
+
+    // ログイン画面へ戻され、未認証アクセスを拒否するメッセージが表示されること
+    await expect(page).toHaveURL('https://www.saucedemo.com/');
     await expect(loginPage.errorMessage).toBeVisible();
+    await expect(loginPage.errorMessage).toContainText("You can only access '/checkout-complete.html' when you are logged in");
   });
 });

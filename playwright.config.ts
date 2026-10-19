@@ -29,10 +29,24 @@ export default defineConfig({
   /* Retry on CI only */
   retries: isCI ? 2 : 0,
   /* 💡 CIでの並列実行ワーカー数：PC＋スマホの並列処理のため 2 ワーカーを指定 */
-  workers: isCI ? 2 : undefined,
+  workers: isCI ? 4 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: 'html',
-  
+
+  /* 💡 VRT（スクリーンショット比較）の共通設定。各 spec へ複製せず、ここに集約します（#23）。
+     下記は Playwright の既定値と同じです（挙動は変わりません）。明示することで、意図を読み取れるようにしています。
+     ※ 許容差分（maxDiffPixels / maxDiffPixelRatio）は、あえて設定していません。
+        現状 VRT の flaky は 0 件で、緩めると小さなアイコン変更（本体 PR #49 のようなケース）を見逃しやすくなるためです。
+        不安定さが観測された場合に、実績を見ながら最小限に追加します。
+     ※ 動的な要素（日時・ランダム値など）が画面に加わった場合は、mask で個別に隠し、理由をコメントに残します。 */
+  expect: {
+    toHaveScreenshot: {
+      animations: 'disabled', // CSS アニメーション・トランジションを停止して揺れを防ぐ
+      scale: 'css',           // デバイスピクセル比に依らず CSS ピクセルで比較する
+      caret: 'hide',          // 入力欄のカーソルの点滅を隠す
+    },
+  },
+
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* 💡 環境ファイル内の BASE_URL を使用（未設定なら http://localhost:3000 にフォールバック） */

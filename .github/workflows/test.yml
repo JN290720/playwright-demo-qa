@@ -7,10 +7,10 @@ on:
     types:
       - completed
 
+# 最小権限: レポートを gh-pages ブランチへ push するための contents: write のみ
+# (Pages のデプロイ API / OIDC は使わないため pages・id-token は不要)
 permissions:
   contents: write
-  pages: write
-  id-token: write
 
 jobs:
   post-deploy-test:
@@ -48,13 +48,37 @@ jobs:
 
       # 💡 WebKit (Safari) 等の起動に必要な OS 依存ライブラリ (libevent 等) を常にインストール
       # ※ OS パッケージは Actions キャッシュ対象外となるため、キャッシュヒット時でも必ず実行します
+      # 💡 apt の一時的なハング対策（#19）: 1 回 3 分で打ち切り、最大 3 回まで再試行します。
+      # （過去に、このステップが約 60 分ハングして Job が打ち切られた実績があります）
+      # timeout-minutes は、再試行を使い切った場合の合計より少し長い「最後の砦」です。
       - name: Install Playwright System Dependencies
-        run: npx playwright install-deps
+        timeout-minutes: 12
+        run: |
+          echo 'Acquire::Retries "3";' | sudo tee /etc/apt/apt.conf.d/80-retries > /dev/null
+          for i in 1 2 3; do
+            if timeout 180 npx playwright install-deps; then
+              exit 0
+            fi
+            echo "::warning::install-deps attempt $i failed or timed out"
+            sleep 10
+          done
+          echo "::error::install-deps failed after 3 attempts"
+          exit 1
 
       # 💡 キャッシュがヒットしなかった場合のみ、ブラウザ本体（Chromium / WebKit）をダウンロード
       - name: Install Playwright Browsers
         if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: npx playwright install chromium webkit
+        timeout-minutes: 10
+        run: |
+          for i in 1 2; do
+            if timeout 240 npx playwright install chromium webkit; then
+              exit 0
+            fi
+            echo "::warning::browser install attempt $i failed or timed out"
+            sleep 10
+          done
+          echo "::error::browser install failed after 2 attempts"
+          exit 1
 
       # -----------------------------------------------------------------------
       # ステップ2: 本番 URL に対する Playwright E2E テスト実行
@@ -85,8 +109,38 @@ jobs:
       # ステップ4: GitHub Pages へ全レポートを一括アップロード
       # -----------------------------------------------------------------------
       # 1回のデプロイアクションで2つのレポートを同時公開（Git Push のバッティング競合を回避）
-      - name: Deploy All Reports to GitHub Pages
+      # 💡 他のワークフローと gh-pages への push が競合する(cannot lock ref)ことがあるため、
+      # 失敗時のみランダム待機をはさんで最大 3 回まで再試行します。
+      - name: Deploy All Reports to GitHub Pages (attempt 1)
+        id: deploy-reports-1
         if: always()
+        continue-on-error: true
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./deploy-artifacts
+          keep_files: true
+
+      - name: Wait before retry (attempt 2)
+        if: always() && steps.deploy-reports-1.outcome == 'failure'
+        run: sleep $((RANDOM % 20 + 5))
+
+      - name: Deploy All Reports to GitHub Pages (attempt 2)
+        id: deploy-reports-2
+        if: always() && steps.deploy-reports-1.outcome == 'failure'
+        continue-on-error: true
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./deploy-artifacts
+          keep_files: true
+
+      - name: Wait before retry (attempt 3)
+        if: always() && steps.deploy-reports-2.outcome == 'failure'
+        run: sleep $((RANDOM % 20 + 5))
+
+      - name: Deploy All Reports to GitHub Pages (attempt 3)
+        if: always() && steps.deploy-reports-2.outcome == 'failure'
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}

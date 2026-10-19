@@ -1,0 +1,57 @@
+name: Cleanup PR Report
+
+# PR がクローズ・マージされたら、gh-pages に公開した該当 PR のテストレポートを削除します（#34）。
+# 削除し損ねた分（クローズ直前に走ったテストがレポートを復活させた場合など）は、
+# 週次の cleanup-gh-pages.yml が回収します。
+on:
+  pull_request:
+    types: [closed]
+    branches: [ main, master ]
+
+# 既定は全拒否。必要な権限だけを Job に付与します（Issue #33 の方針）
+permissions: {}
+
+concurrency:
+  group: cleanup-pr-report-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    # fork からの PR は GITHUB_TOKEN が読み取り専用で、そもそもレポートも公開されないため対象外
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write # gh-pages ブランチへの push のみ
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+
+      - name: Remove PR report
+        env:
+          # head.ref は任意の文字列のため、run: に ${{ }} で直接埋め込まず env 経由で受ける（スクリプト注入の防止）
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          case "$HEAD_REF" in ""|*..*|/*) echo "不正なブランチ名のため中止: $HEAD_REF"; exit 1;; esac
+          dir="pr-reports/${HEAD_REF}"
+          if [ ! -d "$dir" ]; then
+            echo "削除するレポートがありません: $dir"
+            exit 0
+          fi
+          git rm -rq -- "$dir"
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git commit -m "ci: PR #${PR_NUMBER} のレポートを削除 [skip ci]"
+          # 他のワークフローとの push 競合に備え、最大 3 回まで取り込み直して再試行する
+          for i in 1 2 3; do
+            if git push origin HEAD:gh-pages; then
+              exit 0
+            fi
+            echo "::warning::push attempt $i failed; rebase and retry"
+            git pull --rebase origin gh-pages
+          done
+          echo "::error::push failed after 3 attempts"
+          exit 1

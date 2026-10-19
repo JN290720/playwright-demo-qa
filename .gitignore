@@ -17,3 +17,7 @@ blob-report/
 .env
 !.env.staging
 !.env.prod
+# VRT のベースライン画像は CI（Linux）が生成する *-linux.png のみを使う。
+# ローカル（Windows / macOS）で生成された画像を誤ってコミットしないようにする
+*-win32.png
+*-darwin.png

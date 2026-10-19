@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "test": "playwright test",
     "typecheck": "tsc --noEmit",
     "test:stg": "cross-env ENV=staging npx playwright test",
     "test:prod": "cross-env ENV=prod npx playwright test"
@@ -12,10 +13,13 @@
   "license": "ISC",
   "type": "commonjs",
   "description": "",
+  "engines": {
+    "node": ">=24 <25"
+  },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
     "@playwright/test": "^1.62.1",
-    "@types/node": "^26.2.0",
+    "@types/node": "^24.19.2",
     "cross-env": "^10.1.0",
     "dotenv": "^17.4.2",
     "typescript": "^5.9.3"

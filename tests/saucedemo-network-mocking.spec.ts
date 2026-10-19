@@ -50,6 +50,10 @@ test.describe('SauceDemo Network Mocking & Resilience Tests', () => {
 
     // 遅延があっても最終的にログイン後の商品一覧が表示されること（タイムアウト設定を拡張）
     await expect(page.locator('.title')).toBeVisible({ timeout: 10000 });
+
+    // 遅延下でも、カートへの追加が完了し、バッジに反映されること
+    await page.locator('[data-test="add-to-cart-sauce-labs-backpack"]').click();
+    await expect(page.locator('.shopping_cart_badge')).toHaveText('1', { timeout: 10000 });
   });
 
   // -------------------------------------------------------------
@@ -66,13 +70,21 @@ test.describe('SauceDemo Network Mocking & Resilience Tests', () => {
     await context.setOffline(true);
 
     try {
-      // オフライン状態でカートアイコンをクリック
-      await page.locator('.shopping_cart_link').click();
-    } catch (e) {
-      console.log('オフライン状態のためクライアント側で遷移・通信が抑制されました');
+      // 【検証】オフラインになっても、既に描画された商品一覧が残っていること
+      await expect(page.locator('.title')).toHaveText('Products');
+      await expect(page.locator('.inventory_item')).not.toHaveCount(0);
+
+      // 【検証】SPA のクライアント側の状態は、通信なしでも動くこと（カートへの追加がバッジに反映される）
+      await page.locator('[data-test="add-to-cart-sauce-labs-backpack"]').click();
+      await expect(page.locator('.shopping_cart_badge')).toHaveText('1');
+      await expect(page.locator('[data-test="remove-sauce-labs-backpack"]')).toBeVisible();
     } finally {
-      // ネットワーク状態を復元
+      // 検証の成否に関わらず、ネットワーク状態を復元する
       await context.setOffline(false);
     }
+
+    // 【検証】通信を復旧したあとも、画面とカートの状態が維持されていること
+    await expect(page.locator('.title')).toHaveText('Products');
+    await expect(page.locator('.shopping_cart_badge')).toHaveText('1');
   });
 });

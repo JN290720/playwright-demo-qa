@@ -8,22 +8,29 @@ on:
   issue_comment:
     types: [created]
 
+# 最小権限: 既定は読み取りのみ。書き込みが必要な権限は Job 単位で付与する
 permissions:
-  contents: write      # VRT更新画像のGit Commit & Push、およびHTMLレポート（gh-pages）のデプロイ権限
-  pull-requests: write # PR画面へのステータスコメント投稿・更新権限
-  issues: write        # issue_comment イベントでPRコメントおよびリアクションを操作するための権限
+  contents: read
 
 jobs:
   test:
+    permissions:
+      contents: write      # VRT更新画像のGit Commit & Push、およびHTMLレポート（gh-pages）のデプロイ権限
+      pull-requests: write # PR画面へのステータスコメント投稿・更新権限
+      issues: write        # issue_comment イベントでPRコメントおよびリアクションを操作するための権限
     # -------------------------------------------------------------------------
     # 【実行条件の制御】
     # 1. 通常のPRイベント（作成・Push）時
     # 2. または、PRに対するコメント投稿であり、かつ本文に "/update-vrt" が含まれる時
+    #    ただし、コメント投稿者がリポジトリの OWNER / MEMBER / COLLABORATOR の場合のみ
     # ※無関係なIssueコメントや通常のPRコメントでの無駄なActions起動を防ぎます
+    # ※書き込み権限のない第三者のコメントで、書き込み権限つきのトークンが動くことを防ぎます
     # -------------------------------------------------------------------------
     if: |
       github.event_name == 'pull_request' ||
-      (github.event.issue.pull_request && contains(github.event.comment.body, '/update-vrt'))
+      (github.event.issue.pull_request &&
+       contains(github.event.comment.body, '/update-vrt') &&
+       contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association))
 
     timeout-minutes: 60
     runs-on: ubuntu-latest
@@ -98,13 +105,37 @@ jobs:
 
       # 💡 WebKit (Safari) 等の起動に必要な OS 依存ライブラリ (libevent 等) を常にインストール
       # ※ OS パッケージは Actions キャッシュ対象外となるため、キャッシュヒット時でも必ず実行します
+      # 💡 apt の一時的なハング対策（#19）: 1 回 3 分で打ち切り、最大 3 回まで再試行します。
+      # （過去に、このステップが約 60 分ハングして Job が打ち切られた実績があります）
+      # timeout-minutes は、再試行を使い切った場合の合計より少し長い「最後の砦」です。
       - name: Install Playwright System Dependencies
-        run: npx playwright install-deps
+        timeout-minutes: 12
+        run: |
+          echo 'Acquire::Retries "3";' | sudo tee /etc/apt/apt.conf.d/80-retries > /dev/null
+          for i in 1 2 3; do
+            if timeout 180 npx playwright install-deps; then
+              exit 0
+            fi
+            echo "::warning::install-deps attempt $i failed or timed out"
+            sleep 10
+          done
+          echo "::error::install-deps failed after 3 attempts"
+          exit 1
 
       # 💡 キャッシュがヒットしなかった場合のみ、ブラウザ本体（Chromium / WebKit）をダウンロード
       - name: Install Playwright Browsers
         if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: npx playwright install chromium webkit
+        timeout-minutes: 10
+        run: |
+          for i in 1 2; do
+            if timeout 240 npx playwright install chromium webkit; then
+              exit 0
+            fi
+            echo "::warning::browser install attempt $i failed or timed out"
+            sleep 10
+          done
+          echo "::error::browser install failed after 2 attempts"
+          exit 1
 
       # -----------------------------------------------------------------------
       # ステップ3-A: 【通常時】Playwright テストの実行
@@ -174,8 +205,40 @@ jobs:
       # -----------------------------------------------------------------------
       # ステップ5: HTMLテストレポートの GitHub Pages デプロイ
       # -----------------------------------------------------------------------
-      - name: Deploy Playwright Report to GitHub Pages
+      # 💡 複数 PR が同時に走ると gh-pages への push が競合する(cannot lock ref)ため、
+      # 失敗時のみランダム待機をはさんで最大 3 回まで再試行します。
+      - name: Deploy Playwright Report to GitHub Pages (attempt 1)
+        id: deploy-report-1
         if: "always() && !contains(github.event.comment.body, '/update-vrt')"
+        continue-on-error: true
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./playwright-report
+          destination_dir: pr-reports/${{ steps.pr-branch.outputs.result }}
+          keep_files: true
+
+      - name: Wait before retry (attempt 2)
+        if: "always() && steps.deploy-report-1.outcome == 'failure'"
+        run: sleep $((RANDOM % 20 + 5))
+
+      - name: Deploy Playwright Report to GitHub Pages (attempt 2)
+        id: deploy-report-2
+        if: "always() && steps.deploy-report-1.outcome == 'failure'"
+        continue-on-error: true
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./playwright-report
+          destination_dir: pr-reports/${{ steps.pr-branch.outputs.result }}
+          keep_files: true
+
+      - name: Wait before retry (attempt 3)
+        if: "always() && steps.deploy-report-2.outcome == 'failure'"
+        run: sleep $((RANDOM % 20 + 5))
+
+      - name: Deploy Playwright Report to GitHub Pages (attempt 3)
+        if: "always() && steps.deploy-report-2.outcome == 'failure'"
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}

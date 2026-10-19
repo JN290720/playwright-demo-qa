@@ -4,13 +4,16 @@ on:
   push:
     branches: [ main ]
 
+# 最小権限: 既定は読み取りのみ。Pages デプロイに必要な権限は Job 単位で付与する
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 jobs:
   deploy:
+    permissions:
+      contents: read
+      pages: write     # GitHub Pages へのデプロイ
+      id-token: write  # deploy-pages の OIDC 認証
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -20,7 +23,9 @@ jobs:
     - uses: actions/configure-pages@v5
     - uses: actions/upload-pages-artifact@v3
       with:
-        path: '.'
+        # 公開するのは public/ の中身だけ（許可リスト方式）。
+        # リポジトリ全体（'.'）を公開すると、.env.* や CLAUDE.md などが意図せず公開されるため。
+        path: './public'
     - name: Deploy to GitHub Pages
       id: deployment
       uses: actions/deploy-pages@v4
