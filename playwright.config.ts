@@ -30,6 +30,10 @@ export default defineConfig({
   retries: isCI ? 2 : 0,
   /* 💡 CIでの並列実行ワーカー数：PC＋スマホの並列処理のため 2 ワーカーを指定 */
   workers: isCI ? 4 : undefined,
+  /* 💡 タイムアウト（#19、ユーザー承認済み）: 既定では actionTimeout / navigationTimeout が「無制限」で、
+     ハングしても原因が分かりにくいため、明示して早く失敗させます。 */
+  timeout: 30_000, // テスト 1 件の上限（既定値を明示）
+  globalTimeout: isCI ? 10 * 60_000 : undefined, // CI 全体の上限（通常 約 2〜4 分の 2.5 倍以上）。Playwright 側で止まった場所をレポートに残して終了する
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: 'html',
 
@@ -51,6 +55,10 @@ export default defineConfig({
   use: {
     /* 💡 環境ファイル内の BASE_URL を使用（未設定なら http://localhost:3000 にフォールバック） */
     baseURL: process.env.BASE_URL || 'http://localhost:3000',
+
+    /* 💡 操作・ページ遷移のタイムアウト（既定は無制限）。外部サイトの遅延を考慮し、遷移は操作より長くする */
+    actionTimeout: 10_000,
+    navigationTimeout: 20_000,
 
     /* 失敗時の自動証拠収集設定 */
     trace: 'on-first-retry', // 失敗してリトライした時に詳細な操作ログ（Trace Viewer）を保存
