@@ -1,0 +1,68 @@
+name: Android Emulator Test (experimental)
+
+# #85 の調査用。Android エミュレータ上の Chrome で、既存の POM を使ったテストが CI で動くかを確認する。
+# 通常の PR / デプロイのテストには影響しない（このファイルやスクリプトを変更した PR と、手動実行のときだけ動く）。
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/android-test.yml'
+      - 'scripts/android/**'
+      - 'tests-android/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-test-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  android:
+    name: android (${{ matrix.target }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        # イメージの種類によって、Chrome の有無や root の可否が違うため、両方を調べる
+        target: [ google_apis, google_apis_playstore ]
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # エミュレータの高速化に KVM が必要（Linux ランナーで利用可能にする）
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Run tests on Android emulator
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
+        with:
+          api-level: 34
+          target: ${{ matrix.target }}
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          script: bash scripts/android/run-on-emulator.sh
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: android-${{ matrix.target }}
+          path: |
+            playwright-report-android/
+            android-final-screen.png
+          if-no-files-found: ignore
+          retention-days: 7
