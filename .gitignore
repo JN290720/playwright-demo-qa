@@ -26,3 +26,7 @@ reports/
 # Android 実行（#85）の生成物
 playwright-report-android/
 android-final-screen.png
+
+# テスト観点表（#39）。Deploy App が、デプロイ時に自動生成して公開する
+public/test-catalog.html
+public/test-catalog.csv

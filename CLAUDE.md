@@ -56,6 +56,7 @@ npx playwright show-report
 - 画面操作は Page Object Model(`tests/pages/`)に寄せ、spec に直接セレクタを書き散らさない。
 - `test.only` は残さない(CI で `forbidOnly` により失敗する)。
 - テスト名は、何を確認するかが分かる日本語で書く(既存の spec に合わせる)。
+- **新しい spec ファイルを追加したら、`scripts/generate-test-catalog.js` の `FILE_INFO` に、対象サイトと観点を追記する**（テスト観点表 = 公開サイトの `test-catalog.html` の分類に使う。未登録だと「未分類」になり、CI に警告が出る）
 - 待機は固定の `waitForTimeout` ではなく、Playwright の自動待機・`expect` を使う。
 
 ## VRT の運用
