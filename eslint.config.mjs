@@ -1,4 +1,4 @@
-// ESLint の設定（#21、ユーザー承認済み）。原則すべて error。no-networkidle のみ warn（待機方法を変えると VRT の安定性に影響しうるため）。
+// ESLint の設定（#21、ユーザー承認済み）。すべて error（warn のルールも error に引き上げる）。#81 で networkidle の使用をやめ、例外は無くなった。
 import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import playwright from 'eslint-plugin-playwright';
@@ -24,8 +24,6 @@ export default tseslint.config(
     files: ['tests/**/*.ts'],
     rules: {
       ...toError(playwright.configs['flat/recommended'].rules),
-      // networkidle は非推奨だが、VRT の待機に使っている。置き換えは VRT の安定性に影響しうるため、別 Issue で扱う。それまでは warn
-      'playwright/no-networkidle': 'warn',
       // 「見た目の確認」の共通関数（内部で toHaveScreenshot を呼ぶ）を、アサーションとして扱う
       'playwright/expect-expect': ['error', { assertFunctionNames: ['expectPageScreenshot'] }],
     },
