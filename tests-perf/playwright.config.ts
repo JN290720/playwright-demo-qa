@@ -13,7 +13,10 @@ export default defineConfig({
   testDir: '.',
   workers: 1,
   retries: 0,
-  timeout: 120_000,
+  // 💡 「失敗にしない」を守るための、長い待ち時間（レビューエージェントの指摘）: 既定の expect の待ち時間（5 秒）のままだと、
+  //    遅い回で待ちきれず、そのテストが失敗し、**遅い回の値が記録されない**（実質のしきい値になる）。遅くても、測り切れるようにする
+  timeout: 300_000,
+  expect: { timeout: 120_000 },
   reporter: [['list']],
   projects: [{ name: 'desktop-chrome', use: { ...devices['Desktop Chrome'] } }],
 });
