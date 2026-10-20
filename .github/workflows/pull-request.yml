@@ -105,7 +105,12 @@ jobs:
         run: npm ci
 
       # 💡 型チェックと lint（#21、ユーザー承認済み）: ブラウザの取得やテスト実行の前に、早く失敗させます。
-      #    lint は、原則すべて error（no-networkidle のみ warn。warn では失敗にしない）。/update-vrt の実行時は不要
+      #    lint は、すべて error（違反があれば失敗）。/update-vrt の実行時は不要
+      # /update-vrt の範囲の指定を解析するスクリプトの動作確認（#117）
+      - name: Self-test /update-vrt parser
+        if: "!contains(github.event.comment.body, '/update-vrt')"
+        run: node scripts/parse-update-vrt.js --self-test
+
       - name: Type check
         if: "!contains(github.event.comment.body, '/update-vrt')"
         run: npm run typecheck
@@ -186,11 +191,29 @@ jobs:
       # -----------------------------------------------------------------------
       # コメントに "/update-vrt" が含まれている場合のみ実行。
       # `--update-snapshots` フラグを付与して対象全環境（PC / スマホ / Safari）のベースライン画像を再撮影・更新します。
-      - name: Update VRT Snapshots
+      # 💡 範囲の指定（#117）: `/update-vrt project=desktop-safari test=P3,P8` のように、更新するプロジェクト・画面を絞れる。
+      #    指定が無ければ、今までどおり全部。コメントは、許可リスト方式で解析する（scripts/parse-update-vrt.js。シェルへそのまま渡さない）
+      - name: Parse /update-vrt options
+        id: vrt-opts
         if: "contains(github.event.comment.body, '/update-vrt')"
         env:
+          COMMENT_BODY: ${{ github.event.comment.body }}
+        run: node scripts/parse-update-vrt.js
+
+      - name: Update VRT Snapshots
+        if: "contains(github.event.comment.body, '/update-vrt') && steps.vrt-opts.outputs.valid == 'true'"
+        env:
           ENV: staging
-        run: npx playwright test tests/saucedemo-visual-regression.spec.ts --update-snapshots --project=desktop-chrome --project=mobile-chrome --project=desktop-safari
+          VRT_PROJECTS: ${{ steps.vrt-opts.outputs.projects }}
+          VRT_GREP: ${{ steps.vrt-opts.outputs.grep }}
+          VRT_SCOPE: ${{ steps.vrt-opts.outputs.scope }}
+        run: |
+          # 検証済みの値（許可リストに合うもの）だけを、配列で渡す
+          args=()
+          for p in $VRT_PROJECTS; do args+=("--project=$p"); done
+          if [ -n "$VRT_GREP" ]; then args+=(-g "$VRT_GREP"); fi
+          echo "更新の範囲: $VRT_SCOPE"
+          npx playwright test tests/saucedemo-visual-regression.spec.ts --update-snapshots "${args[@]}"
       
         # -----------------------------------------------------------------------
       # ステップ3-C: レポートディレクトリの作成・準備（空回避）
@@ -211,8 +234,10 @@ jobs:
       # /update-vrt 実行によって更新された画像ファイルをPRブランチへ自動コミット＆Pushします。
       # 差分がない場合はエラーを起こさず安全にスキップし、結果情報を出力変数に保存します。
       - name: Commit & Push updated snapshots
-        if: "contains(github.event.comment.body, '/update-vrt')"
+        if: "contains(github.event.comment.body, '/update-vrt') && steps.vrt-opts.outputs.valid == 'true'"
         id: commit-vrt
+        env:
+          VRT_SCOPE: ${{ steps.vrt-opts.outputs.scope }}
         run: |
           # Gitコミット用のBotユーザー情報を設定
           git config --global user.name "github-actions[bot]"
@@ -223,7 +248,7 @@ jobs:
           
           # 差分が存在する場合のみコミット＆Pushを実施（[skip ci] で無限ループロジックを防止）
           if ! git diff --staged --quiet; then
-            git commit -m "chore(vrt): PC/スマホ/Safari全環境のVRTベースライン画像を自動更新 [skip ci]"
+            git commit -m "chore(vrt): VRTベースライン画像を自動更新（${VRT_SCOPE}） [skip ci]"
             git push
             
             # 最新のコミットSHAハッシュと「変更あり」フラグを出力変数へセット
@@ -288,6 +313,9 @@ jobs:
       - name: Comment PR Status or VRT Reply
         if: always()
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
+        env:
+          VRT_SCOPE: ${{ steps.vrt-opts.outputs.scope }}
+          VRT_ERROR: ${{ steps.vrt-opts.outputs.error }}
         with:
           script: |
             const isVrtCommand = context.eventName === 'issue_comment' && context.payload.comment.body.includes('/update-vrt');
@@ -297,17 +325,23 @@ jobs:
               // 💡 /update-vrt コマンド完了時のレスポンス投稿処理
               const isSuccess = '${{ job.status }}' === 'success';
               const hasChanges = '${{ steps.commit-vrt.outputs.has_changes }}' === 'true';
+              const optsParsed = '${{ steps.vrt-opts.outcome }}' === 'success';
+              const optsValid = '${{ steps.vrt-opts.outputs.valid }}' === 'true';
+              const scope = process.env.VRT_SCOPE || '全プロジェクト・全画面';
               const commitSha = '${{ steps.commit-vrt.outputs.commit_sha }}';
               let replyBody = '';
 
-              if (isSuccess) {
+              if (optsParsed && !optsValid) {
+                // 範囲の指定が不正: 何も更新していない（理由と使い方を返信する）
+                replyBody = `⚠️ **\`/update-vrt\` の指定を解釈できなかったため、何も更新していません。**\n\n${process.env.VRT_ERROR}`;
+              } else if (isSuccess) {
                 if (hasChanges) {
                   const commitUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/commit/${commitSha}`;
-                  replyBody = `📸 **PC・スマホ・Safari環境の VRT Snapshots を自動更新しました！**\n\n` +
+                  replyBody = `📸 **VRT Snapshots を自動更新しました！**（範囲: ${scope}）\n\n` +
                               `🔗 **画像の更新差分:** [コミット結果を表示 (${commitSha.substring(0, 7)})](${commitUrl})\n\n` +
                               `最新の画像をブランチにコミット＆Pushしました。再テストの完了をお待ちください。`;
                 } else {
-                  replyBody = `ℹ️ **VRT Snapshots に変更差分はありませんでした。**\n既存の画像と完全に一致しています。`;
+                  replyBody = `ℹ️ **VRT Snapshots に変更差分はありませんでした。**（範囲: ${scope}）\n既存の画像と一致しています（ピクセル単位の小さな揺れは、許容範囲内のため更新されません）。`;
                 }
               } else {
                 replyBody = `❌ **VRT Snapshots の自動更新に失敗しました。**\nActions ログをご確認ください。`;
@@ -335,7 +369,8 @@ jobs:
                            (flakySummary ? `${flakySummary}\n` : '') +
                            `---\n` +
                            `📸 **VRT画像を更新したい場合:**\n` +
-                           `コメント欄に \`/update-vrt\` と投稿すると、Linux環境のPC/スマホ/Safari最新画像を自動更新してPushします。`;
+                           `コメント欄に \`/update-vrt\` と投稿すると、Linux環境のPC/スマホ/Safari最新画像を自動更新してPushします。\n` +
+                           `範囲を絞る場合: \`/update-vrt project=desktop-safari\`（プロジェクト）、\`/update-vrt test=P3,P8\`（画面）。併用も可。`;
 
               const { data: comments } = await github.rest.issues.listComments({
                 owner: context.repo.owner,
