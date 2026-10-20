@@ -54,7 +54,7 @@ body:
     id: impact
     attributes:
       label: 影響範囲
-      description: 「影響する画面・機能」「影響する spec・プロジェクト」「実行の段階（PR の CI・デプロイ後・週次・Android・性能）」「影響する環境（stg・prd）」「影響するファイル・ワークフロー」「調べ方（使ったコマンドと件数）」。調べ方は docs/impact-scope.md を参照。不明な点は「不明」と書く。
+      description: 影響する範囲を書く。調べ方は docs/impact-scope.md。分からなければ「不明」と書く（空欄にしない）。
       placeholder: "- 影響する画面・機能:\n- 影響する spec・プロジェクト:\n- 実行の段階:\n- 環境:\n- ファイル・ワークフロー:\n- 調べ方（コマンドと件数）:"
     validations:
       required: true
