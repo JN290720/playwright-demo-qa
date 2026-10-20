@@ -82,6 +82,34 @@ jobs:
         keep_files: true
         commit_message: 'deploy: app ${{ github.sha }}'
 
+  # テスト観点ごとの Issue（親 + 観点ごとのサブ Issue）の「テストケースの表」を、テストのコードから自動で更新する（#39）。
+  # 表は、コードとずれないよう、デプロイのたびに作り直す（内容が変わらなければ、Issue は更新しない）。
+  # 💡 失敗しても、Deploy App 全体は失敗にしない（continue-on-error）: 失敗にすると、後続の Post-Deploy Test が止まるため。
+  #    Issue を書き換える権限（issues: write）は、デプロイ（gh-pages への書き込み）とは別の Job に分ける（最小権限）
+  sync-viewpoint-issues:
+    needs: deploy
+    if: ${{ needs.deploy.result == 'success' }}
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read # コードの取得
+      issues: write  # Issue の本文の更新
+    steps:
+    - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+      with:
+        node-version-file: '.nvmrc'
+        cache: 'npm'
+    - name: Install dependencies
+      run: npm ci
+    - name: Generate test catalog
+      run: node scripts/generate-test-catalog.js reports/catalog
+    - name: Sync test viewpoint issues
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: node scripts/sync-test-viewpoint-issues.js reports/catalog/test-catalog.json
+
   # 失敗の通知（#37、ユーザー承認済み）: デプロイが失敗したら GitHub Issue を作成（既にあればコメントを追記）。
   # 成功に戻ったら、復旧を書いて閉じる。デプロイ（gh-pages への書き込み権限を持つ Job）とは別の Job で行う（最小権限）。
   notify:
