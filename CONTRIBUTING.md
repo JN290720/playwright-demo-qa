@@ -7,9 +7,9 @@ Claude 向けの作業ルールは [CLAUDE.md](CLAUDE.md) にまとめていま�
 
 1. **Issue を作る**(または既存の Issue を選ぶ)。優先度ラベル(`P0`〜`P3`)を付ける
 2. `main` からブランチを作る(`種別/内容`。例: `ci/fix-timeout`、`test/add-checkout-case`)
-3. 変更して、ローカルでテストを実行する(下記)
-4. PR を作る([PR テンプレート](.github/PULL_REQUEST_TEMPLATE.md)に沿って書く)
-5. CI(`PR Test & VRT Update`)が通ることを確認する
+3. 変更する。ローカルでのテストは任意です(先に確認すると、速く・安く直せます。下記。`npm run test:stg` が、PR の CI と同じ範囲です)
+4. PR を作る([PR テンプレート](.github/PULL_REQUEST_TEMPLATE.md)に沿って書く)。ローカルの確認を終えてからでなくてもかまいません。失敗は CI で検知します
+5. CI(`PR Test & VRT Update`)の結果を確認する。失敗したら原因を調べて直す。方針が変わったら PR を閉じる。失敗のまま放置・マージしない
 6. レビュー後、`main` へマージする
 7. 本体 `playwright-demo` へ、同じ内容を PR として反映する(本体のマージも CI が通ってから)
 
