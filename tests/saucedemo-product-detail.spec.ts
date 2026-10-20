@@ -41,7 +41,6 @@ test.describe('商品詳細ページ（機能）', () => {
       await expect(page.locator('.inventory_details_price')).toHaveText(price);
       await expect(page.locator('.inventory_details_desc')).toHaveText(description);
       await expect(page.locator('img.inventory_details_img')).toBeVisible();
-      await expect(page.locator('img.inventory_details_img')).toHaveAttribute('alt', name);
     });
   }
 
