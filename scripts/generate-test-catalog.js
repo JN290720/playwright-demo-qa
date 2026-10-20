@@ -29,6 +29,7 @@ const FILE_INFO = {
   'saucedemo-user-types.spec.ts': { site: 'SauceDemo', viewpoint: '機能（特殊ユーザー）' },
   'login.spec.ts': { site: 'SauceDemo / TodoMVC', viewpoint: '機能（正常系）' },
   'saucedemo-checkout-validation.spec.ts': { site: 'SauceDemo', viewpoint: '異常系' },
+  'saucedemo-cart-checkout.spec.ts': { site: 'SauceDemo', viewpoint: '異常系' },
   'saucedemo-qa-destructive.spec.ts': { site: 'SauceDemo', viewpoint: '異常系・破壊的操作' },
   'saucedemo-security-input.spec.ts': { site: 'SauceDemo', viewpoint: 'セキュリティ' },
   'saucedemo-protected-pages.spec.ts': { site: 'SauceDemo', viewpoint: 'セキュリティ' },
