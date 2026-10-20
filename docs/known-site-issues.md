@@ -5,7 +5,7 @@ SauceDemo には、標準ユーザー以外に、**意図的に不具合や遅�
 サイトが直ったときに、気づけるようにするため。
 
 - **`test.fail()`**: Playwright の機能で、「このテストは失敗するはず」と宣言する。失敗すれば「成功」扱い（CI は赤くならない）。**予期せず成功したら、テストが失敗として報告される** → サイトが直ったと分かる
-- 対象のテストは `tests/saucedemo-user-types.spec.ts`（#15）と、9 は `tests/saucedemo-sidebar-logout.spec.ts`（#57）。ユーザー判断は #15、ユーザー判断: 既知の不具合は `test.fail()` で記録し、CI を不安定にしない）
+- 対象のテストは、1〜8 が `tests/saucedemo-user-types.spec.ts`（#15）、9 が `tests/saucedemo-sidebar-logout.spec.ts`（#57）。ユーザー判断（#15）: 既知の不具合は `test.fail()` で記録し、CI を不安定にしない
 - a11y（アクセシビリティ）の不備は `docs/a11y-known-issues.md` に別に記録
 
 | # | ユーザー | 不具合の内容 | 期待する正しい挙動（テストが確認していること） | 確認日 |
