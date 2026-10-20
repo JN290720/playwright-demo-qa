@@ -89,6 +89,14 @@ QA リポジトリは、**失敗を安全に検知するための検証用プロ
 - CI でしか確認できない変更は、**ドラフト PR** で出して CI を確認してから、レビュー可能にしてよい
 - PR 本文の「動作確認」には、**ローカルで確認したこと / CI で確認すること / マージ後に確認すること**を分けて書く
 
+## テストレポートの公開（GitHub Pages）
+
+- **公開元は `gh-pages` ブランチ**（`build_type=legacy`、本体と同じ構成）。テストレポート（`main-deploy-report/` = 最新、`main-test-<run id>/` = 実行ごと、`pr-reports/<ブランチ>/` = PR ごと）と、`public/`（Deploy App が公開）が、同じ `gh-pages` に置かれる
+- 公開元を「GitHub Actions」にしてはいけない（`gh-pages` が配信されず、レポートが 404 になる。実例: #89）
+- PR のレポートは、**PR をマージ／クローズすると削除される**（`Cleanup PR Report`）。`main` のレポートは削除されない
+- 公開元の設定を API で変えても、**ビルドは自動で始まらない**。`POST /repos/{repo}/pages/builds` で依頼するか、`gh-pages` に push する
+- レポートの URL が 404 のときの確認: (1) `gh api repos/{repo}/pages` で `build_type` と `source` (2) `gh-pages` ブランチにファイルがあるか (3) `pages/builds/latest` の `status`
+
 ## ブランチ・コミット・PR
 
 - ブランチ名は `種別/内容` の形式。種別は `feature` / `fix` / `ci` / `docs` / `refactor` / `test` / `chore`。
