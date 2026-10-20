@@ -99,7 +99,15 @@ export default defineConfig({
     // mainマージ後に WebKit 固有の表示・動作崩れを最終チェックします。
     // =========================================================================
     ...(isPR
-      ? [] // PR時はスキップ（上記2プロジェクトのみで高速完走）
+      ? [
+          // 【試行用・マージしない】PR でも Safari の縮小版（VRT 14 + 購入フロー + ログイン/カート @prd = 16 件）を動かす
+          {
+            name: 'desktop-safari',
+            use: { ...devices['Desktop Safari'] },
+            testMatch: [/saucedemo-visual-regression\.spec\.ts/, /saucedemo-e2e-purchase\.spec\.ts/, /login\.spec\.ts/],
+            grep: /@prd|Visual Regression/,
+          },
+        ]
       : [
           {
             name: 'desktop-safari',
