@@ -100,7 +100,7 @@ QA リポジトリは、**失敗を安全に検知するための検証用プロ
 
 ## ブランチ・コミット・PR
 
-- ブランチ名は `種別/内容` の形式。種別は `feature` / `fix` / `ci` / `docs` / `refactor` / `test` / `chore`。
+- ブランチ名は `種別/内容` の形式。種別は `feat` / `fix` / `ci` / `docs` / `refactor` / `test` / `chore`（一覧と意味は [CONTRIBUTING.md](CONTRIBUTING.md) を参照）。
 - コミットメッセージは `種別: 概要`(日本語)。例: `ci: PRテストワークフローの修正`。
 - `main` に直接 push しない。必ずブランチを切って PR にする。
 - PR 本文は [PR テンプレート](.github/PULL_REQUEST_TEMPLATE.md) の見出し(概要 / 関連 Issue / 変更内容 / 動作確認)に沿って書く。
