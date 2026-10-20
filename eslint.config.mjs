@@ -27,7 +27,7 @@ export default tseslint.config(
       // networkidle は非推奨だが、VRT の待機に使っている。置き換えは VRT の安定性に影響しうるため、別 Issue で扱う。それまでは warn
       'playwright/no-networkidle': 'warn',
       // 「見た目の確認」の共通関数（内部で toHaveScreenshot を呼ぶ）を、アサーションとして扱う
-      'playwright/expect-expect': ['error', { assertFunctionNames: ['expectPageScreenshot'] }],
+      'playwright/expect-expect': ['error', { assertFunctionNames: ['expectPageScreenshot', 'expectNoA11yViolations'] }],
     },
   },
 );
