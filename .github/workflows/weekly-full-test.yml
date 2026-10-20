@@ -7,7 +7,8 @@ name: Weekly Full Test
 #   ・サイト側の変更による、新しい不具合・見た目の変化
 # が、次に PR を出すまで見つからなかった。PR を待たずに検知する。
 #
-# - 実行内容: ENV=staging（全テスト）。PC の Chrome / スマホ表示の Chrome / Safari（WebKit。PR 以外なので含まれる）
+# - 実行内容: ENV=staging（全テスト）。PC の Chrome / スマホ表示の Chrome（PR のテストと同じ 2 種）
+#   Safari（WebKit）は、まだ含めない: QA の Safari 用の基準画像（VRT）が、現在の描画と合っておらず、全件が失敗するため（2026-10-20 に確認。#36 で、基準画像の撮り直しとあわせて扱う）
 # - 失敗 → GitHub Issue（ラベル weekly-failure）で通知。復旧したら自動でクローズ（notify-failure.js）
 # - 既知の不具合のテスト（test.fail()）が予期せず成功 → 「サイトが直った可能性」を、サイト不具合の一覧 Issue（ラベル site-defect）にコメント
 # - このファイルを変更した PR でも動く（変更の検証用。通知は送らない）
@@ -54,7 +55,7 @@ jobs:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-weekly-${{ hashFiles('**/package-lock.json') }}
 
-      # WebKit (Safari) 等の起動に必要な OS 依存ライブラリ。キャッシュ対象外のため常に実行（apt のハング対策で再試行。#19）
+      # ブラウザの起動に必要な OS 依存ライブラリ。キャッシュ対象外のため常に実行（apt のハング対策で再試行。#19）
       - name: Install Playwright System Dependencies
         timeout-minutes: 12
         run: |
@@ -74,7 +75,7 @@ jobs:
         timeout-minutes: 10
         run: |
           for i in 1 2; do
-            if timeout 240 npx playwright install chromium webkit; then
+            if timeout 240 npx playwright install chromium; then
               exit 0
             fi
             echo "::warning::browser install attempt $i failed or timed out"
@@ -87,7 +88,7 @@ jobs:
         env:
           ENV: staging
           PLAYWRIGHT_JSON_OUTPUT_NAME: reports/results.json
-        run: npx playwright test --reporter=html,json
+        run: npx playwright test --project=desktop-chrome --project=mobile-chrome --reporter=html,json
 
       # flaky（リトライで通ったテスト）と失敗を抽出して、Job Summary に表示する
       - name: Summarize results
