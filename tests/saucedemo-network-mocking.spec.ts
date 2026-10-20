@@ -81,4 +81,47 @@ test.describe('SauceDemo Network Mocking & Resilience Tests', () => {
     await expect(page.locator('.title')).toHaveText('Products');
     await expect(page.locator('.shopping_cart_badge')).toHaveText('1');
   });
+
+  // -------------------------------------------------------------
+  // 4. 商品詳細ページでの画像の取得失敗（#134 N2）
+  // -------------------------------------------------------------
+  test('P4: 商品詳細ページで、商品画像が読み込めなくても、商品名・価格・ボタンが使えること', async ({ page }) => {
+    // 💡 画像（jpg / png など）のリクエストを失敗させる
+    await page.route(/\.(jpg|jpeg|png|webp|svg)(\?.*)?$/, (route) => route.abort());
+
+    await page.goto('https://www.saucedemo.com/');
+    await page.locator('[data-test="username"]').fill(CREDENTIALS.standard.username);
+    await page.locator('[data-test="password"]').fill(CREDENTIALS.standard.password);
+    await page.locator('[data-test="login-button"]').click();
+    await expect(page.locator('.title')).toHaveText('Products');
+    await page.locator('[data-test="item-4-title-link"]').click();
+
+    // 💡 検証: 画像が無くても、商品名・価格・「Add to cart」が表示され、使える。画像には代わりの説明文（alt）がある
+    // （一覧の要素が、切り替わる間、残るため、詳細ページ専用のクラスで特定する。#71 と同じ）
+    await expect(page.locator('.inventory_details_container')).toBeVisible();
+    await expect(page.locator('.inventory_details_name')).toHaveText('Sauce Labs Backpack');
+    await expect(page.locator('.inventory_details_price')).toHaveText('$29.99');
+    await expect(page.locator('img.inventory_details_img')).toHaveAttribute('alt', 'Sauce Labs Backpack');
+    await page.locator('[data-test="add-to-cart"]').click();
+    await expect(page.locator('.shopping_cart_badge')).toHaveText('1');
+  });
+
+  // -------------------------------------------------------------
+  // 5. 外部リソース（フォント・エラー収集サービス）の取得失敗（#134 N3）
+  // -------------------------------------------------------------
+  test('P5: 外部サイトのリソース（Google Fonts など）が読み込めなくても、主要な操作が行えること', async ({ page }) => {
+    // 💡 このサイト自身（www.saucedemo.com）以外への通信（Google Fonts、エラー収集サービスなど）を、すべて失敗させる
+    await page.route((url) => url.hostname !== 'www.saucedemo.com', (route) => route.abort());
+
+    await page.goto('https://www.saucedemo.com/');
+    await page.locator('[data-test="username"]').fill(CREDENTIALS.standard.username);
+    await page.locator('[data-test="password"]').fill(CREDENTIALS.standard.password);
+    await page.locator('[data-test="login-button"]').click();
+
+    // 💡 検証: 外部のリソースが無くても、ログイン → 商品一覧 → カートへの追加が行える
+    await expect(page.locator('.title')).toHaveText('Products');
+    await expect(page.locator('.inventory_item')).toHaveCount(6);
+    await page.locator('[data-test="add-to-cart-sauce-labs-backpack"]').click();
+    await expect(page.locator('.shopping_cart_badge')).toHaveText('1');
+  });
 });
