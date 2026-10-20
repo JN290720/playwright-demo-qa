@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { LoginPage } from './pages/LoginPage';
 import { CREDENTIALS } from './fixtures/users';
 
 test.describe('SauceDemo Network Mocking & Resilience Tests', () => {
@@ -16,10 +17,9 @@ test.describe('SauceDemo Network Mocking & Resilience Tests', () => {
       });
     });
 
-    await page.goto('https://www.saucedemo.com/');
-    await page.locator('[data-test="username"]').fill(CREDENTIALS.standard.username);
-    await page.locator('[data-test="password"]').fill(CREDENTIALS.standard.password);
-    await page.locator('[data-test="login-button"]').click();
+    const loginPage = new LoginPage(page);
+    await loginPage.goto();
+    await loginPage.loginAs(CREDENTIALS.standard);
 
     // 💡 検証: 画像が読み込めなくても画面タイトルや商品名テキスト、ボタンが正しく表示されていること
     await expect(page.locator('.title')).toHaveText('Products');
@@ -37,10 +37,9 @@ test.describe('SauceDemo Network Mocking & Resilience Tests', () => {
       await route.continue();
     });
 
-    await page.goto('https://www.saucedemo.com/');
-    await page.locator('[data-test="username"]').fill(CREDENTIALS.standard.username);
-    await page.locator('[data-test="password"]').fill(CREDENTIALS.standard.password);
-    await page.locator('[data-test="login-button"]').click();
+    const loginPage = new LoginPage(page);
+    await loginPage.goto();
+    await loginPage.loginAs(CREDENTIALS.standard);
 
     // 遅延があっても最終的にログイン後の商品一覧が表示されること（タイムアウト設定を拡張）
     await expect(page.locator('.title')).toBeVisible({ timeout: 10000 });
@@ -54,10 +53,9 @@ test.describe('SauceDemo Network Mocking & Resilience Tests', () => {
   // 3. ログイン後操作中のオフライン（通信断）テスト
   // -------------------------------------------------------------
   test('P3: 商品一覧を表示後にオフラインになっても、既存描画が維持されること', async ({ page, context }) => {
-    await page.goto('https://www.saucedemo.com/');
-    await page.locator('[data-test="username"]').fill(CREDENTIALS.standard.username);
-    await page.locator('[data-test="password"]').fill(CREDENTIALS.standard.password);
-    await page.locator('[data-test="login-button"]').click();
+    const loginPage = new LoginPage(page);
+    await loginPage.goto();
+    await loginPage.loginAs(CREDENTIALS.standard);
     await page.locator('.title').waitFor({ state: 'visible' });
 
     // 💡 ログイン成功後にネットワークを切断（オフライン化）
@@ -89,10 +87,9 @@ test.describe('SauceDemo Network Mocking & Resilience Tests', () => {
     // 💡 画像（jpg / png など）のリクエストを失敗させる
     await page.route(/\.(jpg|jpeg|png|webp|svg)(\?.*)?$/, (route) => route.abort());
 
-    await page.goto('https://www.saucedemo.com/');
-    await page.locator('[data-test="username"]').fill(CREDENTIALS.standard.username);
-    await page.locator('[data-test="password"]').fill(CREDENTIALS.standard.password);
-    await page.locator('[data-test="login-button"]').click();
+    const loginPage = new LoginPage(page);
+    await loginPage.goto();
+    await loginPage.loginAs(CREDENTIALS.standard);
     await expect(page.locator('.title')).toHaveText('Products');
     await page.locator('[data-test="item-4-title-link"]').click();
 
@@ -113,10 +110,9 @@ test.describe('SauceDemo Network Mocking & Resilience Tests', () => {
     // 💡 このサイト自身（www.saucedemo.com）以外への通信（Google Fonts、エラー収集サービスなど）を、すべて失敗させる
     await page.route((url) => url.hostname !== 'www.saucedemo.com', (route) => route.abort());
 
-    await page.goto('https://www.saucedemo.com/');
-    await page.locator('[data-test="username"]').fill(CREDENTIALS.standard.username);
-    await page.locator('[data-test="password"]').fill(CREDENTIALS.standard.password);
-    await page.locator('[data-test="login-button"]').click();
+    const loginPage = new LoginPage(page);
+    await loginPage.goto();
+    await loginPage.loginAs(CREDENTIALS.standard);
 
     // 💡 検証: 外部のリソースが無くても、ログイン → 商品一覧 → カートへの追加が行える
     await expect(page.locator('.title')).toHaveText('Products');

@@ -1,5 +1,6 @@
 import { test, expect } from './fixtures/test';
 import type { Page } from '@playwright/test';
+import { LoginPage } from './pages/LoginPage';
 import { CREDENTIALS, SHIPPING_INFO } from './fixtures/users';
 
 /**
@@ -86,10 +87,9 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
 
   // 9. ログイン失敗のエラー表示（誤ったユーザー名・パスワード）（#135 V1）
   test('P9: ログイン失敗のエラー表示の見た目に変更がないこと (PC)', async ({ page }) => {
-    await page.goto('https://www.saucedemo.com/');
-    await page.locator('[data-test="username"]').fill(CREDENTIALS.invalid.username);
-    await page.locator('[data-test="password"]').fill(CREDENTIALS.invalid.password);
-    await page.locator('[data-test="login-button"]').click();
+    const loginPage = new LoginPage(page);
+    await loginPage.goto();
+    await loginPage.loginAs(CREDENTIALS.invalid);
     await page.locator('[data-test="error"]').waitFor({ state: 'visible' });
     await waitForPasswordMasked(page);
     await waitForRenderComplete(page);
@@ -99,10 +99,9 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
 
   // 10. ロックされたユーザーのエラー表示（#135 V2）
   test('P10: ロックされたユーザーのエラー表示の見た目に変更がないこと (PC)', async ({ page }) => {
-    await page.goto('https://www.saucedemo.com/');
-    await page.locator('[data-test="username"]').fill(CREDENTIALS.lockedOut.username);
-    await page.locator('[data-test="password"]').fill(CREDENTIALS.lockedOut.password);
-    await page.locator('[data-test="login-button"]').click();
+    const loginPage = new LoginPage(page);
+    await loginPage.goto();
+    await loginPage.loginAs(CREDENTIALS.lockedOut);
     await page.locator('[data-test="error"]').waitFor({ state: 'visible' });
     await waitForPasswordMasked(page);
     await waitForRenderComplete(page);
@@ -115,10 +114,9 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
 
     // 各テスト前にログインを実行して商品一覧へ移動
     test.beforeEach(async ({ page }) => {
-      await page.goto('https://www.saucedemo.com/');
-      await page.locator('[data-test="username"]').fill(CREDENTIALS.standard.username);
-      await page.locator('[data-test="password"]').fill(CREDENTIALS.standard.password);
-      await page.locator('[data-test="login-button"]').click();
+      const loginPage = new LoginPage(page);
+      await loginPage.goto();
+      await loginPage.loginAs(CREDENTIALS.standard);
       await page.locator('.title').waitFor({ state: 'visible' });
     });
 
