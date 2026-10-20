@@ -910,6 +910,123 @@
     {
       "site": "SauceDemo",
       "viewpoint": "セキュリティ",
+      "screen": "カート",
+      "title": "S1: 未ログインで「カート」(/cart.html) を開くと、ログイン画面に戻り、ログインを求められること",
+      "group": "保護ページへの直接アクセス（未ログイン）",
+      "file": "saucedemo-protected-pages.spec.ts",
+      "env": "stg のみ",
+      "browsers": "PC Chrome / スマホ Chrome / Safari",
+      "android": "",
+      "known": "",
+      "no": 69
+    },
+    {
+      "site": "SauceDemo",
+      "viewpoint": "セキュリティ",
+      "screen": "購入手続き入力",
+      "title": "S2: 未ログインで「購入手続き入力」(/checkout-step-one.html) を開くと、ログイン画面に戻り、ログインを求められること",
+      "group": "保護ページへの直接アクセス（未ログイン）",
+      "file": "saucedemo-protected-pages.spec.ts",
+      "env": "stg のみ",
+      "browsers": "PC Chrome / スマホ Chrome / Safari",
+      "android": "",
+      "known": "",
+      "no": 70
+    },
+    {
+      "site": "SauceDemo",
+      "viewpoint": "セキュリティ",
+      "screen": "購入確認",
+      "title": "S3: 未ログインで「購入確認」(/checkout-step-two.html) を開くと、ログイン画面に戻り、ログインを求められること",
+      "group": "保護ページへの直接アクセス（未ログイン）",
+      "file": "saucedemo-protected-pages.spec.ts",
+      "env": "stg のみ",
+      "browsers": "PC Chrome / スマホ Chrome / Safari",
+      "android": "",
+      "known": "",
+      "no": 71
+    },
+    {
+      "site": "SauceDemo",
+      "viewpoint": "セキュリティ",
+      "screen": "商品詳細",
+      "title": "S4: 未ログインで「商品詳細」(/inventory-item.html?id=4) を開くと、ログイン画面に戻り、ログインを求められること",
+      "group": "保護ページへの直接アクセス（未ログイン）",
+      "file": "saucedemo-protected-pages.spec.ts",
+      "env": "stg のみ",
+      "browsers": "PC Chrome / スマホ Chrome / Safari",
+      "android": "",
+      "known": "",
+      "no": 72
+    },
+    {
+      "site": "SauceDemo",
+      "viewpoint": "セキュリティ",
+      "screen": "ログアウト",
+      "title": "S5: ログアウト後に、ブラウザの「戻る」を押しても、保護ページ（商品一覧）を見られないこと",
+      "group": "セッション（ログイン状態）の検証",
+      "file": "saucedemo-protected-pages.spec.ts",
+      "env": "stg のみ",
+      "browsers": "PC Chrome / スマホ Chrome / Safari",
+      "android": "",
+      "known": "",
+      "no": 73
+    },
+    {
+      "site": "SauceDemo",
+      "viewpoint": "セキュリティ",
+      "screen": "ログイン",
+      "title": "S6: ログイン状態の Cookie を削除すると、保護ページを開けないこと",
+      "group": "セッション（ログイン状態）の検証",
+      "file": "saucedemo-protected-pages.spec.ts",
+      "env": "stg のみ",
+      "browsers": "PC Chrome / スマホ Chrome / Safari",
+      "android": "",
+      "known": "",
+      "no": 74
+    },
+    {
+      "site": "SauceDemo",
+      "viewpoint": "セキュリティ",
+      "screen": "ログイン",
+      "title": "S7: Cookie（session-username）の値を「locked_out_user」にしても、保護ページを開けないこと",
+      "group": "セッション（ログイン状態）の検証",
+      "file": "saucedemo-protected-pages.spec.ts",
+      "env": "stg のみ",
+      "browsers": "PC Chrome / スマホ Chrome / Safari",
+      "android": "",
+      "known": "",
+      "no": 75
+    },
+    {
+      "site": "SauceDemo",
+      "viewpoint": "セキュリティ",
+      "screen": "ログイン",
+      "title": "S7: Cookie（session-username）の値を「nonexistent_user」にしても、保護ページを開けないこと",
+      "group": "セッション（ログイン状態）の検証",
+      "file": "saucedemo-protected-pages.spec.ts",
+      "env": "stg のみ",
+      "browsers": "PC Chrome / スマホ Chrome / Safari",
+      "android": "",
+      "known": "",
+      "no": 76
+    },
+    {
+      "site": "SauceDemo",
+      "viewpoint": "セキュリティ",
+      "screen": "ログイン",
+      "title": "S8: [既知の不具合] ログインせずに、Cookie（session-username）だけを手で作っても、保護ページを開けないこと",
+      "group": "セッション（ログイン状態）の検証",
+      "file": "saucedemo-protected-pages.spec.ts",
+      "env": "stg のみ",
+      "browsers": "PC Chrome / スマホ Chrome / Safari",
+      "android": "",
+      "known": "○（既知の不具合を検知する）",
+      "no": 77
+    },
+    {
+      "site": "SauceDemo",
+      "viewpoint": "セキュリティ",
       "screen": "ログイン",
       "title": "SQLインジェクション風文字列でログインを試みても認証をバイパスできないこと",
       "group": "SauceDemo セキュリティ入力（インジェクション）検証",
@@ -918,7 +1035,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 69
+      "no": 78
     },
     {
       "site": "SauceDemo",
@@ -931,7 +1048,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 70
+      "no": 79
     },
     {
       "site": "SauceDemo",
@@ -944,7 +1061,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 71
+      "no": 80
     },
     {
       "site": "SauceDemo",
@@ -957,7 +1074,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 72
+      "no": 81
     },
     {
       "site": "SauceDemo",
@@ -970,7 +1087,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 73
+      "no": 82
     },
     {
       "site": "SauceDemo",
@@ -983,7 +1100,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "○（既知の不具合を検知する）",
-      "no": 74
+      "no": 83
     },
     {
       "site": "SauceDemo",
@@ -996,7 +1113,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 75
+      "no": 84
     },
     {
       "site": "SauceDemo",
@@ -1009,7 +1126,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 76
+      "no": 85
     },
     {
       "site": "SauceDemo",
@@ -1022,7 +1139,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 77
+      "no": 86
     },
     {
       "site": "SauceDemo",
@@ -1035,7 +1152,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 78
+      "no": 87
     },
     {
       "site": "SauceDemo",
@@ -1048,7 +1165,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 79
+      "no": 88
     },
     {
       "site": "SauceDemo",
@@ -1061,7 +1178,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 80
+      "no": 89
     },
     {
       "site": "SauceDemo",
@@ -1074,7 +1191,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 81
+      "no": 90
     },
     {
       "site": "SauceDemo",
@@ -1087,7 +1204,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 82
+      "no": 91
     },
     {
       "site": "SauceDemo",
@@ -1100,7 +1217,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 83
+      "no": 92
     },
     {
       "site": "SauceDemo",
@@ -1113,7 +1230,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 84
+      "no": 93
     },
     {
       "site": "SauceDemo",
@@ -1126,7 +1243,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 85
+      "no": 94
     },
     {
       "site": "SauceDemo",
@@ -1139,7 +1256,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "○（既知の不具合を検知する）",
-      "no": 86
+      "no": 95
     },
     {
       "site": "SauceDemo",
@@ -1152,7 +1269,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 87
+      "no": 96
     },
     {
       "site": "SauceDemo",
@@ -1165,7 +1282,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "○",
       "known": "",
-      "no": 88
+      "no": 97
     },
     {
       "site": "SauceDemo",
@@ -1178,7 +1295,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "○",
       "known": "",
-      "no": 89
+      "no": 98
     },
     {
       "site": "SauceDemo",
@@ -1191,7 +1308,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "○",
       "known": "",
-      "no": 90
+      "no": 99
     },
     {
       "site": "SauceDemo",
@@ -1204,7 +1321,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "○",
       "known": "",
-      "no": 91
+      "no": 100
     },
     {
       "site": "SauceDemo",
@@ -1217,7 +1334,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "○",
       "known": "",
-      "no": 92
+      "no": 101
     },
     {
       "site": "SauceDemo",
@@ -1230,7 +1347,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "○",
       "known": "",
-      "no": 93
+      "no": 102
     },
     {
       "site": "SauceDemo",
@@ -1243,7 +1360,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "○",
       "known": "",
-      "no": 94
+      "no": 103
     },
     {
       "site": "SauceDemo",
@@ -1256,7 +1373,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "○",
       "known": "",
-      "no": 95
+      "no": 104
     },
     {
       "site": "SauceDemo",
@@ -1269,7 +1386,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 96
+      "no": 105
     },
     {
       "site": "SauceDemo",
@@ -1282,7 +1399,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 97
+      "no": 106
     },
     {
       "site": "SauceDemo",
@@ -1295,7 +1412,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 98
+      "no": 107
     },
     {
       "site": "jsonplaceholder（API）",
@@ -1308,7 +1425,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 99
+      "no": 108
     },
     {
       "site": "jsonplaceholder（API）",
@@ -1321,7 +1438,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 100
+      "no": 109
     },
     {
       "site": "jsonplaceholder（API）",
@@ -1334,7 +1451,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 101
+      "no": 110
     }
   ]
 }
