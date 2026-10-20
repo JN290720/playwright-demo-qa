@@ -1,9 +1,6 @@
 import { test, expect } from '@playwright/test';
-import type { Page } from '@playwright/test';
-import { LoginPage } from './pages/LoginPage';
-import { InventoryPage } from './pages/InventoryPage';
 import { CheckoutPage } from './pages/CheckoutPage';
-import { CREDENTIALS } from './fixtures/users';
+import { loginAndShowInventory } from './helpers/login';
 import { openSideMenu } from './helpers/side-menu';
 
 /**
@@ -18,16 +15,6 @@ const sideMenuLinks = {
   logout: '[data-test="logout-sidebar-link"]',
   reset: '[data-test="reset-sidebar-link"]',
 } as const;
-
-/** ログインして、商品一覧を表示する */
-async function loginAndShowInventory(page: Page) {
-  const loginPage = new LoginPage(page);
-  await loginPage.goto();
-  await loginPage.loginAs(CREDENTIALS.standard);
-  const inventoryPage = new InventoryPage(page);
-  await expect(inventoryPage.title).toHaveText('Products');
-  return { loginPage, inventoryPage };
-}
 
 test.describe('サイドメニューとログアウト', () => {
   test('メニューに、All Items / About / Logout / Reset App State のリンクが表示されること', async ({ page }) => {
