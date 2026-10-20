@@ -35,7 +35,7 @@
 
 ## 3. ワークフロー（GitHub Actions）
 
-- 10 本のワークフロー（いつ動くか・何のためか・結果を誰が見るか）の一覧は、[README](../README.md) の「CI/CD パイプライン」の表を参照（ここには重複させない）
+- ワークフロー（いつ動くか・何のためか・結果を誰が見るか）の一覧は、[README](../README.md) の「CI/CD パイプライン」の表を参照（ここには重複させない）
 - 手順（VRT の更新・Android の基準画像）は [README](../README.md)
 - 作業のルール（ブランチ・コミット・PR）は [CONTRIBUTING.md](../CONTRIBUTING.md)
 - AI への作業ルールは [CLAUDE.md](../CLAUDE.md)
