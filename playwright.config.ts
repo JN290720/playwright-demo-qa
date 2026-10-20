@@ -66,8 +66,8 @@ export default defineConfig({
 
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
-    /* 💡 環境ファイル内の BASE_URL を使用（未設定なら http://localhost:3000 にフォールバック） */
-    baseURL: process.env.BASE_URL || 'http://localhost:3000',
+    /* 💡 対象サイトは 1 つ（SauceDemo）で、環境ごとに変えない（#45）。環境変数では上書きしない。テストは相対パス（/inventory.html など）で書く */
+    baseURL: 'https://www.saucedemo.com',
 
     /* 💡 操作・ページ遷移のタイムアウト（既定は無制限）。外部サイトの遅延を考慮し、遷移は操作より長くする */
     actionTimeout: 10_000,
