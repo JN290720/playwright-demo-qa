@@ -1,8 +1,5 @@
 import { test, expect } from '@playwright/test';
-import type { Page } from '@playwright/test';
-import { LoginPage } from './pages/LoginPage';
-import { InventoryPage } from './pages/InventoryPage';
-import { CREDENTIALS } from './fixtures/users';
+import { loginAndShowInventory } from './helpers/login';
 
 /**
  * 商品詳細ページの機能のテスト（#131）。
@@ -13,19 +10,10 @@ import { CREDENTIALS } from './fixtures/users';
  */
 const PRODUCT_IDS = [0, 1, 2, 3, 4, 5] as const;
 
-async function login(page: Page) {
-  const loginPage = new LoginPage(page);
-  const inventoryPage = new InventoryPage(page);
-  await loginPage.goto();
-  await loginPage.loginAs(CREDENTIALS.standard);
-  await expect(inventoryPage.title).toHaveText('Products');
-  return inventoryPage;
-}
-
 test.describe('商品詳細ページ（機能）', () => {
   for (const id of PRODUCT_IDS) {
     test(`D3: 商品 ID ${id} の詳細ページに、商品名・価格・説明・画像が、一覧と同じ内容で表示されること`, async ({ page }) => {
-      await login(page);
+      await loginAndShowInventory(page);
       // 一覧での、この商品の表示内容（一覧の中で、この商品へのリンクを持つ行）
       const row = page.locator('.inventory_item', { has: page.locator(`[data-test="item-${id}-title-link"]`) });
       const name = (await row.locator('.inventory_item_name').textContent()) ?? '';
@@ -45,7 +33,7 @@ test.describe('商品詳細ページ（機能）', () => {
   }
 
   test('D4: 詳細ページで「Add to cart」→ カートのバッジが 1 →「Remove」→ バッジが消えること', async ({ page }) => {
-    const inventoryPage = await login(page);
+    const { inventoryPage } = await loginAndShowInventory(page);
     await page.locator('[data-test="item-4-title-link"]').click();
     await expect(page.locator('.inventory_details_container')).toBeVisible();
 
@@ -59,7 +47,7 @@ test.describe('商品詳細ページ（機能）', () => {
   });
 
   test('D5: 詳細ページで追加した商品が、「Back to products」で戻った一覧で「Remove」表示になっていること', async ({ page }) => {
-    const inventoryPage = await login(page);
+    const { inventoryPage } = await loginAndShowInventory(page);
     await page.locator('[data-test="item-4-title-link"]').click();
     await expect(page.locator('.inventory_details_container')).toBeVisible();
     await page.locator('[data-test="add-to-cart"]').click();
