@@ -109,7 +109,13 @@ jobs:
       # /update-vrt の範囲の指定を解析するスクリプトの動作確認（#117）
       - name: Self-test /update-vrt parser
         if: "!contains(github.event.comment.body, '/update-vrt')"
-        run: node scripts/parse-update-vrt.js --self-test
+        run: |
+          # このスクリプトが入る前（古い）のブランチでは、無いので、スキップする
+          if [ -f scripts/parse-update-vrt.js ]; then
+            node scripts/parse-update-vrt.js --self-test
+          else
+            echo "このブランチには scripts/parse-update-vrt.js が無いため、スキップします（main を取り込むと実行されます）"
+          fi
 
       - name: Type check
         if: "!contains(github.event.comment.body, '/update-vrt')"
@@ -193,12 +199,24 @@ jobs:
       # `--update-snapshots` フラグを付与して対象全環境（PC / スマホ / Safari）のベースライン画像を再撮影・更新します。
       # 💡 範囲の指定（#117）: `/update-vrt project=desktop-safari test=P3,P8` のように、更新するプロジェクト・画面を絞れる。
       #    指定が無ければ、今までどおり全部。コメントは、許可リスト方式で解析する（scripts/parse-update-vrt.js。シェルへそのまま渡さない）
+      #    パーサは、PR のブランチではなく、**既定のブランチ（main）のもの**を使う: コメントで動くこのワークフローは main の定義で動くため、
+      #    PR のブランチが古い（パーサが無い）場合でも、動くようにする（#117 のマージ後に、古いブランチで失敗した）
+      - name: Checkout parser from default branch
+        if: "contains(github.event.comment.body, '/update-vrt')"
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          path: .vrt-tools
+          sparse-checkout: scripts/parse-update-vrt.js
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
       - name: Parse /update-vrt options
         id: vrt-opts
         if: "contains(github.event.comment.body, '/update-vrt')"
         env:
           COMMENT_BODY: ${{ github.event.comment.body }}
-        run: node scripts/parse-update-vrt.js
+        run: node .vrt-tools/scripts/parse-update-vrt.js
 
       - name: Update VRT Snapshots
         if: "contains(github.event.comment.body, '/update-vrt') && steps.vrt-opts.outputs.valid == 'true'"
