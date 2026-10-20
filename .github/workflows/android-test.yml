@@ -76,7 +76,7 @@ jobs:
           disable-animations: true
           script: UPDATE_SNAPSHOTS=${{ inputs.update_snapshots && '1' || '0' }} UPDATE_MODE=${{ inputs.update_mode || 'changed' }} bash scripts/android/run-on-emulator.sh
 
-      # 💡 flaky（リトライで通ったテスト）と失敗を抽出して、Job Summary に表示する（Android はリトライなしなので、失敗として表示される）
+      # 💡 flaky（リトライで通ったテスト）と失敗を抽出して、Job Summary に表示する（Android は tests-android/playwright.config.ts の retries: 1 で、リトライで通ったものは flaky として表示する。最後まで失敗したものは、失敗として表示される。#37）
       - name: Summarize results
         if: always()
         run: |
