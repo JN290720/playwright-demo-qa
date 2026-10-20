@@ -33,9 +33,13 @@ npm ci
 npx playwright install --with-deps
 ```
 ### 2. テストの実行
-#### すべての E2E テストを実行
+#### 既定（ENV 未指定 = prod）のテストを実行（`@prd` タグの主要機能のみ）
 ```
 npx playwright test
+```
+#### 全テストを実行（staging。PR の CI と同じ範囲）
+```
+npm run test:stg
 ```
 #### UI モードでテストを実行（デバッグ用）
 ```
@@ -113,7 +117,7 @@ npx playwright show-report
 ## 📝 開発フローとブランチ戦略
 
 1. 機能追加・修正時は `main` ブランチから作業ブランチを作成（例: `fix/xxx`, `feature/xxx`）
-2. ローカルでテスト（`npx playwright test`）を実行して問題ないことを確認
+2. ローカルでテスト（`npm run test:stg`。全テスト）を実行して問題ないことを確認
 3. PR を作成（自動で `.github/PULL_REQUEST_TEMPLATE.md` が適応されます）
 4. CI のチェック（`PR Test`）が通過したことを確認して `main` へマージ
 5. マージ後、自動でデプロイおよび公開後テストが実行されます
