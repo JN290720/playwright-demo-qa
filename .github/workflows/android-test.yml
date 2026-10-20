@@ -74,7 +74,7 @@ jobs:
           arch: x86_64
           profile: pixel_6
           disable-animations: true
-          script: UPDATE_SNAPSHOTS=${{ inputs.update_snapshots && '1' || '0' }} UPDATE_MODE=${{ inputs.update_mode || 'all' }} bash scripts/android/run-on-emulator.sh
+          script: UPDATE_SNAPSHOTS=${{ inputs.update_snapshots && '1' || '0' }} UPDATE_MODE=${{ inputs.update_mode || 'changed' }} bash scripts/android/run-on-emulator.sh
 
       # 💡 flaky（リトライで通ったテスト）と失敗を抽出して、Job Summary に表示する（Android はリトライなしなので、失敗として表示される）
       - name: Summarize results
