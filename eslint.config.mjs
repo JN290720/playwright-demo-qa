@@ -25,7 +25,7 @@ export default tseslint.config(
     rules: {
       ...toError(playwright.configs['flat/recommended'].rules),
       // 「見た目の確認」の共通関数（内部で toHaveScreenshot を呼ぶ）を、アサーションとして扱う
-      'playwright/expect-expect': ['error', { assertFunctionNames: ['expectPageScreenshot'] }],
+      'playwright/expect-expect': ['error', { assertFunctionNames: ['expectPageScreenshot', 'expectNoA11yViolations'] }],
     },
   },
 );
