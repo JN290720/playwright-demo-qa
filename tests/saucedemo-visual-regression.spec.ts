@@ -1,4 +1,5 @@
-import { test, expect, Page } from '@playwright/test';
+import { test, expect } from './fixtures/test';
+import type { Page } from '@playwright/test';
 import { CREDENTIALS, SHIPPING_INFO } from './fixtures/users';
 
 /**
@@ -30,6 +31,35 @@ async function waitForRenderComplete(page: Page) {
   await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(resolve)));
 }
 
+/**
+ * ページ全体の見た目を、基準画像と比べる。
+ *
+ * - PC（PC 上のモバイル表示を含む）: ページ全体を 1 枚で撮る（fullPage）
+ * - Android（実機の Chrome）: 画面の大きさを変えられないため、全体を 1 枚で撮ると「スクロールの貼り合わせ」になり、
+ *   固定ヘッダーが何度も写り込んで不正確になる（#85 の検証で確認）。そのため、画面の高さずつスクロールしながら
+ *   上から下まで順に撮る（<名前>-part1, part2, ...）。ページ全体を漏れなく比較できる。
+ *   （画面の高さが変わる変更で枚数が増減すると、基準画像の撮り直しが必要になる）
+ */
+async function expectPageScreenshot(page: Page, name: string) {
+  if (process.env.ANDROID !== '1') {
+    await expect(page).toHaveScreenshot(`${name}.png`, { fullPage: true });
+    return;
+  }
+  const { height, viewport } = await page.evaluate(() => ({
+    height: document.documentElement.scrollHeight,
+    viewport: window.innerHeight,
+  }));
+  const parts = Math.ceil(height / viewport);
+  for (let i = 0; i < parts; i++) {
+    // 最後の 1 枚は、ページの一番下に合わせる（前の画面と少し重なる）
+    const top = Math.min(i * viewport, height - viewport);
+    await page.evaluate((y) => window.scrollTo({ top: y, behavior: 'instant' }), top);
+    // スクロール後の描画（画像の読み込み・再描画）を待つ
+    await waitForRenderComplete(page);
+    await expect(page).toHaveScreenshot(`${name}-part${i + 1}.png`);
+  }
+}
+
 test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対応版)', () => {
 
   // 1. ログインページ (PC)
@@ -37,9 +67,7 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
     await page.goto('https://www.saucedemo.com/');
     await waitForRenderComplete(page);
 
-    await expect(page).toHaveScreenshot('login-page-pc.png', {
-      fullPage: true,
-    });
+    await expectPageScreenshot(page, 'login-page-pc');
   });
 
   // 💡 ログイン後ページのテスト群
@@ -58,9 +86,7 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
     test('P2: 商品一覧ページの見た目に変更がないこと (PC)', async ({ page }) => {
       await waitForRenderComplete(page);
 
-      await expect(page).toHaveScreenshot('inventory-page-pc.png', {
-        fullPage: true,
-      });
+      await expectPageScreenshot(page, 'inventory-page-pc');
     });
 
     // 3. 商品詳細ページ
@@ -70,9 +96,7 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
 
       await waitForRenderComplete(page);
 
-      await expect(page).toHaveScreenshot('inventory-item-page-pc.png', {
-        fullPage: true,
-      });
+      await expectPageScreenshot(page, 'inventory-item-page-pc');
     });
 
     // 4. ショッピングカートページ
@@ -82,9 +106,7 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
 
       await waitForRenderComplete(page);
 
-      await expect(page).toHaveScreenshot('cart-page-pc.png', {
-        fullPage: true,
-      });
+      await expectPageScreenshot(page, 'cart-page-pc');
     });
 
     // 5. 購入手続き情報入力画面 (Step One)
@@ -95,9 +117,7 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
 
       await waitForRenderComplete(page);
 
-      await expect(page).toHaveScreenshot('checkout-step-one-pc.png', {
-        fullPage: true,
-      });
+      await expectPageScreenshot(page, 'checkout-step-one-pc');
     });
 
     // 6. 購入確認画面 (Step Two)
@@ -112,9 +132,7 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
 
       await waitForRenderComplete(page);
 
-      await expect(page).toHaveScreenshot('checkout-step-two-pc.png', {
-        fullPage: true,
-      });
+      await expectPageScreenshot(page, 'checkout-step-two-pc');
     });
 
     // 7. 購入完了画面 (Complete)
@@ -130,21 +148,21 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
 
       await waitForRenderComplete(page);
 
-      await expect(page).toHaveScreenshot('checkout-complete-pc.png', {
-        fullPage: true,
-      });
+      await expectPageScreenshot(page, 'checkout-complete-pc');
     });
 
     // 8. サイドメニュー展開状態
     test('P8: サイドメニュー展開時の見た目に変更がないこと (PC)', async ({ page }) => {
-      await page.locator('#react-burger-menu-btn').click();
-      await page.locator('.bm-menu-wrap').waitFor({ state: 'visible' });
+      // Android の実機の Chrome では、タップが取りこぼされてメニューが開かないことがあった（#85）ため、
+      // 「ボタンを押す → メニューが表示される」までを、表示されるまで繰り返す
+      await expect(async () => {
+        await page.locator('#react-burger-menu-btn').click();
+        await expect(page.locator('.bm-menu-wrap')).toBeVisible({ timeout: 3_000 });
+      }).toPass({ timeout: 20_000 });
 
       await waitForRenderComplete(page);
 
-      await expect(page).toHaveScreenshot('side-menu-pc.png', {
-        fullPage: true,
-      });
+      await expectPageScreenshot(page, 'side-menu-pc');
     });
 
   });
