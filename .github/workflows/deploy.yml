@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
 
-# 最小権限: 既定は読み取りのみ。Pages デプロイに必要な権限は Job 単位で付与する
+# 最小権限: 既定は読み取りのみ。書き込みが必要な権限は Job 単位で付与する
 permissions:
   contents: read
 
@@ -16,29 +16,63 @@ concurrency:
 jobs:
   deploy:
     permissions:
-      contents: read
-      pages: write     # GitHub Pages へのデプロイ
-      id-token: write  # deploy-pages の OIDC 認証
+      contents: write # gh-pages ブランチへ push するため（#89）
     # 通常は約 30 秒。指定が無いと既定の 360 分になり、ハングに気づけないため 10 分に制限（#19）
     timeout-minutes: 10
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
     - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
-    - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5.0.0
-    - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3.0.1
+
+    # 公開するのは public/ の中身だけ（許可リスト方式）。
+    # リポジトリ全体を公開すると、.env.* や CLAUDE.md などが意図せず公開されるため。
+    #
+    # 💡 公開の方法（#89）: GitHub Pages の公開元は gh-pages ブランチ（本体と同じ構成）。
+    #    テストレポート（main-deploy-report/ など）と同じ gh-pages に、public/ を置く。
+    #    keep_files: true なので、すでにあるレポートは消えない。
+    #    以前は、公開元が「GitHub Actions」で、gh-pages のレポートが配信されず 404 になっていた。
+    #
+    # 💡 他のワークフロー（Post-Deploy Test、PR のレポート）と gh-pages への push が競合する(cannot lock ref)ことがあるため、
+    #    失敗時のみランダム待機をはさんで最大 3 回まで再試行する（test.yml と同じ）。
+    - name: Deploy public/ to gh-pages (attempt 1)
+      id: deploy-1
+      continue-on-error: true
+      uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453 # v4.1.0
       with:
-        # 公開するのは public/ の中身だけ（許可リスト方式）。
-        # リポジトリ全体（'.'）を公開すると、.env.* や CLAUDE.md などが意図せず公開されるため。
-        path: './public'
-    - name: Deploy to GitHub Pages
-      id: deployment
-      uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./public
+        keep_files: true
+        commit_message: 'deploy: app ${{ github.sha }}'
+
+    - name: Wait before retry (attempt 2)
+      if: steps.deploy-1.outcome == 'failure'
+      run: sleep $((RANDOM % 20 + 5))
+
+    - name: Deploy public/ to gh-pages (attempt 2)
+      id: deploy-2
+      if: steps.deploy-1.outcome == 'failure'
+      continue-on-error: true
+      uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453 # v4.1.0
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./public
+        keep_files: true
+        commit_message: 'deploy: app ${{ github.sha }}'
+
+    - name: Wait before retry (attempt 3)
+      if: steps.deploy-2.outcome == 'failure'
+      run: sleep $((RANDOM % 20 + 5))
+
+    - name: Deploy public/ to gh-pages (attempt 3)
+      if: steps.deploy-2.outcome == 'failure'
+      uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453 # v4.1.0
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./public
+        keep_files: true
+        commit_message: 'deploy: app ${{ github.sha }}'
 
   # 失敗の通知（#37、ユーザー承認済み）: デプロイが失敗したら GitHub Issue を作成（既にあればコメントを追記）。
-  # 成功に戻ったら、復旧を書いて閉じる。デプロイの権限（pages・id-token）を持たない、別の Job で行う（最小権限）。
+  # 成功に戻ったら、復旧を書いて閉じる。デプロイ（gh-pages への書き込み権限を持つ Job）とは別の Job で行う（最小権限）。
   notify:
     needs: deploy
     if: ${{ always() && (needs.deploy.result == 'success' || needs.deploy.result == 'failure') }}
