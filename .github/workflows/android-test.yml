@@ -16,6 +16,11 @@ on:
         description: '基準画像（Android 用）を撮り直して、選んだブランチにコミットする（main では不可）'
         type: boolean
         default: false
+      update_mode:
+        description: '撮り直しの範囲（update_snapshots が true のとき）: changed = まだ無い画像の追加と、実際に変わった画像だけの更新（差が無い既存の画像は変更しない）／ all = 既存も含めてすべて撮り直す'
+        type: choice
+        options: [ changed, all ]
+        default: changed
   pull_request:
     branches: [ main ]
     paths:
@@ -69,7 +74,7 @@ jobs:
           arch: x86_64
           profile: pixel_6
           disable-animations: true
-          script: UPDATE_SNAPSHOTS=${{ inputs.update_snapshots && '1' || '0' }} bash scripts/android/run-on-emulator.sh
+          script: UPDATE_SNAPSHOTS=${{ inputs.update_snapshots && '1' || '0' }} UPDATE_MODE=${{ inputs.update_mode || 'changed' }} bash scripts/android/run-on-emulator.sh
 
       # 💡 flaky（リトライで通ったテスト）と失敗を抽出して、Job Summary に表示する（Android はリトライなしなので、失敗として表示される）
       - name: Summarize results

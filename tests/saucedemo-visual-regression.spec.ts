@@ -61,6 +61,19 @@ async function expectPageScreenshot(page: Page, name: string) {
   }
 }
 
+/**
+ * パスワード欄の「最後の 1 文字の一時表示」が消えるまで待つ。
+ * Android の Chrome は、パスワード欄に入力した直後の 1 文字を、一瞬（約 1 秒）表示する。基準画像にその 1 文字が写ると、
+ * 撮影のタイミングで見た目が変わり、不安定になる（#135 で確認。基準画像に「e」が写っていた）。
+ * この関数を呼んだ時点から 1.5 秒の経過を、条件で待つ（固定の待機ではなく、ページ内の時刻で判定する）。
+ * 呼ぶのは、パスワードの入力・ログイン操作・エラー表示の確認のあとなので、**入力からは 1.5 秒より長く**たつ（安全側。
+ * 入力の時刻そのものを数えるわけではない。レビューエージェントの指摘）。
+ */
+async function waitForPasswordMasked(page: Page) {
+  const start = await page.evaluate(() => performance.now());
+  await page.waitForFunction((t0) => performance.now() - t0 > 1500, start);
+}
+
 test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対応版)', () => {
 
   // 1. ログインページ (PC)
@@ -69,6 +82,32 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
     await waitForRenderComplete(page);
 
     await expectPageScreenshot(page, 'login-page-pc');
+  });
+
+  // 9. ログイン失敗のエラー表示（誤ったユーザー名・パスワード）（#135 V1）
+  test('P9: ログイン失敗のエラー表示の見た目に変更がないこと (PC)', async ({ page }) => {
+    await page.goto('https://www.saucedemo.com/');
+    await page.locator('[data-test="username"]').fill(CREDENTIALS.invalid.username);
+    await page.locator('[data-test="password"]').fill(CREDENTIALS.invalid.password);
+    await page.locator('[data-test="login-button"]').click();
+    await page.locator('[data-test="error"]').waitFor({ state: 'visible' });
+    await waitForPasswordMasked(page);
+    await waitForRenderComplete(page);
+
+    await expectPageScreenshot(page, 'login-error-invalid-pc');
+  });
+
+  // 10. ロックされたユーザーのエラー表示（#135 V2）
+  test('P10: ロックされたユーザーのエラー表示の見た目に変更がないこと (PC)', async ({ page }) => {
+    await page.goto('https://www.saucedemo.com/');
+    await page.locator('[data-test="username"]').fill(CREDENTIALS.lockedOut.username);
+    await page.locator('[data-test="password"]').fill(CREDENTIALS.lockedOut.password);
+    await page.locator('[data-test="login-button"]').click();
+    await page.locator('[data-test="error"]').waitFor({ state: 'visible' });
+    await waitForPasswordMasked(page);
+    await waitForRenderComplete(page);
+
+    await expectPageScreenshot(page, 'login-error-locked-pc');
   });
 
   // 💡 ログイン後ページのテスト群
@@ -164,6 +203,52 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
       await waitForRenderComplete(page);
 
       await expectPageScreenshot(page, 'side-menu-pc');
+    });
+
+    // 11. 購入手続きの入力エラー表示（何も入力せず Continue）（#135 V3）
+    test('P11: 購入手続きの入力エラー表示の見た目に変更がないこと (PC)', async ({ page }) => {
+      await page.locator('.shopping_cart_link').click();
+      await page.locator('[data-test="checkout"]').click();
+      await page.locator('[data-test="continue"]').click();
+      await page.locator('[data-test="error"]').waitFor({ state: 'visible' });
+
+      await waitForRenderComplete(page);
+
+      await expectPageScreenshot(page, 'checkout-error-pc');
+    });
+
+    // 12. 空のカート（#135 V4）
+    test('P12: 空のカート画面の見た目に変更がないこと (PC)', async ({ page }) => {
+      await page.locator('.shopping_cart_link').click();
+      await page.locator('[data-test="checkout"]').waitFor({ state: 'visible' });
+
+      await waitForRenderComplete(page);
+
+      await expectPageScreenshot(page, 'cart-empty-pc');
+    });
+
+    // 13. 商品が入ったカート（2 商品）（#135 V5）
+    test('P13: 商品が入ったカート画面の見た目に変更がないこと (PC)', async ({ page }) => {
+      await page.locator('[data-test="add-to-cart-sauce-labs-backpack"]').click();
+      await page.locator('[data-test="add-to-cart-sauce-labs-bike-light"]').click();
+      await page.locator('.shopping_cart_link').click();
+      await page.locator('[data-test="checkout"]').waitFor({ state: 'visible' });
+
+      await waitForRenderComplete(page);
+
+      await expectPageScreenshot(page, 'cart-items-pc');
+    });
+
+    // 14. 並び替え後の商品一覧（価格の高い順）（#135 V6）
+    test('P14: 並び替え（価格の高い順）後の商品一覧の見た目に変更がないこと (PC)', async ({ page }) => {
+      await page.locator('[data-test="product-sort-container"]').selectOption('hilo');
+      // 並び替えが反映されたことの確認（前提）。最高額の商品（Fleece Jacket $49.99）が先頭に来る。
+      // この値の直書きは、「並び替え後の画面の撮影」の前提を確かめるためのもので、価格の検証が目的ではない
+      await expect(page.locator('.inventory_item_price').first()).toHaveText('$49.99');
+
+      await waitForRenderComplete(page);
+
+      await expectPageScreenshot(page, 'inventory-sorted-hilo-pc');
     });
 
   });

@@ -25,7 +25,10 @@ adb shell 'settings put global window_animation_scale 0; settings put global tra
 echo "== playwright test =="
 # REPEAT: 同じテストを繰り返して、安定性（flaky の有無）を確認する
 UPDATE_ARG=""
-if [ "${UPDATE_SNAPSHOTS:-0}" = "1" ]; then UPDATE_ARG="--update-snapshots=all"; echo "基準画像を撮り直します（--update-snapshots）"; fi
+# UPDATE_MODE: all = 既存の画像も含めて、すべて撮り直す ／ changed = まだ無い画像の追加と、実際に変わった画像だけの更新（差が無い既存の画像は、変更しない。/update-vrt と同じ）。許可リスト方式で検証する
+# （missing は使わない: Playwright の missing は、足りない画像を書き出すが、そのテストを失敗扱いにするため、ジョブが失敗する）
+case "${UPDATE_MODE:-all}" in all|changed) ;; *) echo "::error::UPDATE_MODE が不正です: ${UPDATE_MODE}"; exit 2;; esac
+if [ "${UPDATE_SNAPSHOTS:-0}" = "1" ]; then UPDATE_ARG="--update-snapshots=${UPDATE_MODE:-all}"; echo "基準画像を更新します（--update-snapshots=${UPDATE_MODE:-all}）"; fi
 timeout 900 npx playwright test -c tests-android/playwright.config.ts --repeat-each="${REPEAT:-1}" $UPDATE_ARG
 code=$?
 echo "playwright exit code: $code"
