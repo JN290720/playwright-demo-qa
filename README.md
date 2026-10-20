@@ -53,12 +53,12 @@ npx playwright show-report
 
 | ワークフロー（ファイル） | 発火タイミング | 目的 | 副作用（書き込み先） |
 | :--- | :--- | :--- | :--- |
-| **PR Test & VRT Update** (`pull-request.yml`) | PR の作成・更新時（`main` 向け）／ PR コメントの `/update-vrt`（OWNER / MEMBER / COLLABORATOR のみ有効） | PR のテスト（`ENV=staging`、全テスト）と結果コメント。`/update-vrt` で、Linux の VRT 基準画像を撮り直す（テストはスキップ） | `/update-vrt` 時は PR ブランチへ画像をコミット（`[skip ci]`）。PR のレポートを `gh-pages` へ公開 |
-| **Deploy App** (`deploy.yml`) | `main` への push（マージ後） | `public/` を公開する | `gh-pages` へ push。失敗時は Issue（`deploy-failure`）を作成し、復旧したら閉じる |
+| **PR Test & VRT Update** (`pull-request.yml`) | PR の作成・更新時（`main`・`master` 向け）／ PR コメントの `/update-vrt`（OWNER / MEMBER / COLLABORATOR のみ有効） | PR のテスト（`ENV=staging`、全テスト）と結果コメント。`/update-vrt` で、Linux の VRT 基準画像を撮り直す（テストはスキップ） | PR へ結果のコメントを投稿・更新。PR のレポートを `gh-pages` へ公開。`/update-vrt` 時は PR ブランチへ画像をコミット（`[skip ci]`） |
+| **Deploy App** (`deploy.yml`) | `main` への push（マージ後） | `public/` を公開する。テスト観点の Issue（親とサブ）の「テストケースの表」を、テストのコードから更新する | `gh-pages` へ push。失敗時は Issue（`deploy-failure`）を作成し、復旧したら閉じる。成功時は、テスト観点の Issue（親とサブ）の本文の表を書き換える（内容が変わったときだけ。失敗しても Deploy App は失敗にならない） |
 | **Post-Deploy Test** (`test.yml`) | `Deploy App` の**成功後**（`workflow_run`） | `ENV=prod` で、`@prd` タグの主要機能のみを実行（Safari も含む） | `gh-pages` へレポートを公開。失敗時は Issue（`post-deploy-failure`）を作成し、復旧したら閉じる |
-| **Claude Code** (`claude.yml`) | Issue / PR のコメント・レビュー、Issue の作成で `@claude` とメンションされた時 | Claude による調査・提案・実装 | 権限の範囲でコメント・PR を作成。`.github/workflows/` の変更は行えない |
-| **PR レポートの削除** (`cleanup-pr-report.yml`) | PR のクローズ・マージ時 | その PR のテストレポートを `gh-pages` から消す | `gh-pages` へ削除コミット（`[skip ci]`） |
-| **Android Emulator Test** (`android-test.yml`) | 毎日 03:00 JST（夜間）／ 手動実行／ Android 関連ファイルを変えた `main` 向け PR（失敗の通知は送らない） | エミュレータ上の Chrome で、VRT と購入 1 件を確認 | 夜間・PR の失敗は Issue を作成し、復旧したら閉じる。手動で `update_snapshots` を付けたときだけ、選んだブランチへ基準画像をコミット（`main` は不可。下の「Android の基準画像」を参照） |
+| **Claude Code** (`claude.yml`) | Issue / PR のコメント・レビュー、Issue の作成・アサインで `@claude` とメンションされた時 | Claude による調査・提案・実装 | ブランチへの push（`contents: write`）、PR・コメント・Issue の作成と更新。`.github/workflows/` の変更は行えない |
+| **PR レポートの削除** (`cleanup-pr-report.yml`) | PR のクローズ・マージ時（`main`・`master` 向け） | その PR のテストレポートを `gh-pages` から消す | `gh-pages` へ削除コミット（`[skip ci]`） |
+| **Android Emulator Test** (`android-test.yml`) | 毎日 03:00 JST（夜間）／ 手動実行／ Android 関連ファイルを変えた `main` 向け PR（PR では失敗の通知は送らない） | エミュレータ上の Chrome で、VRT と購入 1 件を確認 | 夜間・手動実行の失敗は Issue を作成し、成功に戻ったら閉じる（PR では作らない）。手動で `update_snapshots` を付けたときだけ、選んだブランチへ基準画像をコミット（`main` は不可。下の「Android の基準画像を更新したい場合」を参照） |
 | **Weekly Full Test** (`weekly-full-test.yml`) | 毎週月曜 03:37 JST ／ 手動 ／ 該当ファイルを変えた `main` 向け PR | 全テスト（`ENV=staging`）。サイト側の変化を、PR を待たずに検知する | 失敗時は Issue（`weekly-failure`）を作成し、復旧したら閉じる。`test.fail()` の既知の不具合が予期せず成功したら、サイト不具合の Issue にコメント |
 | **Daily Report** (`daily-report.yml`) | 毎朝 05:17 JST（予備 07:43 JST）／ 手動 | 日次のレポートを投稿する | 日次レポート用の Issue を作成・コメント |
 | **Dependency Review** (`dependency-review.yml`) | 毎週月曜 09:23 JST ／ 手動 | 依存関係の更新提案（`npm audit` など）を確認する | 提案の Issue（`dependency-review` ラベル）を作成・コメント |
