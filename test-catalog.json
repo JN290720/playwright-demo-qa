@@ -1521,9 +1521,9 @@
     {
       "site": "SauceDemo",
       "viewpoint": "VRT（見た目）",
-      "screen": "商品一覧",
-      "title": "P2: 商品一覧ページの見た目に変更がないこと (PC)",
-      "group": "SauceDemo Visual Regression Tests (完全同期・全ページ対応版) › ログイン後全ページのビジュアル比較",
+      "screen": "ログイン",
+      "title": "P10: ロックされたユーザーのエラー表示の見た目に変更がないこと (PC)",
+      "group": "SauceDemo Visual Regression Tests (完全同期・全ページ対応版)",
       "file": "saucedemo-visual-regression.spec.ts",
       "env": "stg のみ",
       "browsers": "PC Chrome / スマホ Chrome / Safari",
@@ -1534,8 +1534,8 @@
     {
       "site": "SauceDemo",
       "viewpoint": "VRT（見た目）",
-      "screen": "商品詳細",
-      "title": "P3: 商品詳細ページの見た目に変更がないこと (PC)",
+      "screen": "購入手続き入力",
+      "title": "P11: 購入手続きの入力エラー表示の見た目に変更がないこと (PC)",
       "group": "SauceDemo Visual Regression Tests (完全同期・全ページ対応版) › ログイン後全ページのビジュアル比較",
       "file": "saucedemo-visual-regression.spec.ts",
       "env": "stg のみ",
@@ -1548,7 +1548,7 @@
       "site": "SauceDemo",
       "viewpoint": "VRT（見た目）",
       "screen": "カート",
-      "title": "P4: カート画面の見た目に変更がないこと (PC)",
+      "title": "P12: 空のカート画面の見た目に変更がないこと (PC)",
       "group": "SauceDemo Visual Regression Tests (完全同期・全ページ対応版) › ログイン後全ページのビジュアル比較",
       "file": "saucedemo-visual-regression.spec.ts",
       "env": "stg のみ",
@@ -1556,6 +1556,71 @@
       "android": "○",
       "known": "",
       "no": 118
+    },
+    {
+      "site": "SauceDemo",
+      "viewpoint": "VRT（見た目）",
+      "screen": "カート",
+      "title": "P13: 商品が入ったカート画面の見た目に変更がないこと (PC)",
+      "group": "SauceDemo Visual Regression Tests (完全同期・全ページ対応版) › ログイン後全ページのビジュアル比較",
+      "file": "saucedemo-visual-regression.spec.ts",
+      "env": "stg のみ",
+      "browsers": "PC Chrome / スマホ Chrome / Safari",
+      "android": "○",
+      "known": "",
+      "no": 119
+    },
+    {
+      "site": "SauceDemo",
+      "viewpoint": "VRT（見た目）",
+      "screen": "商品一覧",
+      "title": "P14: 並び替え（価格の高い順）後の商品一覧の見た目に変更がないこと (PC)",
+      "group": "SauceDemo Visual Regression Tests (完全同期・全ページ対応版) › ログイン後全ページのビジュアル比較",
+      "file": "saucedemo-visual-regression.spec.ts",
+      "env": "stg のみ",
+      "browsers": "PC Chrome / スマホ Chrome / Safari",
+      "android": "○",
+      "known": "",
+      "no": 120
+    },
+    {
+      "site": "SauceDemo",
+      "viewpoint": "VRT（見た目）",
+      "screen": "商品一覧",
+      "title": "P2: 商品一覧ページの見た目に変更がないこと (PC)",
+      "group": "SauceDemo Visual Regression Tests (完全同期・全ページ対応版) › ログイン後全ページのビジュアル比較",
+      "file": "saucedemo-visual-regression.spec.ts",
+      "env": "stg のみ",
+      "browsers": "PC Chrome / スマホ Chrome / Safari",
+      "android": "○",
+      "known": "",
+      "no": 121
+    },
+    {
+      "site": "SauceDemo",
+      "viewpoint": "VRT（見た目）",
+      "screen": "商品詳細",
+      "title": "P3: 商品詳細ページの見た目に変更がないこと (PC)",
+      "group": "SauceDemo Visual Regression Tests (完全同期・全ページ対応版) › ログイン後全ページのビジュアル比較",
+      "file": "saucedemo-visual-regression.spec.ts",
+      "env": "stg のみ",
+      "browsers": "PC Chrome / スマホ Chrome / Safari",
+      "android": "○",
+      "known": "",
+      "no": 122
+    },
+    {
+      "site": "SauceDemo",
+      "viewpoint": "VRT（見た目）",
+      "screen": "カート",
+      "title": "P4: カート画面の見た目に変更がないこと (PC)",
+      "group": "SauceDemo Visual Regression Tests (完全同期・全ページ対応版) › ログイン後全ページのビジュアル比較",
+      "file": "saucedemo-visual-regression.spec.ts",
+      "env": "stg のみ",
+      "browsers": "PC Chrome / スマホ Chrome / Safari",
+      "android": "○",
+      "known": "",
+      "no": 123
     },
     {
       "site": "SauceDemo",
@@ -1568,7 +1633,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "○",
       "known": "",
-      "no": 119
+      "no": 124
     },
     {
       "site": "SauceDemo",
@@ -1581,7 +1646,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "○",
       "known": "",
-      "no": 120
+      "no": 125
     },
     {
       "site": "SauceDemo",
@@ -1594,7 +1659,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "○",
       "known": "",
-      "no": 121
+      "no": 126
     },
     {
       "site": "SauceDemo",
@@ -1607,7 +1672,20 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "○",
       "known": "",
-      "no": 122
+      "no": 127
+    },
+    {
+      "site": "SauceDemo",
+      "viewpoint": "VRT（見た目）",
+      "screen": "ログイン",
+      "title": "P9: ログイン失敗のエラー表示の見た目に変更がないこと (PC)",
+      "group": "SauceDemo Visual Regression Tests (完全同期・全ページ対応版)",
+      "file": "saucedemo-visual-regression.spec.ts",
+      "env": "stg のみ",
+      "browsers": "PC Chrome / スマホ Chrome / Safari",
+      "android": "○",
+      "known": "",
+      "no": 128
     },
     {
       "site": "SauceDemo",
@@ -1620,7 +1698,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 123
+      "no": 129
     },
     {
       "site": "SauceDemo",
@@ -1633,7 +1711,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 124
+      "no": 130
     },
     {
       "site": "SauceDemo",
@@ -1646,7 +1724,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 125
+      "no": 131
     },
     {
       "site": "SauceDemo",
@@ -1659,7 +1737,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 126
+      "no": 132
     },
     {
       "site": "SauceDemo",
@@ -1672,7 +1750,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 127
+      "no": 133
     },
     {
       "site": "jsonplaceholder（API）",
@@ -1685,7 +1763,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 128
+      "no": 134
     },
     {
       "site": "jsonplaceholder（API）",
@@ -1698,7 +1776,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 129
+      "no": 135
     },
     {
       "site": "jsonplaceholder（API）",
@@ -1711,7 +1789,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 130
+      "no": 136
     }
   ]
 }
