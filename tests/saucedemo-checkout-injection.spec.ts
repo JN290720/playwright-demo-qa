@@ -5,7 +5,8 @@ import { CheckoutPage } from './pages/CheckoutPage';
 import { CREDENTIALS } from './fixtures/users';
 
 // 購入手続きの入力欄（姓・名・郵便番号）に入れる、インジェクション風の文字列（#169）。
-// 実サイトの実測（2026-10-20）では、どれも拒否されず、スクリプトも動かなかった
+// 実サイトの実測（2026-10-20）では、どれも拒否されず、スクリプトも動かなかった。
+// 300 文字は、注入の検証としては弱い（スクリプトを含まない）。長い入力で画面が崩れないかの確認として置いている
 const PAYLOADS = [
   { name: 'XSS（img の onerror）', value: '<img src=x onerror=alert(1)>' },
   { name: 'XSS（script タグ）', value: '<script>alert(1)</script>' },
