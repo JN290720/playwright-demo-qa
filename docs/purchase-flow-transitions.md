@@ -40,7 +40,7 @@ stateDiagram-v2
 | 入力 → 確認（Continue） | `checkout-validation`（日本語の全角入力で確認画面へ進む）、`checkout-totals`（金額の表示）、`e2e-purchase` | ✅ |
 | 確認 → 完了（Finish） | `e2e-purchase`（注文完了まで）。Finish のエラー（error_user）は `user-types`（既知の不具合） | ✅（error_user は ❌） |
 | 入力 → カート（Cancel） | `cart-checkout` C2（カートに戻り、中身が保たれる） | ✅ |
-| 入力に注入文字列（姓・名・郵便番号） | saucedemo-checkout-injection「購入入力欄に {入力} を入れても、スクリプトが動かないこと」（#169。ダイアログ 0 件・注入要素 0 件を判定） | ✅ |
+| 入力に注入文字列（姓・名・郵便番号） | saucedemo-checkout-injection「購入入力欄に {種類} を入れても、スクリプトが動かないこと」（種類は 4 つ: XSS（img の onerror）・XSS（script タグ）・SQL インジェクション・300 文字の長い文字列。#169。ダイアログ 0 件・注入要素 0 件を判定） | ✅ |
 | 確認 → 一覧（Cancel） | `cart-checkout` C3（商品一覧に戻る） | ✅ |
 | カート → 一覧（Continue Shopping） | `inventory-cart`「カート: 『Continue Shopping』で商品一覧に戻り、カートの内容が維持される」 | ✅ |
 | 完了 → 一覧（Back to Home） | なし | なし |
