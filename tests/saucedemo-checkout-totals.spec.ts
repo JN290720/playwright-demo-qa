@@ -33,10 +33,26 @@ const CASES = [
 /** 一覧での、この商品（ボタン）の価格 */
 async function listPriceOf(page: Page, buttonDataTest: string) {
   const row = page.locator('.inventory_item', { has: page.locator(`[data-test="${buttonDataTest}"]`) });
-  return CheckoutPage.parseAmount((await row.locator('.inventory_item_price').textContent()) ?? '');
+  const price = row.locator('.inventory_item_price');
+  await price.waitFor({ state: 'visible' }); // 表示を待ってから読む（不安定さの予防。レビューの提案）
+  return CheckoutPage.parseAmount((await price.textContent()) ?? '');
 }
 
 test.describe('購入確認画面の金額（小計・税・合計）', () => {
+  // A3 の前提の確認: 「同じ価格の 2 件」というケースの前提（2 商品の価格が同じ）が、今も成り立っていること。
+  // 価格が変わると、A3 は「同価格のケース」ではなくなるため、ここで気づけるようにする（レビューエージェントの提案）
+  test('A3 の前提: Bolt T-Shirt と Test.allTheThings() T-Shirt の価格が、同じであること', async ({ page }) => {
+    const loginPage = new LoginPage(page);
+    await loginPage.goto();
+    await loginPage.loginAs(CREDENTIALS.standard);
+    await expect(new InventoryPage(page).title).toHaveText('Products');
+
+    const boltPrice = await listPriceOf(page, BUTTONS.boltTShirt);
+    const redPrice = await listPriceOf(page, BUTTONS.redTShirt);
+
+    expect(boltPrice).toBe(redPrice);
+  });
+
   for (const c of CASES) {
     test(`${c.id}: ${c.name}で、小計・税・合計が正しく計算され、各商品の価格が一覧と一致すること`, async ({ page }) => {
       const loginPage = new LoginPage(page);
