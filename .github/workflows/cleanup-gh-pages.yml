@@ -102,7 +102,9 @@ jobs:
             cat deletions.txt
             echo '```'
           } > archive/notes.md
+          # -R: このステップは、Git のリポジトリの外（ワークスペースの直下）で動くため、リポジトリを明示する
           gh release create "$tag" "archive/gh-pages-reports-${stamp}.tar.gz" \
+            -R "$GITHUB_REPOSITORY" \
             --title "gh-pages レポートのアーカイブ (${stamp})" \
             --notes-file archive/notes.md \
             --prerelease
