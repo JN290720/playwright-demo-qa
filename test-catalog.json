@@ -1235,6 +1235,58 @@
     {
       "site": "SauceDemo",
       "viewpoint": "セキュリティ",
+      "screen": "購入手続き入力",
+      "title": "購入入力欄に 300 文字の長い文字列 を入れても、スクリプトが動かないこと",
+      "group": "SauceDemo セキュリティ入力（購入手続きのインジェクション）検証",
+      "file": "saucedemo-checkout-injection.spec.ts",
+      "env": "stg のみ",
+      "browsers": "PC Chrome / スマホ Chrome / Safari",
+      "android": "",
+      "known": "",
+      "no": 94
+    },
+    {
+      "site": "SauceDemo",
+      "viewpoint": "セキュリティ",
+      "screen": "購入手続き入力",
+      "title": "購入入力欄に SQL インジェクション を入れても、スクリプトが動かないこと",
+      "group": "SauceDemo セキュリティ入力（購入手続きのインジェクション）検証",
+      "file": "saucedemo-checkout-injection.spec.ts",
+      "env": "stg のみ",
+      "browsers": "PC Chrome / スマホ Chrome / Safari",
+      "android": "",
+      "known": "",
+      "no": 95
+    },
+    {
+      "site": "SauceDemo",
+      "viewpoint": "セキュリティ",
+      "screen": "購入手続き入力",
+      "title": "購入入力欄に XSS（img の onerror） を入れても、スクリプトが動かないこと",
+      "group": "SauceDemo セキュリティ入力（購入手続きのインジェクション）検証",
+      "file": "saucedemo-checkout-injection.spec.ts",
+      "env": "stg のみ",
+      "browsers": "PC Chrome / スマホ Chrome / Safari",
+      "android": "",
+      "known": "",
+      "no": 96
+    },
+    {
+      "site": "SauceDemo",
+      "viewpoint": "セキュリティ",
+      "screen": "購入手続き入力",
+      "title": "購入入力欄に XSS（script タグ） を入れても、スクリプトが動かないこと",
+      "group": "SauceDemo セキュリティ入力（購入手続きのインジェクション）検証",
+      "file": "saucedemo-checkout-injection.spec.ts",
+      "env": "stg のみ",
+      "browsers": "PC Chrome / スマホ Chrome / Safari",
+      "android": "",
+      "known": "",
+      "no": 97
+    },
+    {
+      "site": "SauceDemo",
+      "viewpoint": "セキュリティ",
       "screen": "カート",
       "title": "S1: 未ログインで「カート」(/cart.html) を開くと、ログイン画面に戻り、ログインを求められること",
       "group": "保護ページへの直接アクセス（未ログイン）",
@@ -1243,7 +1295,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 94
+      "no": 98
     },
     {
       "site": "SauceDemo",
@@ -1256,7 +1308,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 95
+      "no": 99
     },
     {
       "site": "SauceDemo",
@@ -1269,7 +1321,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 96
+      "no": 100
     },
     {
       "site": "SauceDemo",
@@ -1282,7 +1334,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 97
+      "no": 101
     },
     {
       "site": "SauceDemo",
@@ -1295,7 +1347,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 98
+      "no": 102
     },
     {
       "site": "SauceDemo",
@@ -1308,7 +1360,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 99
+      "no": 103
     },
     {
       "site": "SauceDemo",
@@ -1321,7 +1373,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 100
+      "no": 104
     },
     {
       "site": "SauceDemo",
@@ -1334,7 +1386,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 101
+      "no": 105
     },
     {
       "site": "SauceDemo",
@@ -1347,7 +1399,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "○（既知の不具合を検知する）",
-      "no": 102
+      "no": 106
     },
     {
       "site": "SauceDemo",
@@ -1360,7 +1412,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 103
+      "no": 107
     },
     {
       "site": "SauceDemo",
@@ -1373,7 +1425,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 104
+      "no": 108
     },
     {
       "site": "SauceDemo",
@@ -1386,7 +1438,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 105
+      "no": 109
     },
     {
       "site": "SauceDemo",
@@ -1399,7 +1451,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 106
+      "no": 110
     },
     {
       "site": "SauceDemo",
@@ -1412,7 +1464,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 107
+      "no": 111
     },
     {
       "site": "SauceDemo",
@@ -1425,7 +1477,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "○（既知の不具合を検知する）",
-      "no": 108
+      "no": 112
     },
     {
       "site": "SauceDemo",
@@ -1438,7 +1490,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 109
+      "no": 113
     },
     {
       "site": "SauceDemo",
@@ -1451,7 +1503,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 110
+      "no": 114
     },
     {
       "site": "SauceDemo",
@@ -1464,7 +1516,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 111
+      "no": 115
     },
     {
       "site": "SauceDemo",
@@ -1477,7 +1529,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 112
+      "no": 116
     },
     {
       "site": "SauceDemo",
@@ -1490,7 +1542,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 113
+      "no": 117
     },
     {
       "site": "SauceDemo",
@@ -1503,7 +1555,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 114
+      "no": 118
     },
     {
       "site": "SauceDemo",
@@ -1516,7 +1568,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 115
+      "no": 119
     },
     {
       "site": "SauceDemo",
@@ -1529,7 +1581,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 116
+      "no": 120
     },
     {
       "site": "SauceDemo",
@@ -1542,7 +1594,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 117
+      "no": 121
     },
     {
       "site": "SauceDemo",
@@ -1555,7 +1607,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 118
+      "no": 122
     },
     {
       "site": "SauceDemo",
@@ -1568,7 +1620,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 119
+      "no": 123
     },
     {
       "site": "SauceDemo",
@@ -1581,7 +1633,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "○（既知の不具合を検知する）",
-      "no": 120
+      "no": 124
     },
     {
       "site": "SauceDemo",
@@ -1594,7 +1646,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 121
+      "no": 125
     },
     {
       "site": "SauceDemo",
@@ -1607,7 +1659,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "○",
       "known": "",
-      "no": 122
+      "no": 126
     },
     {
       "site": "SauceDemo",
@@ -1620,7 +1672,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "○",
       "known": "",
-      "no": 123
+      "no": 127
     },
     {
       "site": "SauceDemo",
@@ -1633,7 +1685,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "○",
       "known": "",
-      "no": 124
+      "no": 128
     },
     {
       "site": "SauceDemo",
@@ -1646,7 +1698,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "○",
       "known": "",
-      "no": 125
+      "no": 129
     },
     {
       "site": "SauceDemo",
@@ -1659,7 +1711,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "○",
       "known": "",
-      "no": 126
+      "no": 130
     },
     {
       "site": "SauceDemo",
@@ -1672,7 +1724,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "○",
       "known": "",
-      "no": 127
+      "no": 131
     },
     {
       "site": "SauceDemo",
@@ -1685,7 +1737,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "○",
       "known": "",
-      "no": 128
+      "no": 132
     },
     {
       "site": "SauceDemo",
@@ -1698,7 +1750,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "○",
       "known": "",
-      "no": 129
+      "no": 133
     },
     {
       "site": "SauceDemo",
@@ -1711,7 +1763,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "○",
       "known": "",
-      "no": 130
+      "no": 134
     },
     {
       "site": "SauceDemo",
@@ -1724,7 +1776,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "○",
       "known": "",
-      "no": 131
+      "no": 135
     },
     {
       "site": "SauceDemo",
@@ -1737,7 +1789,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "○",
       "known": "",
-      "no": 132
+      "no": 136
     },
     {
       "site": "SauceDemo",
@@ -1750,7 +1802,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "○",
       "known": "",
-      "no": 133
+      "no": 137
     },
     {
       "site": "SauceDemo",
@@ -1763,7 +1815,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "○",
       "known": "",
-      "no": 134
+      "no": 138
     },
     {
       "site": "SauceDemo",
@@ -1776,7 +1828,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "○",
       "known": "",
-      "no": 135
+      "no": 139
     },
     {
       "site": "SauceDemo",
@@ -1789,7 +1841,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 136
+      "no": 140
     },
     {
       "site": "SauceDemo",
@@ -1802,7 +1854,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 137
+      "no": 141
     },
     {
       "site": "SauceDemo",
@@ -1815,7 +1867,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 138
+      "no": 142
     },
     {
       "site": "SauceDemo",
@@ -1828,7 +1880,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 139
+      "no": 143
     },
     {
       "site": "SauceDemo",
@@ -1841,7 +1893,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 140
+      "no": 144
     },
     {
       "site": "jsonplaceholder（API）",
@@ -1854,7 +1906,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 141
+      "no": 145
     },
     {
       "site": "jsonplaceholder（API）",
@@ -1867,7 +1919,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 142
+      "no": 146
     },
     {
       "site": "jsonplaceholder（API）",
@@ -1880,7 +1932,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 143
+      "no": 147
     }
   ]
 }
