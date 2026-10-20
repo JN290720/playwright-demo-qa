@@ -2,6 +2,7 @@
 
 このプロジェクトは、Playwright を使用した Web アプリケーションの自動 E2E テスト・ビジュアルレグレッションテスト（VRT）、および GitHub Actions を活用した CI/CD パイプライン構築デモ用の個人リポジトリです。
 
+> 決まったことと、その理由（日付・判断・関連 Issue）は [docs/decisions.md](docs/decisions.md) を参照してください。
 > 全体像（対象・今できること・ワークフローの一覧）は、まず [docs/overview.md](docs/overview.md) を読んでください。
 
 ---
