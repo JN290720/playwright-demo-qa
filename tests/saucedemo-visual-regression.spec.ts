@@ -1,5 +1,5 @@
 import { test, expect } from './fixtures/test';
-import type { Locator, Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import { CREDENTIALS, SHIPPING_INFO } from './fixtures/users';
 
 /**
@@ -41,10 +41,9 @@ async function waitForRenderComplete(page: Page) {
  *   上から下まで順に撮る（<名前>-part1, part2, ...）。ページ全体を漏れなく比較できる。
  *   （画面の高さが変わる変更で枚数が増減すると、基準画像の撮り直しが必要になる）
  */
-/** options.mask: 撮影から除外（塗りつぶし）する要素。Android の Chrome は、パスワード欄に入力した直後の 1 文字を一瞬だけ表示するため、撮影のタイミングで見た目が変わる（#135 で確認）。そのため、P9・P10 では、パスワード欄を除外する */
-async function expectPageScreenshot(page: Page, name: string, options: { mask?: Locator[] } = {}) {
+async function expectPageScreenshot(page: Page, name: string) {
   if (process.env.ANDROID !== '1') {
-    await expect(page).toHaveScreenshot(`${name}.png`, { fullPage: true, mask: options.mask });
+    await expect(page).toHaveScreenshot(`${name}.png`, { fullPage: true });
     return;
   }
   const { height, viewport } = await page.evaluate(() => ({
@@ -58,7 +57,7 @@ async function expectPageScreenshot(page: Page, name: string, options: { mask?: 
     await page.evaluate((y) => window.scrollTo({ top: y, behavior: 'instant' }), top);
     // スクロール後の描画（画像の読み込み・再描画）を待つ
     await waitForRenderComplete(page);
-    await expect(page).toHaveScreenshot(`${name}-part${i + 1}.png`, { mask: options.mask });
+    await expect(page).toHaveScreenshot(`${name}-part${i + 1}.png`);
   }
 }
 
@@ -81,7 +80,7 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
     await page.locator('[data-test="error"]').waitFor({ state: 'visible' });
     await waitForRenderComplete(page);
 
-    await expectPageScreenshot(page, 'login-error-invalid-pc', { mask: [page.locator('[data-test="password"]')] });
+    await expectPageScreenshot(page, 'login-error-invalid-pc');
   });
 
   // 10. ロックされたユーザーのエラー表示（#135 V2）
@@ -93,7 +92,7 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
     await page.locator('[data-test="error"]').waitFor({ state: 'visible' });
     await waitForRenderComplete(page);
 
-    await expectPageScreenshot(page, 'login-error-locked-pc', { mask: [page.locator('[data-test="password"]')] });
+    await expectPageScreenshot(page, 'login-error-locked-pc');
   });
 
   // 💡 ログイン後ページのテスト群
