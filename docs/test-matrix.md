@@ -18,7 +18,7 @@
 | カート | ✅ 削除・再読み込みの保持・「Continue Shopping」（`inventory-cart`）、C2（Cancel）・C4（再読み込み）（`cart-checkout`） | ✅ C6（素早い 2 回押し。`cart-checkout`） | ❌ | ✅ `accessibility` P4・P4b。※カートのリンクはキーボードで開けない（K3b。`docs/a11y-known-issues.md`） | ✅ VRT P4・P12（空）・P13（商品あり） | △ `network-mocking` P2（遅延下のカート追加） |
 | 購入手続き入力 | ✅ 日本語の氏名・郵便番号で確認へ進む（`checkout-validation`）、C2（Cancel。`cart-checkout`）、K4（キーボードで完走） | ✅ 項目ごとの欠落（`checkout-validation`）、全項目未入力（`qa-destructive` P11）。空のカートで進める既知の不具合（C1） | ❌ 入力欄へのインジェクション風文字列は未確認（[#152 の調査](https://github.com/JN290720/playwright-demo-qa/issues/152) A-2） | ✅ `accessibility` P5・P5b（入力エラー表示）・K4 | ✅ VRT P5・P11 | ❌ |
 | 購入確認 | ✅ 小計・税・合計と、各商品の価格（`checkout-totals` の全ケース。`e2e-purchase` の 5）、C3（Cancel。`cart-checkout`） | ❌ | ❌ | ✅ `accessibility` P6 | ✅ VRT P6 | ❌ |
-| 購入完了 | ✅ 注文完了まで（`e2e-purchase`。`@prd`） | ✅ `qa-destructive` P12（完了画面の直リンク） | △ 直リンクの扱い（`qa-destructive` P12） | ✅ `accessibility` P7 | ✅ VRT P7 | ❌ |
+| 購入完了 | ✅ 注文完了まで（`e2e-purchase`。`@prd`）、完了後に「戻る」で一覧まで戻ってもカートが空（`checkout-after-purchase`。#168） | ✅ `qa-destructive` P12（完了画面の直リンク） | △ 直リンクの扱い（`qa-destructive` P12） | ✅ `accessibility` P7 | ✅ VRT P7 | ❌ |
 | サイドメニュー | ✅ 各リンク（All Items / About / Logout / Reset App State）、閉じる（×・Esc）（`sidebar-logout`） | ❌ | ❌ | ✅ `accessibility` P8・K3（キーボードで開閉） | ✅ VRT P8 | ❌ |
 | ログアウト | ✅ ログイン画面に戻る・入力欄が空（`sidebar-logout`） | ✅ 戻るボタン後の保護（`qa-destructive` P7）、ログアウト後の直リンクの保護（`checkout-validation`。認可の検証） | △ Cookie の操作（`protected-pages` S6・S7。S8 は既知の不具合） | ❌ | ❌ | ❌ |
 

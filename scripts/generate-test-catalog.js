@@ -28,6 +28,7 @@ const FILE_INFO = {
   'saucedemo-sidebar-logout.spec.ts': { site: 'SauceDemo', viewpoint: '機能（正常系）' },
   'saucedemo-checkout-totals.spec.ts': { site: 'SauceDemo', viewpoint: '機能（正常系）' },
   'saucedemo-product-detail.spec.ts': { site: 'SauceDemo', viewpoint: '機能（正常系）' },
+  'saucedemo-checkout-after-purchase.spec.ts': { site: 'SauceDemo', viewpoint: '機能（正常系）' },
   'saucedemo-user-types.spec.ts': { site: 'SauceDemo', viewpoint: '機能（特殊ユーザー）' },
   'login.spec.ts': { site: 'SauceDemo / TodoMVC', viewpoint: '機能（正常系）' },
   'saucedemo-checkout-validation.spec.ts': { site: 'SauceDemo', viewpoint: '異常系' },
