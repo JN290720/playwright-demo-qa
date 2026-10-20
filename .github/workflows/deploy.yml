@@ -23,6 +23,17 @@ jobs:
     steps:
     - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
+    # テスト観点表（何を、どこまでテストしているか）を、テストのコードから自動生成して、public/ に置く（#39）。
+    # 手で書いた表はコードとずれていくため、デプロイのたびに作り直す
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+      with:
+        node-version-file: '.nvmrc'
+        cache: 'npm'
+    - name: Install dependencies
+      run: npm ci
+    - name: Generate test catalog
+      run: npm run catalog
+
     # 公開するのは public/ の中身だけ（許可リスト方式）。
     # リポジトリ全体を公開すると、.env.* や CLAUDE.md などが意図せず公開されるため。
     #
