@@ -54,7 +54,7 @@ npx playwright show-report
 | ワークフロー名 | 発火タイミング | 役割 |
 | :--- | :--- | :--- |
 | **PR Test & VRT Update** (`pull-request.yml`) | • **PR作成・更新時:** 事前検証テスト（PC/スマホ）を実行し、PR画面へ結果コメントを投稿<br>• **`/update-vrt` コメント時:** Linux環境でVRT画像を再撮影・自動コミット（※テスト実行はスキップ。リポジトリの OWNER / MEMBER / COLLABORATOR のコメントのみ有効） | 事前検証テスト（PC/スマホ）の実行と PR 画面への結果自動コメント、および VRT 画像の自動更新 |
-| **Deploy App** (`deploy.yml`) | `main` ブランチへの Push / Merge 時 | GitHub Pages へのデプロイ |
+| **Deploy App** (`deploy.yml`) | `main` ブランチへの Push / Merge 時 | `public/` を `gh-pages` ブランチへ公開（GitHub Pages の公開元は `gh-pages` ブランチ。テストレポートと同じ場所） |
 | **Post-Deploy Test** (`test.yml`) | `Deploy App` の**成功後**（`workflow_run`） | `ENV=prod` で、**必須の主要機能（`@prd` タグ付きのテスト）のみ**を実行（Safari も含む）し、テストレポートを `gh-pages` ブランチへ公開。※ 全テスト（フル検証）は、PR のテスト（`ENV=staging`）で実行する |
 | **Claude Code** (`claude.yml`) | Issue / PR のコメント・レビュー・Issue 本文で `@claude` とメンションされた時 | Claude による調査・提案・実装。ワークフロー（`.github/workflows/`）の変更とマージは行えない |
 
