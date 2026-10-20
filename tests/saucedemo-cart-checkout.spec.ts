@@ -115,6 +115,8 @@ test.describe('カート・購入手続きの異常系・やり直し', () => {
 
     await loginPage.loginAs(CREDENTIALS.visual); // 別のユーザー
     await expect(inventoryPage.title).toHaveText('Products');
+    // 商品一覧のボタンが描画されてから、バッジを確認する（描画前に「バッジ 0 件」と判定して、「予期せず成功」にならないように。レビューエージェントの提案）
+    await expect(page.locator('[data-test^="add-to-cart-"]').first()).toBeVisible();
 
     await expect(inventoryPage.cartBadge).toHaveCount(0, { timeout: 3_000 });
   });
