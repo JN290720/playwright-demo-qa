@@ -52,7 +52,8 @@ jobs:
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-weekly-${{ hashFiles('**/package-lock.json') }}
+          # キーに、入れるブラウザ（chromium-webkit）を含める: ブラウザの構成を変えたときに、古いキャッシュに当たって、入れ直されないのを防ぐ
+          key: ${{ runner.os }}-playwright-weekly-chromium-webkit-${{ hashFiles('**/package-lock.json') }}
 
       # WebKit (Safari) 等の起動に必要な OS 依存ライブラリ。キャッシュ対象外のため常に実行（apt のハング対策で再試行。#19）
       - name: Install Playwright System Dependencies
