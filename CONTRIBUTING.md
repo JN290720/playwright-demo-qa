@@ -28,12 +28,13 @@ npx playwright test --ui  # UI モード
 ## ブランチ名・コミット・PR のルール
 
 - **種別**（この一覧を正とする。README・CLAUDE.md は、ここを参照する）:
-  - `feat`: 新機能の追加
-  - `fix`: バグ・不具合の修正
-  - `test`: テストコードの追加・修正
-  - `refactor`: リファクタリング（挙動を変えないコード整理）
-  - `docs`: ドキュメントの更新
-  - `chore`: 設定ファイル・ビルド・ライブラリ更新など
+  - `feat`: 新機能の追加（例: `feat: ログイン画面にパスワード表示切り替えを追加`）
+  - `fix`: バグ・不具合の修正（例: `fix: カート画面で削除時に合計金額が更新されない不具合を修正`）
+  - `test`: テストコードの追加・修正（例: `test: SauceDemoのE2E自動テスト（基本機能・異常系）を追加`）
+  - `refactor`: リファクタリング（挙動を変えないコード整理）（例: `refactor: Page Object Pattern を導入してテストコードを再構築`）
+  - `docs`: ドキュメントの更新（例: `docs: Playwrightのローカル実行手順をREADMEに追加`）
+  - `chore`: 設定ファイル・ビルド・ライブラリ更新など（例: `chore: Playwrightを最新バージョンへアップデート`）
+  - `ci`: CI/CD ワークフロー（GitHub Actions 等）の修正（例: `ci: VRTの自動更新コメントトリガーをPRテストに統合`）
   - `ci`: CI/CD ワークフロー（GitHub Actions 等）の修正
 - ブランチ名: `種別/内容`（例: `feat/add-login-toggle`）
 - コミットメッセージ・PR タイトル: `種別: 概要`（日本語）。例: `ci: PRテストワークフローの修正`。scope（対象の機能名）は任意で、`種別(scope): 概要` の形でもよい（例: `test(saucedemo): E2E自動テストコードを追加`）
