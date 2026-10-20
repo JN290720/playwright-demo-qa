@@ -57,7 +57,7 @@ npx playwright show-report
 
 本リポジトリでは、用途に応じて 10 本のワークフロー（`.github/workflows/`）を自動実行しています。「副作用」列は、そのワークフローが外部に書き込むもの（コミット・Issue・削除）です。
 
-| ワークフロー（ファイル） | 発火タイミング | 目的 | 副作用（書き込み先） | 結果を見る人 |
+| ワークフロー（ファイル） | 発火タイミング | 目的 | 副作用（書き込み先） | 結果を見る人（想定） |
 | :--- | :--- | :--- | :--- | :--- |
 | **PR Test & VRT Update** (`pull-request.yml`) | PR の作成・更新時（`main`・`master` 向け）／ PR コメントの `/update-vrt`（OWNER / MEMBER / COLLABORATOR のみ有効） | PR のテスト（`ENV=staging`、全テスト）と結果コメント。`/update-vrt` で、Linux の VRT 基準画像を撮り直す（テストはスキップ） | PR へ結果のコメントを投稿・更新。PR のレポートを `gh-pages` へ公開。`/update-vrt` 時は PR ブランチへ画像をコミット（`[skip ci]`） | PR の作成者・レビュワー（PR のコメントに結果が出る） |
 | **Deploy App** (`deploy.yml`) | `main` への push（マージ後） | `public/` を公開する。テスト観点の Issue（親とサブ）の「テストケースの表」を、テストのコードから更新する | `gh-pages` へ push。失敗時は Issue（`deploy-failure`）を作成し、復旧したら閉じる。成功時は、テスト観点の Issue（親とサブ）の本文の表を書き換える（内容が変わったときだけ。失敗しても Deploy App は失敗にならない） | マージした人（失敗時は `deploy-failure` の Issue） |
@@ -69,6 +69,8 @@ npx playwright show-report
 | **Daily Report** (`daily-report.yml`) | 毎朝 05:17 JST（予備 07:43 JST）／ 手動 | 日次のレポートを投稿する | 日次レポート用の Issue を作成・コメント | 担当（毎朝の `daily-report` の Issue） |
 | **Dependency Review** (`dependency-review.yml`) | 毎週月曜 09:23 JST ／ 手動 | 依存関係の更新提案（`npm audit` など）を確認する | 提案の Issue（`dependency-review` ラベル）を作成・コメント | 担当（`dependency-review` の Issue。更新の判断） |
 | **Cleanup gh-pages Reports** (`cleanup-gh-pages.yml`) | 毎週月曜 03:00 JST（自動実行は**常に dry-run**）／ 手動 | 古いテストレポートを整理する。`main-test-*` は新しい順に `keep`（既定 10）件残す | 手動で `dry_run` を `false` にしたときだけ削除: 削除前に GitHub Release へアーカイブし、`gh-pages` から削除コミット（手動の既定は `dry_run = true`） | 担当（手動実行のときの Actions のログ・Release） |
+
+> 「結果を見る人」の列は、ワークフローの YAML からは確定できない。通知先（Issue のラベル）から推定した運用の想定。
 
 > テストレポートは、`main` の最新が `main-deploy-report/`、PR ごとのものが `pr-reports/<ブランチ名>/` に公開されます（`gh-pages` ブランチ）。
 

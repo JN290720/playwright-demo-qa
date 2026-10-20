@@ -30,6 +30,8 @@
 - VRT の基準画像の更新（PR への `/update-vrt`、Android の手動実行）
 - デプロイ後の確認（本番では、主要機能のみ）
 - 週次の全テストと、テスト対象サイトの変化の検知
+- テスト観点の Issue の表の自動更新（デプロイのたび。`scripts/sync-test-viewpoint-issues.js`）
+- 既知の不具合の「直った可能性」の通知（週次。`scripts/notify-site-fixed.js`。[台帳](known-site-issues.md) の見直しの合図）
 - 日次レポート、依存関係レビュー、テストレポートの公開（GitHub Pages）と整理
 - 失敗時の自動の Issue による通知（ラベルの意味は [README](../README.md) の「Issue のラベルの意味」）
 
