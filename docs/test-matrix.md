@@ -20,7 +20,7 @@
 | 購入確認 | ✅ 小計・税・合計と、各商品の価格（`checkout-totals` の全ケース。`e2e-purchase` の 5）、C3（Cancel。`cart-checkout`） | ❌ | ❌ | ✅ `accessibility` P6 | ✅ VRT P6 | ❌ |
 | 購入完了 | ✅ 注文完了まで（`e2e-purchase`。`@prd`） | ✅ `qa-destructive` P12（完了画面の直リンク） | △ 直リンクの扱い（`qa-destructive` P12） | ✅ `accessibility` P7 | ✅ VRT P7 | ❌ |
 | サイドメニュー | ✅ 各リンク（All Items / About / Logout / Reset App State）、閉じる（×・Esc）（`sidebar-logout`） | ❌ | ❌ | ✅ `accessibility` P8・K3（キーボードで開閉） | ✅ VRT P8 | ❌ |
-| ログアウト | ✅ ログイン画面に戻る・入力欄が空（`sidebar-logout`） | ✅ 戻るボタン後の保護（`qa-destructive` P7）、ログアウト後の直リンクの保護（`protected-pages` S5） | △ Cookie の操作（`protected-pages` S6・S7。S8 は既知の不具合） | ❌ | ❌ | ❌ |
+| ログアウト | ✅ ログイン画面に戻る・入力欄が空（`sidebar-logout`） | ✅ 戻るボタン後の保護（`qa-destructive` P7）、ログアウト後の直リンクの保護（`checkout-validation`。認可の検証） | △ Cookie の操作（`protected-pages` S6・S7。S8 は既知の不具合） | ❌ | ❌ | ❌ |
 
 補足:
 - VRT は、`desktop-chrome` / `mobile-chrome` / `desktop-safari` の 3 プロジェクト × 14 画面（P1〜P14）= 42 枚のベースライン（`*-linux.png`）がある。VRT の spec は、3 プロジェクトすべてで実行される
@@ -38,7 +38,8 @@
 |---|---|---|
 | 購入フロー正常系 E2E と、金額（小計・税・合計）の検証（#14 / PR #28） | `e2e-purchase`（`@prd`）、`checkout-totals` | 解消 |
 | チェックアウト入力の異常系（項目ごとの欠落）（#55） | `checkout-validation` | 解消 |
-| 保護ページへの直リンク、ログアウト後の保護（#55） | `qa-destructive` P6・P7、`protected-pages` S5〜S7 | 解消 |
+| 保護ページへの直リンク、ログアウト後の保護（#55） | `qa-destructive` P6・P7、`checkout-validation`（ログアウト後の直接アクセス）、`protected-pages` S5〜S7 | 解消 |
+| 商品詳細の、画像が読み込めないときの表示（ネットワーク。P4） | `network-mocking` P4 | 解消 |
 | ソート 4 種、カート操作、商品詳細（#16 / PR #31） | `inventory-cart`、`product-detail`、`product-detail-errors` | 解消 |
 | モバイルの機能テスト（#14 の実装で兼ねる） | 全 spec が `mobile-chrome` でも実行される | 解消 |
 
