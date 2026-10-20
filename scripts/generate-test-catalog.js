@@ -7,6 +7,7 @@
 // 出力（既定は public/。Deploy App が、公開サイトの test-catalog.html / test-catalog.csv として公開する）:
 //   - test-catalog.csv  : Excel で開ける（UTF-8・BOM 付き）。1 行 = 1 テストケース
 //   - test-catalog.html : 画面 × 観点の件数表と、絞り込める一覧（このファイル 1 つで完結）
+//   - test-catalog.json : 同じ内容を、プログラムで使える形にしたもの（観点ごとの Issue の自動更新 = sync-test-viewpoint-issues.js が使う）
 //
 // 使い方: node scripts/generate-test-catalog.js [出力先ディレクトリ]
 //
@@ -130,6 +131,7 @@ const COLS = [
 const csvCell = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
 const csv = '﻿' + [COLS.map(([, h]) => csvCell(h)).join(','), ...rows.map((r) => COLS.map(([k]) => csvCell(r[k])).join(','))].join('\r\n') + '\r\n';
 fs.writeFileSync(path.join(outDir, 'test-catalog.csv'), csv);
+fs.writeFileSync(path.join(outDir, 'test-catalog.json'), JSON.stringify({ viewpoints: VIEWPOINTS.filter((v) => rows.some((r) => r.viewpoint === v)), screens: [...SCREENS.map(([n]) => n), '（複数・全体）'], rows }, null, 2));
 
 // --- HTML ---
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
@@ -201,5 +203,5 @@ function apply(){const t=q.value.trim().toLowerCase();let n=0;for(const r of row
 fs.writeFileSync(path.join(outDir, 'test-catalog.html'), html);
 
 const unclassified = rows.filter((r) => r.viewpoint === '未分類').length;
-console.log(`テスト観点表を生成しました: ${rows.length} 件 → ${outDir}/test-catalog.html, ${outDir}/test-catalog.csv`);
+console.log(`テスト観点表を生成しました: ${rows.length} 件 → ${outDir}/test-catalog.html, .csv, .json`);
 if (unclassified > 0) console.warn(`::warning::未分類のテストが ${unclassified} 件あります。scripts/generate-test-catalog.js の FILE_INFO に、新しい spec ファイルを追記してください`);
