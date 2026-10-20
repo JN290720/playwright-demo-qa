@@ -106,6 +106,8 @@ QA リポジトリは、**失敗を安全に検知するための検証用プロ
 - PR 本文は [PR テンプレート](.github/PULL_REQUEST_TEMPLATE.md) の見出し(概要 / 関連 Issue / 変更内容 / 動作確認)に沿って書く。
 - 1 つの PR では 1 つの目的だけを扱う。無関係な変更を混ぜない。
 - 積み重ね PR（別の PR のブランチを base にした PR）は作らない。依存する変更は、先の PR を `main` にマージしてから、`main` から新しいブランチを切る。base が `main` でない PR は、マージ前に base を確認する。
+- 新しいテストは、観点の Issue → ケース案 → 承認 → 実装の順（手順は [CONTRIBUTING.md](CONTRIBUTING.md) の「テストの追加の流れ」）。承認の前に実装しない。
+- 専門用語は、初めて出すときに一言の説明を付ける。PR・Issue には目的を書く（[CONTRIBUTING.md](CONTRIBUTING.md) の「用語の注釈」）。
 
 ## 権限・シークレット
 
