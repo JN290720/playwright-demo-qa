@@ -61,6 +61,17 @@ async function expectPageScreenshot(page: Page, name: string) {
   }
 }
 
+/**
+ * パスワード欄の「最後の 1 文字の一時表示」が消えるまで待つ。
+ * Android の Chrome は、パスワード欄に入力した直後の 1 文字を、一瞬（約 1 秒）表示する。基準画像にその 1 文字が写ると、
+ * 撮影のタイミングで見た目が変わり、不安定になる（#135 で確認。基準画像に「e」が写っていた）。
+ * 入力から 1.5 秒の経過を、条件で待つ（固定の待機ではなく、ページ内の時刻で判定する）。
+ */
+async function waitForPasswordMasked(page: Page) {
+  const start = await page.evaluate(() => performance.now());
+  await page.waitForFunction((t0) => performance.now() - t0 > 1500, start);
+}
+
 test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対応版)', () => {
 
   // 1. ログインページ (PC)
@@ -78,6 +89,7 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
     await page.locator('[data-test="password"]').fill(CREDENTIALS.invalid.password);
     await page.locator('[data-test="login-button"]').click();
     await page.locator('[data-test="error"]').waitFor({ state: 'visible' });
+    await waitForPasswordMasked(page);
     await waitForRenderComplete(page);
 
     await expectPageScreenshot(page, 'login-error-invalid-pc');
@@ -90,6 +102,7 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
     await page.locator('[data-test="password"]').fill(CREDENTIALS.lockedOut.password);
     await page.locator('[data-test="login-button"]').click();
     await page.locator('[data-test="error"]').waitFor({ state: 'visible' });
+    await waitForPasswordMasked(page);
     await waitForRenderComplete(page);
 
     await expectPageScreenshot(page, 'login-error-locked-pc');
