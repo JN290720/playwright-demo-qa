@@ -63,7 +63,7 @@ npx playwright show-report
 | **PR Test & VRT Update** (`pull-request.yml`) | PR の作成・更新時（`main`・`master` 向け）／ PR コメントの `/update-vrt`（OWNER / MEMBER / COLLABORATOR のみ有効） | PR のテスト（`ENV=staging`、全テスト）と結果コメント。`/update-vrt` で、Linux の VRT 基準画像を撮り直す（テストはスキップ） | PR へ結果のコメントを投稿・更新。PR のレポートを `gh-pages` へ公開。`/update-vrt` 時は PR ブランチへ画像をコミット（`[skip ci]`） | PR の作成者・レビュワー（PR のコメントに結果が出る） |
 | **Deploy App** (`deploy.yml`) | `main` への push（マージ後） | `public/` を公開する。テスト観点の Issue（親とサブ）の「テストケースの表」を、テストのコードから更新する | `gh-pages` へ push。失敗時は Issue（`deploy-failure`）を作成し、復旧したら閉じる。成功時は、テスト観点の Issue（親とサブ）の本文の表を書き換える（内容が変わったときだけ。失敗しても Deploy App は失敗にならない） | マージした人（失敗時は `deploy-failure` の Issue） |
 | **Post-Deploy Test** (`test.yml`) | `Deploy App` の**成功後**（`workflow_run`） | `ENV=prod` で、`@prd` タグの主要機能のみを実行（Safari も含む） | `gh-pages` へレポートを公開。失敗時は Issue（`post-deploy-failure`）を作成し、復旧したら閉じる | 開発者（失敗時は `post-deploy-failure` の Issue） |
-| **Claude Code** (`claude.yml`) | Issue / PR のコメント・レビュー、Issue の作成・アサインで `@claude` とメンションされた時 | Claude による調査・提案・実装 | ブランチへの push（`contents: write`）、PR・コメント・Issue の作成と更新。`.github/workflows/` の変更は行えない | `@claude` を付けた人（コメントで返答） |
+| **Claude Code** (`claude.yml`) | Issue / PR のコメント・レビュー、Issue の本文・タイトル（作成・アサイン時）の先頭に、起動の文字（アットマーク + claude）を書いた時。助言を求めるときだけ使う | 助言のみ（独立した監査役。変更・マージはしない） | ブランチへの push（`contents: write`）、PR・コメント・Issue の作成と更新。`.github/workflows/` の変更は行えない | 起動の文字を先頭に書いた人（コメントで返答） |
 | **PR レポートの削除** (`cleanup-pr-report.yml`) | PR のクローズ・マージ時（`main`・`master` 向け） | その PR のテストレポートを `gh-pages` から消す | `gh-pages` へ削除コミット（`[skip ci]`） | 自動のみ（人は見ない） |
 | **Android Emulator Test** (`android-test.yml`) | 毎日 03:00 JST（夜間）／ 手動実行／ Android 関連ファイルを変えた `main` 向け PR（PR では失敗の通知は送らない） | エミュレータ上の Chrome で、VRT と購入 1 件を確認 | 夜間・手動実行の失敗は Issue を作成し、成功に戻ったら閉じる（PR では作らない）。手動で `update_snapshots` を付けたときだけ、選んだブランチへ基準画像をコミット（`main` は不可。下の「Android の基準画像を更新したい場合」を参照） | 開発者（失敗時は `android-failure` の Issue） |
 | **Weekly Full Test** (`weekly-full-test.yml`) | 毎週月曜 03:37 JST ／ 手動 ／ 該当ファイルを変えた `main` 向け PR | 全テスト（`ENV=staging`）。サイト側の変化を、PR を待たずに検知する | 失敗時は Issue（`weekly-failure`）を作成し、復旧したら閉じる。`test.fail()` の既知の不具合が予期せず成功したら、サイト不具合の Issue にコメント | 開発者（失敗時は `weekly-failure` の Issue） |
@@ -151,7 +151,7 @@ Android（エミュレータ上の Chrome）の基準画像は、PR のコメン
 
 - 両リポジトリは同じ履歴を共有しています（QA は本体の `main` から複製したものです）。
 - 本プロジェクトはデモ用のため、変更内容によっては QA での検証を省略して直接 PR を出すことがあります（簡略構成）。
-- Claude（`@claude`）への指示や作業ルールは [CLAUDE.md](CLAUDE.md) にまとめています。両リポジトリで同じ内容を保ちます。
+- Claude（起動の文字は、アットマーク + claude。書き方は CLAUDE.md）への指示や作業ルールは [CLAUDE.md](CLAUDE.md) にまとめています。両リポジトリで同じ内容を保ちます。
 
 ---
 
