@@ -17,6 +17,7 @@ export class CheckoutPage {
   readonly lastNameInput: Locator;    // 姓
   readonly postalCodeInput: Locator;  // 郵便番号
   readonly continueButton: Locator;   // 「Continue」ボタン
+  readonly errorMessage: Locator;     // 入力エラーのメッセージ
 
   // 購入確認画面
   readonly summaryItemPrices: Locator; // 確認画面の各商品の価格
@@ -42,6 +43,7 @@ export class CheckoutPage {
     this.lastNameInput = page.locator('[data-test="lastName"]');
     this.postalCodeInput = page.locator('[data-test="postalCode"]');
     this.continueButton = page.locator('[data-test="continue"]');
+    this.errorMessage = page.locator('[data-test="error"]');
 
     this.summaryItemPrices = page.locator('.inventory_item_price');
     this.subtotalLabel = page.locator('[data-test="subtotal-label"]');

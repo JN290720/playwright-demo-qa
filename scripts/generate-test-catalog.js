@@ -35,6 +35,7 @@ const FILE_INFO = {
   'saucedemo-product-detail-errors.spec.ts': { site: 'SauceDemo', viewpoint: '異常系' },
   'saucedemo-qa-destructive.spec.ts': { site: 'SauceDemo', viewpoint: '異常系・破壊的操作' },
   'saucedemo-security-input.spec.ts': { site: 'SauceDemo', viewpoint: 'セキュリティ' },
+  'saucedemo-checkout-injection.spec.ts': { site: 'SauceDemo', viewpoint: 'セキュリティ' },
   'saucedemo-protected-pages.spec.ts': { site: 'SauceDemo', viewpoint: 'セキュリティ' },
   'saucedemo-accessibility.spec.ts': { site: 'SauceDemo', viewpoint: 'アクセシビリティ' },
   'saucedemo-visual-regression.spec.ts': { site: 'SauceDemo', viewpoint: 'VRT（見た目）' },
