@@ -1,7 +1,7 @@
 # CLAUDE.md
 
 Playwright による E2E テスト・ビジュアルレグレッションテスト(VRT)と、GitHub Actions による CI/CD のデモプロジェクト。
-詳細な手順は [README.md](README.md) を参照。このファイルには、作業時に守るルールの要点だけを書く。
+全体像は [docs/overview.md](docs/overview.md)、詳細な手順は [README.md](README.md) を参照。このファイルには、作業時に守るルールの要点だけを書く。
 
 ## リポジトリの関係(重要)
 
