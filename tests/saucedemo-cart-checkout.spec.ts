@@ -4,6 +4,7 @@ import { LoginPage } from './pages/LoginPage';
 import { InventoryPage } from './pages/InventoryPage';
 import { CheckoutPage } from './pages/CheckoutPage';
 import { CREDENTIALS, SHIPPING_INFO } from './fixtures/users';
+import { openSideMenu } from './helpers/side-menu';
 
 /**
  * カートと購入手続きの、途中でやめる・戻る・開き直すといった操作のテスト（#132）。
@@ -97,5 +98,26 @@ test.describe('カート・購入手続きの異常系・やり直し', () => {
       const removed = await removeButtons.count();
       await expect(inventoryPage.cartBadge).toHaveCount(Math.min(removed, 1));
     }).toPass({ timeout: 5_000 });
+  });
+
+  // 💡 既知のサイト側の不備（Issue #145）: ログアウトしても、カートの中身が消えず、別のユーザーでログインしても、
+  //    前のユーザーのカートが見える（共用のパソコンでは、前の人のカートが次の人に見える）。
+  //    期待値は不明（一般には、ログアウトでカートの表示は消える、または、ユーザーごとに分けられる）。docs/known-site-issues.md 参照。
+  //    test.fail() = 「失敗すること」を期待するテスト。サイトが直って成功すると、テストが失敗して気づける。
+  test('C5: [既知の不具合] ログアウト後に別のユーザーでログインしても、前のユーザーのカートが見えないこと', async ({ page }) => {
+    test.fail(true, 'ログアウトしても、カートの中身が残り、別のユーザーに見える（#145 / docs/known-site-issues.md）');
+    const { inventoryPage } = await loginAndAddBackpack(page);
+    const loginPage = new LoginPage(page);
+
+    await openSideMenu(loginPage);
+    await page.locator('[data-test="logout-sidebar-link"]').click();
+    await expect(loginPage.loginButton).toBeVisible();
+
+    await loginPage.loginAs(CREDENTIALS.visual); // 別のユーザー
+    await expect(inventoryPage.title).toHaveText('Products');
+    // 商品一覧のボタンが描画されてから、バッジを確認する（描画前に「バッジ 0 件」と判定して、「予期せず成功」にならないように。レビューエージェントの提案）
+    await expect(page.locator('[data-test^="add-to-cart-"]').first()).toBeVisible();
+
+    await expect(inventoryPage.cartBadge).toHaveCount(0, { timeout: 3_000 });
   });
 });

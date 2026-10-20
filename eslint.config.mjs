@@ -21,7 +21,7 @@ export default tseslint.config(
   {
     // Playwright のテストコード
     ...playwright.configs['flat/recommended'],
-    files: ['tests/**/*.ts'],
+    files: ['tests/**/*.ts', 'tests-perf/**/*.ts'],
     rules: {
       ...toError(playwright.configs['flat/recommended'].rules),
       // 「見た目の確認」の共通関数（内部で toHaveScreenshot を呼ぶ）を、アサーションとして扱う

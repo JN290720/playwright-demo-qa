@@ -33,9 +33,13 @@ npm ci
 npx playwright install --with-deps
 ```
 ### 2. テストの実行
-#### すべての E2E テストを実行
+#### 既定（ENV 未指定 = prod）のテストを実行（`@prd` タグの主要機能のみ）
 ```
 npx playwright test
+```
+#### 全テストを実行（staging。PR の CI と同じ範囲）
+```
+npm run test:stg
 ```
 #### UI モードでテストを実行（デバッグ用）
 ```
@@ -49,16 +53,41 @@ npx playwright show-report
 
 ## 🔄 CI/CD パイプライン (GitHub Actions)
 
-本リポジトリでは、用途に応じて 4 つのワークフローを自動実行しています。
+本リポジトリでは、用途に応じて 10 本のワークフロー（`.github/workflows/`）を自動実行しています。「副作用」列は、そのワークフローが外部に書き込むもの（コミット・Issue・削除）です。
 
-| ワークフロー名 | 発火タイミング | 役割 |
-| :--- | :--- | :--- |
-| **PR Test & VRT Update** (`pull-request.yml`) | • **PR作成・更新時:** 事前検証テスト（PC/スマホ）を実行し、PR画面へ結果コメントを投稿<br>• **`/update-vrt` コメント時:** Linux環境でVRT画像を再撮影・自動コミット（※テスト実行はスキップ。リポジトリの OWNER / MEMBER / COLLABORATOR のコメントのみ有効） | 事前検証テスト（PC/スマホ）の実行と PR 画面への結果自動コメント、および VRT 画像の自動更新 |
-| **Deploy App** (`deploy.yml`) | `main` ブランチへの Push / Merge 時 | `public/` を `gh-pages` ブランチへ公開（GitHub Pages の公開元は `gh-pages` ブランチ。テストレポートと同じ場所） |
-| **Post-Deploy Test** (`test.yml`) | `Deploy App` の**成功後**（`workflow_run`） | `ENV=prod` で、**必須の主要機能（`@prd` タグ付きのテスト）のみ**を実行（Safari も含む）し、テストレポートを `gh-pages` ブランチへ公開。※ 全テスト（フル検証）は、PR のテスト（`ENV=staging`）で実行する |
-| **Claude Code** (`claude.yml`) | Issue / PR のコメント・レビュー・Issue 本文で `@claude` とメンションされた時 | Claude による調査・提案・実装。ワークフロー（`.github/workflows/`）の変更とマージは行えない |
+| ワークフロー（ファイル） | 発火タイミング | 目的 | 副作用（書き込み先） |
+| :--- | :--- | :--- | :--- |
+| **PR Test & VRT Update** (`pull-request.yml`) | PR の作成・更新時（`main`・`master` 向け）／ PR コメントの `/update-vrt`（OWNER / MEMBER / COLLABORATOR のみ有効） | PR のテスト（`ENV=staging`、全テスト）と結果コメント。`/update-vrt` で、Linux の VRT 基準画像を撮り直す（テストはスキップ） | PR へ結果のコメントを投稿・更新。PR のレポートを `gh-pages` へ公開。`/update-vrt` 時は PR ブランチへ画像をコミット（`[skip ci]`） |
+| **Deploy App** (`deploy.yml`) | `main` への push（マージ後） | `public/` を公開する。テスト観点の Issue（親とサブ）の「テストケースの表」を、テストのコードから更新する | `gh-pages` へ push。失敗時は Issue（`deploy-failure`）を作成し、復旧したら閉じる。成功時は、テスト観点の Issue（親とサブ）の本文の表を書き換える（内容が変わったときだけ。失敗しても Deploy App は失敗にならない） |
+| **Post-Deploy Test** (`test.yml`) | `Deploy App` の**成功後**（`workflow_run`） | `ENV=prod` で、`@prd` タグの主要機能のみを実行（Safari も含む） | `gh-pages` へレポートを公開。失敗時は Issue（`post-deploy-failure`）を作成し、復旧したら閉じる |
+| **Claude Code** (`claude.yml`) | Issue / PR のコメント・レビュー、Issue の作成・アサインで `@claude` とメンションされた時 | Claude による調査・提案・実装 | ブランチへの push（`contents: write`）、PR・コメント・Issue の作成と更新。`.github/workflows/` の変更は行えない |
+| **PR レポートの削除** (`cleanup-pr-report.yml`) | PR のクローズ・マージ時（`main`・`master` 向け） | その PR のテストレポートを `gh-pages` から消す | `gh-pages` へ削除コミット（`[skip ci]`） |
+| **Android Emulator Test** (`android-test.yml`) | 毎日 03:00 JST（夜間）／ 手動実行／ Android 関連ファイルを変えた `main` 向け PR（PR では失敗の通知は送らない） | エミュレータ上の Chrome で、VRT と購入 1 件を確認 | 夜間・手動実行の失敗は Issue を作成し、成功に戻ったら閉じる（PR では作らない）。手動で `update_snapshots` を付けたときだけ、選んだブランチへ基準画像をコミット（`main` は不可。下の「Android の基準画像を更新したい場合」を参照） |
+| **Weekly Full Test** (`weekly-full-test.yml`) | 毎週月曜 03:37 JST ／ 手動 ／ 該当ファイルを変えた `main` 向け PR | 全テスト（`ENV=staging`）。サイト側の変化を、PR を待たずに検知する | 失敗時は Issue（`weekly-failure`）を作成し、復旧したら閉じる。`test.fail()` の既知の不具合が予期せず成功したら、サイト不具合の Issue にコメント |
+| **Daily Report** (`daily-report.yml`) | 毎朝 05:17 JST（予備 07:43 JST）／ 手動 | 日次のレポートを投稿する | 日次レポート用の Issue を作成・コメント |
+| **Dependency Review** (`dependency-review.yml`) | 毎週月曜 09:23 JST ／ 手動 | 依存関係の更新提案（`npm audit` など）を確認する | 提案の Issue（`dependency-review` ラベル）を作成・コメント |
+| **Cleanup gh-pages Reports** (`cleanup-gh-pages.yml`) | 毎週月曜 03:00 JST（自動実行は**常に dry-run**）／ 手動 | 古いテストレポートを整理する。`main-test-*` は新しい順に `keep`（既定 10）件残す | 手動で `dry_run` を `false` にしたときだけ削除: 削除前に GitHub Release へアーカイブし、`gh-pages` から削除コミット（手動の既定は `dry_run = true`） |
 
 > テストレポートは、`main` の最新が `main-deploy-report/`、PR ごとのものが `pr-reports/<ブランチ名>/` に公開されます（`gh-pages` ブランチ）。
+
+### 🏷 Issue のラベルの意味
+
+自動で作られる Issue は、ラベルで種類が分かります。失敗の通知は、同じラベルの open な Issue があれば、新しく作らずにコメントを追記します（重複を作らない）。ラベルが無いときは、スクリプトが作ります。
+
+| ラベル | 作られる条件 | 閉じ方 | 見る人・すること |
+| :--- | :--- | :--- | :--- |
+| `deploy-failure` | Deploy App（`main` への反映）が失敗したとき。優先度 `P1` も付く | 次に成功したら、自動で閉じる（復旧のコメントつき） | 開発者: デプロイが失敗した原因を確認する |
+| `post-deploy-failure` | Post-Deploy Test（本番の `@prd` テスト）が失敗したとき。`P1` も付く | 次に成功したら、自動で閉じる | 開発者: 本番で主要機能が壊れていないか確認する |
+| `weekly-failure` | 週次の全テスト（staging）が失敗したとき。`P1` も付く | 次に成功したら、自動で閉じる | 開発者: 失敗の原因（アプリの不具合か、テスト対象サイトの変化か）を確認する |
+| `android-failure` | Android の夜間・手動実行が失敗したとき（PR の実行では作らない）。`P1` も付く | 次に成功したら、自動で閉じる | 開発者: エミュレータ上の VRT・購入テストの失敗を確認する |
+| `site-defect` | 既知のサイト不具合が「直った可能性」があるとき（`test.fail()` が予期せず成功） | 閉じない。open の `site-defect` の Issue（常設）に、コメントを追記する。同じ内容のコメントは、重ねて追記しない。常設の Issue が無いときは、コメントは投稿されず、何もしない | 開発者: 実際に直っているか確認し、直っていれば `test.fail()` を外す（[docs/known-site-issues.md](docs/known-site-issues.md)） |
+| `test-viewpoint` | テスト観点の Issue（親とサブ）。デプロイのたびに、本文の「テストケースの表」を更新する | 閉じない（本文だけを書き換える） | 開発者: 観点ごとのテストケースを確認する |
+| `daily-report` | 日次レポート。open の 1 件に、毎日コメントを追記する | 閉じない | 人: 毎朝、PR・Issue の状況を確認する |
+| `dependency-review` | 依存関係レビュー（毎週月曜）。open の 1 件に、提案を追記する | 閉じない | 人: 更新の提案を判断し、PR で行う |
+| `needs-user-decision` / `blocked-by-merge` / `ready-for-pr` / `backlog` | 運用ラベル（スクリプトは読むだけ。日次レポートが一覧にする）。`needs-user-decision` は、相談のテンプレート（`.github/ISSUE_TEMPLATE/consultation.yml`）から作ると、自動で付く | 人が外す（ほかのラベルの付け方は運用に従う） | 人: ユーザーの判断が要るもの・マージ待ち・PR を作れるもの・保留かを判断する |
+
+- 優先度 `P0`〜`P3` は、人が Issue に付ける（[CONTRIBUTING.md](CONTRIBUTING.md)）。自動で作られる失敗の Issue だけ、`P1` が付く
+- 「閉じない」ものは、スクリプトが閉じない。閉じるかどうかは、人が判断する
 
 ---
 
@@ -83,6 +112,17 @@ npx playwright show-report
 
 > **💡 注意（初回・環境追加時）**
 > 新しいテストや画面を追加した直後の初回PRでは、ベースライン画像が存在しないためテストが落ちます。その際も同様にコメントで `/update-vrt` と投稿して画像を生成させてください。
+
+### 📱 Android の基準画像を更新したい場合
+
+Android（エミュレータ上の Chrome）の基準画像は、PR のコメントでは更新できません。Actions の **Android Emulator Test** を手動で実行します。
+
+1. Actions の「Android Emulator Test」→ **Run workflow** を開く
+2. **Use workflow from** で、更新したいブランチを選ぶ（`main` では実行できない）
+3. `update_snapshots` にチェックを入れて実行する
+4. CI のエミュレータで撮り直した画像が、選んだブランチに `test: Android の VRT 基準画像を更新する [skip ci]` としてコミットされる。`[skip ci]` のため、テストは再実行されない（必要なら、空のコミットで再実行する）
+
+> 画像が変わっていないときは、コミットされません。
 
 ---
 
@@ -112,43 +152,13 @@ npx playwright show-report
 
 ## 📝 開発フローとブランチ戦略
 
-1. 機能追加・修正時は `main` ブランチから作業ブランチを作成（例: `fix/xxx`, `feature/xxx`）
-2. ローカルでテスト（`npx playwright test`）を実行して問題ないことを確認
-3. PR を作成（自動で `.github/PULL_REQUEST_TEMPLATE.md` が適応されます）
-4. CI のチェック（`PR Test`）が通過したことを確認して `main` へマージ
+1. 機能追加・修正時は `main` ブランチから作業ブランチを作成（例: `fix/xxx`, `feat/xxx`）
+2. ローカルでのテストは任意です（先に `npm run test:stg` で全テストを確認すると、速く・安く直せます。PR の CI と同じ範囲）
+3. PR を作成（自動で `.github/PULL_REQUEST_TEMPLATE.md` が適応されます）。ローカルの確認を終えてからでなくてもかまいません。失敗は CI で検知します
+4. CI（`PR Test`）の結果を確認する。失敗したら直す。方針が変わったら PR を閉じる（失敗のまま放置・マージしない）。通過したら `main` へマージ
 5. マージ後、自動でデプロイおよび公開後テストが実行されます
 
 ---
 ## PRタイトル命名ルール
 
-本リポジトリでは、PR（Pull Request）のコミット履歴やレビューの可読性を保つため、以下の命名ルールを採用しています。
-
-### 基本フォーマット
-
-`<type>(<scope>): <概要（何をしたか）>`
-
-※ `<scope>`（対象機能やモジュール名）は任意です。必要に応じて付与してください。
-
----
-
-### プレフィックス（`<type>`）一覧
-
-| プレフィックス | 意味・用途 | タイトル例 |
-| :--- | :--- | :--- |
-| **`test`** | テストコードの追加・修正 | `test: SauceDemoのE2E自動テスト（基本機能・異常系）を追加` |
-| **`feat`** | 新機能の追加 | `feat: ログイン画面にパスワード表示切り替えを追加` |
-| **`fix`** | バグ・不具合の修正 | `fix: カート画面で削除時に合計金額が更新されない不具合を修正` |
-| **`refactor`** | リファクタリング（挙動を変えないコード整理） | `refactor: Page Object Pattern を導入してテストコードを再構築` |
-| **`docs`** | ドキュメント（READMEやコメント等）の更新 | `docs: Playwrightのローカル実行手順をREADMEに追加` |
-| **`chore`** | 設定ファイル・ビルド・ライブラリ更新など | `chore: Playwrightを最新バージョンへアップデート` |
-| **`ci`** | CI/CDワークフロー（GitHub Actions等）の修正 | `ci: VRTの自動更新コメントトリガーをPRテストに統合` |
-
----
-
-### 記述ルール・マナー
-
-- **要点を簡潔に:** 50文字程度を目安にし、詳細は PR 本文（Description）に記載してください。
-- **語尾の統一:** 日本語で記述する場合は「〜を追加」「〜を修正」など、具体的に実施した内容で終わるようにします。
-- **スコープの活用例:** 
-  - `test(saucedemo): E2E自動テストコードを追加`
-  - `test(todomvc): 破壊テストケースを追加`
+PR タイトル（コミットの種別を含む）の書き方と、種別の一覧（`feat` / `fix` / `test` / `refactor` / `docs` / `chore` / `ci`）は、[CONTRIBUTING.md](CONTRIBUTING.md) の「ブランチ名・コミット・PR のルール」を正とします。ここには重複して書きません。

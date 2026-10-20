@@ -21,7 +21,7 @@ Playwright による E2E テスト・ビジュアルレグレッションテス�
 - `tests/saucedemo-visual-regression.spec.ts-snapshots/`: VRT のベースライン画像
 - `.env.staging` / `.env.prod`: 環境ごとの設定。`ENV` 環境変数で切り替える(未指定は `prod`)
 - `playwright.config.ts`: プロジェクトは `desktop-chrome` / `mobile-chrome`。`desktop-safari` は PR 以外(main など)のみ
-- `.github/workflows/`: `pull-request.yml` / `deploy.yml` / `test.yml` / `claude.yml`
+- `.github/workflows/`: 一覧と、各ワークフローのトリガー・副作用は [README.md](README.md) の「CI/CD パイプライン」を参照
 
   - 同時実行（`concurrency`）: PR のテストは、同じ PR への新しい push で**古い実行をキャンセル**する。コメントの実行（`/update-vrt`）は、コメントごとに独立したグループで、キャンセルしない。Deploy / Post-Deploy は、キャンセルせず同時に 1 つだけ実行する
 
@@ -100,7 +100,7 @@ QA リポジトリは、**失敗を安全に検知するための検証用プロ
 
 ## ブランチ・コミット・PR
 
-- ブランチ名は `種別/内容` の形式。種別は `feature` / `fix` / `ci` / `docs` / `refactor` / `test` / `chore`。
+- ブランチ名は `種別/内容` の形式。種別は `feat` / `fix` / `ci` / `docs` / `refactor` / `test` / `chore`（一覧と意味は [CONTRIBUTING.md](CONTRIBUTING.md) を参照）。
 - コミットメッセージは `種別: 概要`(日本語)。例: `ci: PRテストワークフローの修正`。
 - `main` に直接 push しない。必ずブランチを切って PR にする。
 - PR 本文は [PR テンプレート](.github/PULL_REQUEST_TEMPLATE.md) の見出し(概要 / 関連 Issue / 変更内容 / 動作確認)に沿って書く。

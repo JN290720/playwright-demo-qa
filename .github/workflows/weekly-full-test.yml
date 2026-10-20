@@ -20,6 +20,8 @@ on:
     paths:
       - '.github/workflows/weekly-full-test.yml'
       - 'scripts/notify-site-fixed.js'
+      - 'scripts/summarize-perf.js'
+      - 'tests-perf/**'
 
 # 最小権限: 既定は読み取りのみ。通知（Issue）に必要な権限は Job で付与する
 permissions:
@@ -97,6 +99,16 @@ jobs:
           mkdir -p reports
           node scripts/summarize-flaky.js reports/results.json || true
           if [ -f reports/summary.md ]; then cat reports/summary.md >> "$GITHUB_STEP_SUMMARY"; fi
+
+      # 表示速度の記録（#136。ユーザー判断: 記録のみ。失敗にしない）: 主要な画面の表示時間を、PC の Chrome で各 5 回測り、
+      # 中央値・最小・最大を Job Summary に出す（成果物 reports/perf.json にも残る）。しきい値は設けない。
+      # 💡 このステップが失敗しても、Job は失敗にしない（continue-on-error）。外部サイトで、こちらでは改善できず、通信状況でぶれるため
+      - name: Record performance (record only)
+        if: always()
+        continue-on-error: true
+        run: |
+          npx playwright test -c tests-perf/playwright.config.ts || echo "::warning::表示速度の記録に失敗しました（失敗にはしません）"
+          node scripts/summarize-perf.js reports/perf.json >> "$GITHUB_STEP_SUMMARY" || true
 
       # 既知の不具合のテストが予期せず成功していれば、「サイトが直った可能性」を知らせる（PR では送らない）
       - name: Notify possible site fixes
