@@ -3,9 +3,15 @@ name: Daily Report
 # 毎朝 8:00 JST に、本体 playwright-demo と QA playwright-demo-qa の状況を、
 # 日次レポート用の Issue（ラベル daily-report）にコメントとして自動投稿します（#13）。
 # 事実（CI の状況・PR・Issue・ラベル）は、scripts/daily-report.js が GitHub API から機械的に取得します。
+#
+# 【定時実行の遅れ対策】GitHub の定時実行（schedule）は、混雑時に数十分〜数時間遅れたり、実行されないことがある
+# （毎時 0 分は特に混みやすい）。実際に、8:00 JST（23:00 UTC）の指定が 70 分以上実行されなかった（2026-10-20）。
+# そのため、(1) 混み合う 0 分を避け、(2) 早めの時刻に 1 回目、予備として 2 回目を実行する。
+# 同じ日（JST）のレポートが投稿済みなら、2 回目は投稿しない（scripts/daily-report.js が判定）。
 on:
   schedule:
-    - cron: '0 23 * * *' # 23:00 UTC = 翌 8:00 JST（定時実行は数分〜十数分遅れることがあります）
+    - cron: '17 20 * * *' # 20:17 UTC = 5:17 JST（1 回目。遅れても 8:00 JST までに届きやすい）
+    - cron: '43 22 * * *' # 22:43 UTC = 7:43 JST（予備。1 回目が実行されなかったときのため）
   workflow_dispatch:      # 手動実行（動作確認用）
 
 # 既定は全拒否。必要な権限だけを Job に付与します（Issue #33 の方針）

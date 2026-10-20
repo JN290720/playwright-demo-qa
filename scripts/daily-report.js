@@ -6,6 +6,8 @@
 //   GH_TOKEN=... node scripts/daily-report.js            # Markdown を標準出力へ（投稿はしない）
 //   GH_TOKEN=... node scripts/daily-report.js --post     # 日次レポート用の Issue にコメントとして投稿する
 //
+// 同じ日（JST）のレポートが投稿済みなら、定時実行（schedule）は投稿しない（予備の実行との重複を防ぐ）。手動実行は常に投稿する。
+//
 // 環境変数: GH_TOKEN（必須）, REPO_QA, REPO_MAIN, REPORT_LABEL（既定 daily-report）, WINDOW_HOURS（既定 24）
 'use strict';
 
@@ -181,13 +183,24 @@ async function main() {
   ].join('\n');
   const main = await repoSection(REPO_MAIN, '本体', since);
   const qa = await repoSection(REPO_QA, 'QA', since);
-  const body = `${head}\n${main}\n---\n\n${qa}\n---\n*自動生成: \`scripts/daily-report.js\`（GitHub Actions）*\n`;
+  const jstDate = new Date(now.getTime() + 9 * 3600 * 1000).toISOString().slice(0, 10);
+  const marker = `<!-- daily-report:${jstDate} -->`; // 同じ日の重複投稿を見分けるための目印（画面には表示されない）
+  const body = `${head}\n${main}\n---\n\n${qa}\n---\n*自動生成: \`scripts/daily-report.js\`（GitHub Actions）*\n${marker}\n`;
 
   if (!POST) {
     process.stdout.write(body);
     return;
   }
   const issue = await findOrCreateReportIssue();
+  if (process.env.GITHUB_EVENT_NAME === 'schedule') {
+    // 予備の実行との重複を防ぐ: 今日（JST）のレポートが投稿済みなら、投稿しない
+    const since36h = new Date(now.getTime() - 36 * 3600 * 1000).toISOString();
+    const recent = await api(`/repos/${REPO_QA}/issues/${issue}/comments?since=${encodeURIComponent(since36h)}&per_page=100`);
+    if (recent.some((c) => (c.body || '').includes(marker))) {
+      console.log(`今日（${jstDate} JST）のレポートは投稿済みのため、投稿しません。`);
+      return;
+    }
+  }
   const posted = await api(`/repos/${REPO_QA}/issues/${issue}/comments`, { method: 'POST', body: JSON.stringify({ body }) });
   console.log(`投稿しました: ${posted.html_url}`);
 }

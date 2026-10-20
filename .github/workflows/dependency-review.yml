@@ -5,7 +5,7 @@ name: Dependency Review
 # 選定基準: 公開から 14 日以上たった安定版 / メジャーは手動 / セキュリティ修正は例外。
 on:
   schedule:
-    - cron: '0 0 * * 1' # 月曜 00:00 UTC = 月曜 9:00 JST
+    - cron: '23 0 * * 1' # 月曜 00:23 UTC = 月曜 9:23 JST（毎時 0 分は定時実行が遅れやすいため、ずらしている）
   workflow_dispatch:     # 手動実行（動作確認用）
 
 permissions: {}
