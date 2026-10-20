@@ -40,6 +40,7 @@ stateDiagram-v2
 | 入力 → 確認（Continue） | `checkout-validation`（日本語の全角入力で確認画面へ進む）、`checkout-totals`（金額の表示）、`e2e-purchase` | ✅ |
 | 確認 → 完了（Finish） | `e2e-purchase`（注文完了まで）。Finish のエラー（error_user）は `user-types`（既知の不具合） | ✅（error_user は ❌） |
 | 入力 → カート（Cancel） | `cart-checkout` C2（カートに戻り、中身が保たれる） | ✅ |
+| 入力に注入文字列（姓・名・郵便番号） | saucedemo-checkout-injection「購入入力欄に {入力} を入れても、スクリプトが動かないこと」（#169。ダイアログ 0 件・注入要素 0 件を判定） | ✅ |
 | 確認 → 一覧（Cancel） | `cart-checkout` C3（商品一覧に戻る） | ✅ |
 | カート → 一覧（Continue Shopping） | `inventory-cart`「カート: 『Continue Shopping』で商品一覧に戻り、カートの内容が維持される」 | ✅ |
 | 完了 → 一覧（Back to Home） | なし | なし |
@@ -48,7 +49,7 @@ stateDiagram-v2
 
 | 操作 × 状態 | 対応するテスト | 状態 |
 | :--- | :--- | :--- |
-| 戻る × 完了 → 戻った先のカート | なし（#168 で観点を起票。作業は未実施） | なし |
+| 戻る × 完了 → 一覧（戻った先のカート） | `saucedemo-checkout-after-purchase`「購入完了後にブラウザの「戻る」で一覧まで戻っても、カートが空のままであること」（#168 → #171 でマージ） | ✅ |
 | 戻る × ログアウト後 → 保護ページ | `protected-pages` S5、`qa-destructive` P7（戻るボタンでも保護される） | ✅ |
 | 再読み込み × カート | `cart-checkout` C4（バッジと「Remove」の表示が保たれる）、`inventory-cart`「ページを再読み込みしてもカートの内容が保持される」 | ✅ |
 | 再読み込み × 入力・確認 | なし（#152 の判定待ち。仕様の判断が要る） | なし |
