@@ -1480,6 +1480,32 @@
       "no": 112
     },
     {
+      "site": "SauceDemo",
+      "viewpoint": "ネットワーク",
+      "screen": "商品詳細",
+      "title": "P4: 商品詳細ページで、商品画像が読み込めなくても、商品名・価格・ボタンが使えること",
+      "group": "SauceDemo Network Mocking & Resilience Tests",
+      "file": "saucedemo-network-mocking.spec.ts",
+      "env": "stg のみ",
+      "browsers": "PC Chrome / スマホ Chrome / Safari",
+      "android": "",
+      "known": "",
+      "no": 113
+    },
+    {
+      "site": "SauceDemo",
+      "viewpoint": "ネットワーク",
+      "screen": "（複数・全体）",
+      "title": "P5: 外部サイトのリソース（Google Fonts など）が読み込めなくても、主要な操作が行えること",
+      "group": "SauceDemo Network Mocking & Resilience Tests",
+      "file": "saucedemo-network-mocking.spec.ts",
+      "env": "stg のみ",
+      "browsers": "PC Chrome / スマホ Chrome / Safari",
+      "android": "",
+      "known": "",
+      "no": 114
+    },
+    {
       "site": "jsonplaceholder（API）",
       "viewpoint": "API",
       "screen": "（複数・全体）",
@@ -1490,7 +1516,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 113
+      "no": 115
     },
     {
       "site": "jsonplaceholder（API）",
@@ -1503,7 +1529,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 114
+      "no": 116
     },
     {
       "site": "jsonplaceholder（API）",
@@ -1516,7 +1542,7 @@
       "browsers": "PC Chrome / スマホ Chrome / Safari",
       "android": "",
       "known": "",
-      "no": 115
+      "no": 117
     }
   ]
 }
