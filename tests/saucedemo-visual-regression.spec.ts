@@ -6,9 +6,10 @@ import { CREDENTIALS, SHIPPING_INFO } from './fixtures/users';
  * 💡 レンダリング完了を 100% 待つためのカスタムヘルパー関数
  */
 async function waitForRenderComplete(page: Page) {
-  // 1. ページ遷移＆ネットワークの安定を待つ
-  await page.waitForLoadState('domcontentloaded');
-  await page.waitForLoadState('networkidle');
+  // 1. ページの読み込み完了（load イベント = HTML・CSS・画像などの読み込み）を待つ。
+  //    networkidle（通信が静かになるまで待つ）は、Playwright が非推奨としているため使わない（#81）。
+  //    画像・フォントの完了は、下の 2・3 で個別に確認する
+  await page.waitForLoadState('load');
 
   // 2. Webフォントの読み込み完了を待つ（フォントのガタつき防止）
   await page.evaluate(() => document.fonts.ready);

@@ -1,18 +1,22 @@
 import { test, expect } from '@playwright/test';
-import AxeBuilder from '@axe-core/playwright';
+import { LoginPage } from './pages/LoginPage';
+import { InventoryPage } from './pages/InventoryPage';
+import { CheckoutPage } from './pages/CheckoutPage';
 import { CREDENTIALS, SHIPPING_INFO } from './fixtures/users';
+import { expectNoA11yViolations } from './helpers/a11y';
 
+/**
+ * アクセシビリティ（a11y = 障害のある人や高齢の人でも使えるか）のテスト。
+ * - 自動検査（axe）: WCAG 2.1 Level A / AA の違反が 0 件であること
+ * - キーボード操作: マウスを使わず、キーボードだけで操作できること（視覚障害・運動障害のある人の利用を想定）
+ * 除外しているルールは docs/a11y-known-issues.md に理由を書いている。
+ */
 test.describe('SauceDemo Accessibility (a11y) Tests', () => {
 
   // 1. ログインページ（公開ページ）
-  test('P1: ログインページが WCAG 2.1 Level A & AA 基準を満たしていること', async ({ page }) => {
-    await page.goto('https://www.saucedemo.com/');
-
-    const results = await new AxeBuilder({ page })
-      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
-      .analyze();
-
-    expect(results.violations).toEqual([]);
+  test('P1: ログインページが WCAG 2.1 Level A & AA 基準を満たしていること', async ({ page }, testInfo) => {
+    await new LoginPage(page).goto();
+    await expectNoA11yViolations(page, testInfo);
   });
 
   // 💡 ログイン後ページのテスト群
@@ -20,77 +24,208 @@ test.describe('SauceDemo Accessibility (a11y) Tests', () => {
 
     // 各テスト前にログインを実行
     test.beforeEach(async ({ page }) => {
-      await page.goto('https://www.saucedemo.com/');
-      await page.locator('[data-test="username"]').fill(CREDENTIALS.standard.username);
-      await page.locator('[data-test="password"]').fill(CREDENTIALS.standard.password);
-      await page.locator('[data-test="login-button"]').click();
-      await page.locator('.title').waitFor({ state: 'visible' });
+      const loginPage = new LoginPage(page);
+      await loginPage.goto();
+      await loginPage.loginAs(CREDENTIALS.standard);
+      await expect(new InventoryPage(page).title).toBeVisible();
     });
 
     // 2. 商品一覧ページ (Inventory)
-    test('P2: 商品一覧ページが WCAG 基準を満たしていること', async ({ page }) => {
-      const results = await new AxeBuilder({ page })
-      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
-      .disableRules(['select-name']) // 💡 SauceDemo側の実装不備（ドロップダウンのラベル欠落）を除外
-      .analyze();
-      expect(results.violations).toEqual([]);
+    test('P2: 商品一覧ページが WCAG 基準を満たしていること', async ({ page }, testInfo) => {
+      // 💡 select-name: SauceDemo 側の実装不備（並び替えのドロップダウンのラベル欠落）を除外。docs/a11y-known-issues.md 参照
+      await expectNoA11yViolations(page, testInfo, { disableRules: ['select-name'] });
     });
 
     // 3. 商品詳細ページ (Inventory Item)
-    test('P3: 商品詳細ページが WCAG 基準を満たしていること', async ({ page }) => {
+    test('P3: 商品詳細ページが WCAG 基準を満たしていること', async ({ page }, testInfo) => {
       // 最初の商品のタイトルをクリックして詳細画面へ移動
       await page.locator('.inventory_item_name').first().click();
       await page.locator('[data-test="back-to-products"]').waitFor({ state: 'visible' });
-
-      const results = await new AxeBuilder({ page })
-        .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
-        .analyze();
-
-      expect(results.violations).toEqual([]);
+      await expectNoA11yViolations(page, testInfo);
     });
 
-    // 4. ショッピングカートページ (Cart)
-    test('P4: カート画面が WCAG 基準を満たしていること', async ({ page }) => {
-      // カートアイコンをクリック
-      await page.locator('.shopping_cart_link').click();
-      await page.locator('[data-test="checkout"]').waitFor({ state: 'visible' });
+    // 4. ショッピングカートページ (Cart)・空のカート
+    test('P4: カート画面（空）が WCAG 基準を満たしていること', async ({ page }, testInfo) => {
+      await new InventoryPage(page).cartLink.click();
+      await new CheckoutPage(page).checkoutButton.waitFor({ state: 'visible' });
+      await expectNoA11yViolations(page, testInfo);
+    });
 
-      const results = await new AxeBuilder({ page })
-        .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
-        .analyze();
-
-      expect(results.violations).toEqual([]);
+    // 4b. 商品が入ったカート（実際の購入前に見る画面）
+    test('P4b: カート画面（商品あり）が WCAG 基準を満たしていること', async ({ page }, testInfo) => {
+      const inventoryPage = new InventoryPage(page);
+      await inventoryPage.addItemToCart('add-to-cart-sauce-labs-backpack');
+      await inventoryPage.cartLink.click();
+      await expect(new CheckoutPage(page).cartItems).toHaveCount(1);
+      await expectNoA11yViolations(page, testInfo);
     });
 
     // 5. 購入手続き情報入力画面 (Checkout Step One)
-    test('P5: 購入手続き入力画面が WCAG 基準を満たしていること', async ({ page }) => {
-      await page.locator('.shopping_cart_link').click();
-      await page.locator('[data-test="checkout"]').click();
-      await page.locator('[data-test="firstName"]').waitFor({ state: 'visible' });
+    test('P5: 購入手続き入力画面が WCAG 基準を満たしていること', async ({ page }, testInfo) => {
+      await new InventoryPage(page).cartLink.click();
+      const checkoutPage = new CheckoutPage(page);
+      await checkoutPage.checkoutButton.click();
+      await checkoutPage.firstNameInput.waitFor({ state: 'visible' });
+      await expectNoA11yViolations(page, testInfo);
+    });
 
-      const results = await new AxeBuilder({ page })
-        .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
-        .analyze();
-
-      expect(results.violations).toEqual([]);
+    // 5b. 購入手続きの入力エラー表示（エラーが画面に出ているときの状態）
+    test('P5b: 購入手続きの入力エラー表示が WCAG 基準を満たしていること', async ({ page }, testInfo) => {
+      await new InventoryPage(page).cartLink.click();
+      const checkoutPage = new CheckoutPage(page);
+      await checkoutPage.checkoutButton.click();
+      await checkoutPage.continueButton.click(); // 何も入力せずに進む → エラーが表示される
+      await expect(page.locator('[data-test="error"]')).toBeVisible();
+      await expectNoA11yViolations(page, testInfo);
     });
 
     // 6. 購入確認画面 (Checkout Step Two)
-    test('P6: 購入確認画面が WCAG 基準を満たしていること', async ({ page }) => {
-      await page.locator('.shopping_cart_link').click();
-      await page.locator('[data-test="checkout"]').click();
-      // 入力欄を埋めて次へ進む
-      await page.locator('[data-test="firstName"]').fill(SHIPPING_INFO.firstName);
-      await page.locator('[data-test="lastName"]').fill(SHIPPING_INFO.lastName);
-      await page.locator('[data-test="postalCode"]').fill(SHIPPING_INFO.postalCode);
-      await page.locator('[data-test="continue"]').click();
-      await page.locator('[data-test="finish"]').waitFor({ state: 'visible' });
+    test('P6: 購入確認画面が WCAG 基準を満たしていること', async ({ page }, testInfo) => {
+      await new InventoryPage(page).cartLink.click();
+      const checkoutPage = new CheckoutPage(page);
+      await checkoutPage.checkoutButton.click();
+      await checkoutPage.fillShippingInfo(SHIPPING_INFO.firstName, SHIPPING_INFO.lastName, SHIPPING_INFO.postalCode);
+      await checkoutPage.finishButton.waitFor({ state: 'visible' });
+      await expectNoA11yViolations(page, testInfo);
+    });
 
-      const results = await new AxeBuilder({ page })
-        .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
-        .analyze();
+    // 7. 購入完了画面
+    test('P7: 購入完了画面が WCAG 基準を満たしていること', async ({ page }, testInfo) => {
+      await new InventoryPage(page).cartLink.click();
+      const checkoutPage = new CheckoutPage(page);
+      await checkoutPage.checkoutButton.click();
+      await checkoutPage.fillShippingInfo(SHIPPING_INFO.firstName, SHIPPING_INFO.lastName, SHIPPING_INFO.postalCode);
+      await checkoutPage.finishButton.click();
+      await expect(checkoutPage.completeHeader).toBeVisible();
+      await expectNoA11yViolations(page, testInfo);
+    });
 
-      expect(results.violations).toEqual([]);
+    // 8. サイドメニューを開いた状態
+    test('P8: サイドメニュー展開時が WCAG 基準を満たしていること', async ({ page }, testInfo) => {
+      const loginPage = new LoginPage(page);
+      await loginPage.openSideMenu();
+      await expect(loginPage.sideMenu).toBeVisible();
+      await expectNoA11yViolations(page, testInfo);
+    });
+
+  });
+
+  // ---------------------------------------------------------------------------
+  // エラー表示（ログイン失敗）
+  // ---------------------------------------------------------------------------
+  test('P9: ログイン失敗のエラー表示が WCAG 基準を満たしていること', async ({ page }, testInfo) => {
+    const loginPage = new LoginPage(page);
+    await loginPage.goto();
+    await loginPage.loginAs(CREDENTIALS.invalid);
+    await expect(loginPage.errorMessage).toBeVisible();
+    await expectNoA11yViolations(page, testInfo);
+  });
+
+  // ---------------------------------------------------------------------------
+  // キーボード操作
+  // ---------------------------------------------------------------------------
+  test.describe('キーボード操作', () => {
+
+    test('K1: ログイン画面で、Tab キーで「ユーザー名 → パスワード → ログイン」の順に移動し、Enter で送信できること', async ({ page }) => {
+      const loginPage = new LoginPage(page);
+      await loginPage.goto();
+
+      await page.keyboard.press('Tab');
+      await expect(loginPage.usernameInput).toBeFocused();
+      await page.keyboard.type(CREDENTIALS.standard.username);
+
+      await page.keyboard.press('Tab');
+      await expect(loginPage.passwordInput).toBeFocused();
+      await page.keyboard.type(CREDENTIALS.standard.password);
+
+      await page.keyboard.press('Tab');
+      await expect(loginPage.loginButton).toBeFocused();
+
+      await page.keyboard.press('Enter');
+      await expect(new InventoryPage(page).title).toHaveText('Products');
+    });
+
+    test('K2: ログイン画面で、パスワード入力欄で Enter を押すと送信できること', async ({ page }) => {
+      const loginPage = new LoginPage(page);
+      await loginPage.goto();
+      await loginPage.usernameInput.fill(CREDENTIALS.standard.username);
+      await loginPage.passwordInput.fill(CREDENTIALS.standard.password);
+      await loginPage.passwordInput.press('Enter');
+      await expect(new InventoryPage(page).title).toHaveText('Products');
+    });
+
+    test('K3: サイドメニューを、キーボード（Enter）だけで開いて閉じられること', async ({ page }) => {
+      const loginPage = new LoginPage(page);
+      await loginPage.goto();
+      await loginPage.loginAs(CREDENTIALS.standard);
+      await expect(new InventoryPage(page).title).toBeVisible();
+
+      await loginPage.menuButton.focus();
+      await page.keyboard.press('Enter');
+      await expect(loginPage.sideMenu).toBeVisible();
+
+      // メニュー内の「閉じる」ボタンへフォーカスして Enter で閉じる
+      // メニューが開くアニメーション（左からスライド）が終わるのを待つ。途中で操作すると、フォーカスや Enter が取りこぼされる
+      await expect.poll(async () => (await loginPage.sideMenu.boundingBox())?.x).toBe(0);
+      const closeButton = page.locator('#react-burger-cross-btn');
+      await closeButton.focus();
+      await expect(closeButton).toBeFocused();
+      await page.keyboard.press('Enter');
+      await expect(loginPage.sideMenu).toBeHidden();
+    });
+
+    // 💡 既知のサイト側の不備: カートのリンクは href の無い要素（role="button"）で、Tab の移動順に入らず、Enter でも開かない。
+    //    （キーボードだけでは、カートを開けない = WCAG 2.1.1「キーボード」の違反）。docs/a11y-known-issues.md 参照。
+    //    test.fail() = 「失敗すること」を期待するテスト。サイトが直って成功すると、このテストが失敗して、気づける。
+    test('K3b: [既知の不備] カートのリンクを、キーボード（Tab → Enter）で開けること', async ({ page }) => {
+      test.fail(true, 'SauceDemo のカートのリンクが、キーボードで操作できない（docs/a11y-known-issues.md）');
+      const loginPage = new LoginPage(page);
+      await loginPage.goto();
+      await loginPage.loginAs(CREDENTIALS.standard);
+      const inventoryPage = new InventoryPage(page);
+      await expect(inventoryPage.title).toBeVisible();
+
+      // Tab の移動順に入っていること（tabIndex が 0 以上）。href の無い要素は、-1 になり、Tab で届かない
+      expect(await inventoryPage.cartLink.evaluate((el) => (el as HTMLElement).tabIndex)).toBeGreaterThanOrEqual(0);
+      await inventoryPage.cartLink.focus();
+      await page.keyboard.press('Enter');
+      await expect(page).toHaveURL(/cart\.html/);
+    });
+
+    test('K4: 購入フロー（カートを開く操作を除く）を、キーボードだけで完走できること', async ({ page }) => {
+      const loginPage = new LoginPage(page);
+      const inventoryPage = new InventoryPage(page);
+      const checkoutPage = new CheckoutPage(page);
+
+      await loginPage.goto();
+      await loginPage.usernameInput.fill(CREDENTIALS.standard.username);
+      await loginPage.passwordInput.fill(CREDENTIALS.standard.password);
+      await loginPage.passwordInput.press('Enter');
+      await expect(inventoryPage.title).toBeVisible();
+
+      // フォーカスして Enter（マウスのクリックの代わり）
+      const addButton = page.locator('[data-test="add-to-cart-sauce-labs-backpack"]');
+      await addButton.focus();
+      await page.keyboard.press('Enter');
+      await expect(inventoryPage.cartBadge).toHaveText('1');
+
+      // カートのリンクは、キーボードで開けない（既知の不備。K3b）ため、ここだけマウスで開く
+      await inventoryPage.cartLink.click();
+      await expect(checkoutPage.checkoutButton).toBeVisible();
+      await checkoutPage.checkoutButton.focus();
+      await page.keyboard.press('Enter');
+
+      await checkoutPage.firstNameInput.fill(SHIPPING_INFO.firstName);
+      await checkoutPage.lastNameInput.fill(SHIPPING_INFO.lastName);
+      await checkoutPage.postalCodeInput.fill(SHIPPING_INFO.postalCode);
+      // 「Continue」ボタンへ移動して Enter（入力欄での Enter では、フォームが送信されない。docs/a11y-known-issues.md 参照）
+      await checkoutPage.continueButton.focus();
+      await page.keyboard.press('Enter');
+      await expect(checkoutPage.finishButton).toBeVisible();
+      await checkoutPage.finishButton.focus();
+      await page.keyboard.press('Enter');
+
+      await expect(checkoutPage.completeHeader).toHaveText('Thank you for your order!');
     });
 
   });
