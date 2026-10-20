@@ -17,10 +17,10 @@ on:
         type: boolean
         default: false
       update_mode:
-        description: '撮り直しの範囲（update_snapshots が true のとき）: missing = まだ無い画像だけを追加（既存は変更しない）／ all = 既存も含めてすべて撮り直す'
+        description: '撮り直しの範囲（update_snapshots が true のとき）: changed = まだ無い画像の追加と、実際に変わった画像だけの更新（差が無い既存の画像は変更しない）／ all = 既存も含めてすべて撮り直す'
         type: choice
-        options: [ missing, all ]
-        default: missing
+        options: [ changed, all ]
+        default: changed
   pull_request:
     branches: [ main ]
     paths:
