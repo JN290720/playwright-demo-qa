@@ -71,6 +71,30 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
     await expectPageScreenshot(page, 'login-page-pc');
   });
 
+  // 9. ログイン失敗のエラー表示（誤ったユーザー名・パスワード）（#135 V1）
+  test('P9: ログイン失敗のエラー表示の見た目に変更がないこと (PC)', async ({ page }) => {
+    await page.goto('https://www.saucedemo.com/');
+    await page.locator('[data-test="username"]').fill(CREDENTIALS.invalid.username);
+    await page.locator('[data-test="password"]').fill(CREDENTIALS.invalid.password);
+    await page.locator('[data-test="login-button"]').click();
+    await page.locator('[data-test="error"]').waitFor({ state: 'visible' });
+    await waitForRenderComplete(page);
+
+    await expectPageScreenshot(page, 'login-error-invalid-pc');
+  });
+
+  // 10. ロックされたユーザーのエラー表示（#135 V2）
+  test('P10: ロックされたユーザーのエラー表示の見た目に変更がないこと (PC)', async ({ page }) => {
+    await page.goto('https://www.saucedemo.com/');
+    await page.locator('[data-test="username"]').fill(CREDENTIALS.lockedOut.username);
+    await page.locator('[data-test="password"]').fill(CREDENTIALS.lockedOut.password);
+    await page.locator('[data-test="login-button"]').click();
+    await page.locator('[data-test="error"]').waitFor({ state: 'visible' });
+    await waitForRenderComplete(page);
+
+    await expectPageScreenshot(page, 'login-error-locked-pc');
+  });
+
   // 💡 ログイン後ページのテスト群
   test.describe('ログイン後全ページのビジュアル比較', () => {
 
@@ -164,6 +188,50 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
       await waitForRenderComplete(page);
 
       await expectPageScreenshot(page, 'side-menu-pc');
+    });
+
+    // 11. 購入手続きの入力エラー表示（何も入力せず Continue）（#135 V3）
+    test('P11: 購入手続きの入力エラー表示の見た目に変更がないこと (PC)', async ({ page }) => {
+      await page.locator('.shopping_cart_link').click();
+      await page.locator('[data-test="checkout"]').click();
+      await page.locator('[data-test="continue"]').click();
+      await page.locator('[data-test="error"]').waitFor({ state: 'visible' });
+
+      await waitForRenderComplete(page);
+
+      await expectPageScreenshot(page, 'checkout-error-pc');
+    });
+
+    // 12. 空のカート（#135 V4）
+    test('P12: 空のカート画面の見た目に変更がないこと (PC)', async ({ page }) => {
+      await page.locator('.shopping_cart_link').click();
+      await page.locator('[data-test="checkout"]').waitFor({ state: 'visible' });
+
+      await waitForRenderComplete(page);
+
+      await expectPageScreenshot(page, 'cart-empty-pc');
+    });
+
+    // 13. 商品が入ったカート（2 商品）（#135 V5）
+    test('P13: 商品が入ったカート画面の見た目に変更がないこと (PC)', async ({ page }) => {
+      await page.locator('[data-test="add-to-cart-sauce-labs-backpack"]').click();
+      await page.locator('[data-test="add-to-cart-sauce-labs-bike-light"]').click();
+      await page.locator('.shopping_cart_link').click();
+      await page.locator('[data-test="checkout"]').waitFor({ state: 'visible' });
+
+      await waitForRenderComplete(page);
+
+      await expectPageScreenshot(page, 'cart-items-pc');
+    });
+
+    // 14. 並び替え後の商品一覧（価格の高い順）（#135 V6）
+    test('P14: 並び替え（価格の高い順）後の商品一覧の見た目に変更がないこと (PC)', async ({ page }) => {
+      await page.locator('[data-test="product-sort-container"]').selectOption('hilo');
+      await expect(page.locator('.inventory_item_price').first()).toHaveText('$49.99');
+
+      await waitForRenderComplete(page);
+
+      await expectPageScreenshot(page, 'inventory-sorted-hilo-pc');
     });
 
   });
