@@ -32,8 +32,8 @@ test.describe('SauceDemo Accessibility (a11y) Tests', () => {
 
     // 2. 商品一覧ページ (Inventory)
     test('P2: 商品一覧ページが WCAG 基準を満たしていること', async ({ page }, testInfo) => {
-      // 💡 select-name: SauceDemo 側の実装不備（並び替えのドロップダウンのラベル欠落）を除外。docs/a11y-known-issues.md 参照
-      await expectNoA11yViolations(page, testInfo, { disableRules: ['select-name'] });
+      // （以前は、並び替えのドロップダウンのラベル欠落（select-name）を除外していたが、サイトで修正されたため除外を外した。2026-10-20）
+      await expectNoA11yViolations(page, testInfo);
     });
 
     // 3. 商品詳細ページ (Inventory Item)
@@ -110,6 +110,21 @@ test.describe('SauceDemo Accessibility (a11y) Tests', () => {
 
   });
 
+  // 💡 既知のサイト側の不備: サイドメニューの「Reset App State」にマウスを乗せると、文字色（#3ddc91）のコントラストが 1.77:1 で、
+  //    基準の 4.5:1 を満たさない（WCAG 1.4.3）。docs/a11y-known-issues.md、Issue #113 参照。
+  //    test.fail() = 「失敗すること」を期待するテスト。サイトが直って成功すると、テストが失敗して気づける。
+  test('P8b: [既知の不備] サイドメニューのリンクにマウスを乗せたときも、WCAG 基準を満たしていること', async ({ page }, testInfo) => {
+    test.fail(true, 'Reset App State のホバー時の文字色のコントラストが不足（docs/a11y-known-issues.md）');
+    const loginPage = new LoginPage(page);
+    await loginPage.goto();
+    await loginPage.loginAs(CREDENTIALS.standard);
+    await expect(new InventoryPage(page).title).toBeVisible();
+    await loginPage.openSideMenu();
+    await expect.poll(async () => (await loginPage.sideMenu.boundingBox())?.x).toBe(0);
+    await page.locator('[data-test="reset-sidebar-link"]').hover();
+    await expectNoA11yViolations(page, testInfo);
+  });
+
   // ---------------------------------------------------------------------------
   // エラー表示（ログイン失敗）
   // ---------------------------------------------------------------------------
@@ -129,6 +144,8 @@ test.describe('SauceDemo Accessibility (a11y) Tests', () => {
     test('K1: ログイン画面で、Tab キーで「ユーザー名 → パスワード → ログイン」の順に移動し、Enter で送信できること', async ({ page }) => {
       const loginPage = new LoginPage(page);
       await loginPage.goto();
+      // ページの表示が終わる前に Tab を押すと、フォーカスの移動が取りこぼされて不安定になる（週次の全テストで 1 回失敗した）
+      await expect(loginPage.loginButton).toBeVisible();
 
       await page.keyboard.press('Tab');
       await expect(loginPage.usernameInput).toBeFocused();
@@ -174,8 +191,8 @@ test.describe('SauceDemo Accessibility (a11y) Tests', () => {
       await expect(loginPage.sideMenu).toBeHidden();
     });
 
-    // 💡 既知のサイト側の不備: カートのリンクは href の無い要素（role="button"）で、Tab の移動順に入らず、Enter でも開かない。
-    //    （キーボードだけでは、カートを開けない = WCAG 2.1.1「キーボード」の違反）。docs/a11y-known-issues.md 参照。
+    // 💡 既知のサイト側の不備: カートのリンクは href の無い要素（role="button"）で、フォーカスできず、Tab の移動順にも入らず、Enter / Space でも開かない。
+    //    （キーボードだけでは、カートを開けない = WCAG 2.1.1「キーボード」の違反）。docs/a11y-known-issues.md、Issue #111 参照。
     //    test.fail() = 「失敗すること」を期待するテスト。サイトが直って成功すると、このテストが失敗して、気づける。
     test('K3b: [既知の不備] カートのリンクを、キーボード（Tab → Enter）で開けること', async ({ page }) => {
       test.fail(true, 'SauceDemo のカートのリンクが、キーボードで操作できない（docs/a11y-known-issues.md）');
@@ -185,9 +202,9 @@ test.describe('SauceDemo Accessibility (a11y) Tests', () => {
       const inventoryPage = new InventoryPage(page);
       await expect(inventoryPage.title).toBeVisible();
 
-      // Tab の移動順に入っていること（tabIndex が 0 以上）。href の無い要素は、-1 になり、Tab で届かない
-      expect(await inventoryPage.cartLink.evaluate((el) => (el as HTMLElement).tabIndex)).toBeGreaterThanOrEqual(0);
+      // フォーカスできること（今は、focus() を呼んでもフォーカスされない）
       await inventoryPage.cartLink.focus();
+      await expect(inventoryPage.cartLink).toBeFocused({ timeout: 2_000 });
       await page.keyboard.press('Enter');
       await expect(page).toHaveURL(/cart\.html/);
     });
@@ -218,7 +235,7 @@ test.describe('SauceDemo Accessibility (a11y) Tests', () => {
       await checkoutPage.firstNameInput.fill(SHIPPING_INFO.firstName);
       await checkoutPage.lastNameInput.fill(SHIPPING_INFO.lastName);
       await checkoutPage.postalCodeInput.fill(SHIPPING_INFO.postalCode);
-      // 「Continue」ボタンへ移動して Enter（入力欄での Enter では、フォームが送信されない。docs/a11y-known-issues.md 参照）
+      // 「Continue」ボタンへ移動して Enter（入力欄で Enter を押すと、Continue ではなく「Cancel」が実行され、カートに戻ってしまう。docs/a11y-known-issues.md、Issue #112 参照）
       await checkoutPage.continueButton.focus();
       await page.keyboard.press('Enter');
       await expect(checkoutPage.finishButton).toBeVisible();
