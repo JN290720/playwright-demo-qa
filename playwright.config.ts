@@ -66,7 +66,7 @@ export default defineConfig({
 
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
-    /* 💡 対象サイトは 1 つ（SauceDemo）で、環境ごとに変えない（#45）。環境変数では上書きしない。テストは相対パス（/inventory.html など）で書く */
+    /* 💡 対象サイトは 1 つ（SauceDemo）で、環境ごとに変えない（#45）。環境変数では上書きしない。現在のテストは絶対 URL で書かれている（相対パスへの変更は R3b で行う）。Android・perf の config は baseURL を持たない（R3b で相対パスにする場合は、同じ URL の baseURL を、それぞれの config に入れる） */
     baseURL: 'https://www.saucedemo.com',
 
     /* 💡 操作・ページ遷移のタイムアウト（既定は無制限）。外部サイトの遅延を考慮し、遷移は操作より長くする */
