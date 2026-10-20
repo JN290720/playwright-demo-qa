@@ -35,7 +35,6 @@ npx playwright test --ui  # UI モード
   - `docs`: ドキュメントの更新（例: `docs: Playwrightのローカル実行手順をREADMEに追加`）
   - `chore`: 設定ファイル・ビルド・ライブラリ更新など（例: `chore: Playwrightを最新バージョンへアップデート`）
   - `ci`: CI/CD ワークフロー（GitHub Actions 等）の修正（例: `ci: VRTの自動更新コメントトリガーをPRテストに統合`）
-  - `ci`: CI/CD ワークフロー（GitHub Actions 等）の修正
 - ブランチ名: `種別/内容`（例: `feat/add-login-toggle`）
 - コミットメッセージ・PR タイトル: `種別: 概要`（日本語）。例: `ci: PRテストワークフローの修正`。scope（対象の機能名）は任意で、`種別(scope): 概要` の形でもよい（例: `test(saucedemo): E2E自動テストコードを追加`）
 - 概要は 50 文字程度。語尾は「〜を追加」「〜を修正」など、実施した内容で終える。詳細は PR 本文に書く
