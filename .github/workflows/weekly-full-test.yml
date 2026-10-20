@@ -1,0 +1,142 @@
+name: Weekly Full Test
+
+# 全テスト（stg = フル検証）を、週 1 回、自動で実行する（#98）。
+#
+# 【目的】全テストは、これまで PR の CI でしか動かなかった。そのため、
+#   ・テスト対象サイト側の修正・変更（例: test.fail() で記録した既知の不具合が直った）
+#   ・サイト側の変更による、新しい不具合・見た目の変化
+# が、次に PR を出すまで見つからなかった。PR を待たずに検知する。
+#
+# - 実行内容: ENV=staging（全テスト）。PC の Chrome / スマホ表示の Chrome（PR のテストと同じ 2 種）
+#   Safari（WebKit）は、まだ含めない: QA の Safari 用の基準画像（VRT）が、現在の描画と合っておらず、全件が失敗するため（2026-10-20 に確認。#36 で、基準画像の撮り直しとあわせて扱う）
+# - 失敗 → GitHub Issue（ラベル weekly-failure）で通知。復旧したら自動でクローズ（notify-failure.js）
+# - 既知の不具合のテスト（test.fail()）が予期せず成功 → 「サイトが直った可能性」を、サイト不具合の一覧 Issue（ラベル site-defect）にコメント
+# - このファイルを変更した PR でも動く（変更の検証用。通知は送らない）
+on:
+  schedule:
+    - cron: '37 18 * * 0' # 日曜 18:37 UTC = 月曜 3:37 JST（毎時 0 分は定時実行が遅れやすいため、ずらしている。#88）
+  workflow_dispatch:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/weekly-full-test.yml'
+      - 'scripts/notify-site-fixed.js'
+
+# 最小権限: 既定は読み取りのみ。通知（Issue）に必要な権限は Job で付与する
+permissions:
+  contents: read
+
+concurrency:
+  group: weekly-full-test-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  full-test:
+    permissions:
+      contents: read
+      issues: write # 失敗の通知（Issue の作成・コメント・クローズ）、サイト不具合の Issue へのコメント
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Cache Playwright Browsers
+        id: playwright-cache
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-weekly-${{ hashFiles('**/package-lock.json') }}
+
+      # ブラウザの起動に必要な OS 依存ライブラリ。キャッシュ対象外のため常に実行（apt のハング対策で再試行。#19）
+      - name: Install Playwright System Dependencies
+        timeout-minutes: 12
+        run: |
+          echo 'Acquire::Retries "3";' | sudo tee /etc/apt/apt.conf.d/80-retries > /dev/null
+          for i in 1 2 3; do
+            if timeout 180 npx playwright install-deps; then
+              exit 0
+            fi
+            echo "::warning::install-deps attempt $i failed or timed out"
+            sleep 10
+          done
+          echo "::error::install-deps failed after 3 attempts"
+          exit 1
+
+      - name: Install Playwright Browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        timeout-minutes: 10
+        run: |
+          for i in 1 2; do
+            if timeout 240 npx playwright install chromium; then
+              exit 0
+            fi
+            echo "::warning::browser install attempt $i failed or timed out"
+            sleep 10
+          done
+          echo "::error::browser install failed after 2 attempts"
+          exit 1
+
+      - name: Run all tests (staging)
+        env:
+          ENV: staging
+          PLAYWRIGHT_JSON_OUTPUT_NAME: reports/results.json
+        run: npx playwright test --project=desktop-chrome --project=mobile-chrome --reporter=html,json
+
+      # flaky（リトライで通ったテスト）と失敗を抽出して、Job Summary に表示する
+      - name: Summarize results
+        if: always()
+        run: |
+          mkdir -p reports
+          node scripts/summarize-flaky.js reports/results.json || true
+          if [ -f reports/summary.md ]; then cat reports/summary.md >> "$GITHUB_STEP_SUMMARY"; fi
+
+      # 既知の不具合のテストが予期せず成功していれば、「サイトが直った可能性」を知らせる（PR では送らない）
+      - name: Notify possible site fixes
+        if: always() && github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: node scripts/notify-site-fixed.js reports/results.json
+
+      - name: Notify failure via Issue
+        if: failure() && github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MODE: failure
+          NOTIFY_LABEL: weekly-failure
+          NOTIFY_TITLE: '🚨 週次の全テストが失敗しました'
+          NOTIFY_BODY: |
+            週次の全テスト（Weekly Full Test）が失敗しました。サイト側の変更や不具合の可能性があります。
+            （既知の不具合のテストが「予期せず成功」して失敗になっている場合は、サイトが直ったということです。サイト不具合の一覧の Issue も確認してください）
+
+            - 実行: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            - コミット: ${{ github.sha }}
+        run: node scripts/notify-failure.js
+
+      - name: Close failure issue on recovery
+        if: success() && github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MODE: recovery
+          NOTIFY_LABEL: weekly-failure
+          NOTIFY_BODY: |
+            Weekly Full Test が成功しました（${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}）。
+        run: node scripts/notify-failure.js
+
+      - name: Upload Test Report Artifact
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: weekly-playwright-report
+          path: |
+            playwright-report/
+            reports/
+          retention-days: 14
