@@ -15,6 +15,7 @@ export class InventoryPage {
   readonly cartLink: Locator;          // ショッピングカートアイコンのリンク
   readonly itemNames: Locator;         // 商品名の一覧（並び順の検証に使用）
   readonly itemPrices: Locator;        // 商品価格の一覧（並び順の検証に使用）
+  readonly itemButtons: Locator;       // 各商品の「Add to cart / Remove」ボタンの一覧（カートの状態の検証に使用）
 
   /**
    * コンストラクタ：ページ上の各要素を特定するためのロケータ（セレクター）を定義
@@ -31,6 +32,7 @@ export class InventoryPage {
     this.cartLink = page.locator('.shopping_cart_link');
     this.itemNames = page.locator('.inventory_item_name');
     this.itemPrices = page.locator('.inventory_item_price');
+    this.itemButtons = page.locator('.inventory_item button');
   }
 
   /**
