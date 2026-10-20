@@ -4,6 +4,7 @@ import { LoginPage } from './pages/LoginPage';
 import { InventoryPage } from './pages/InventoryPage';
 import { CheckoutPage } from './pages/CheckoutPage';
 import { CREDENTIALS } from './fixtures/users';
+import { openSideMenu } from './helpers/side-menu';
 
 /**
  * サイドメニュー（左上のハンバーガーメニュー）とログアウトの機能のテスト（#57）。
@@ -26,16 +27,6 @@ async function loginAndShowInventory(page: Page) {
   const inventoryPage = new InventoryPage(page);
   await expect(inventoryPage.title).toHaveText('Products');
   return { loginPage, inventoryPage };
-}
-
-/**
- * サイドメニューを開き、開くアニメーション（左からスライド）が終わるまで待つ。
- * 途中で操作すると、クリックが取りこぼされることがあるため。
- */
-async function openSideMenu(loginPage: LoginPage) {
-  await loginPage.openSideMenu();
-  await expect(loginPage.sideMenu).toBeVisible();
-  await expect.poll(async () => (await loginPage.sideMenu.boundingBox())?.x).toBe(0);
 }
 
 test.describe('サイドメニューとログアウト', () => {
