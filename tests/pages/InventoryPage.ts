@@ -39,7 +39,7 @@ export class InventoryPage {
    * 商品一覧ページへ直接アクセスする（ログイン済みセッション等を想定）
    */
   async goto() {
-    await this.page.goto('https://www.saucedemo.com/inventory.html');
+    await this.page.goto('/inventory.html');
   }
 
   /**

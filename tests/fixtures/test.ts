@@ -22,7 +22,7 @@ const androidTest = base.extend<{ page: Page }>({
     // 前のテストのログイン状態やカートが影響しないよう、最初に消す（繰り返し実行で 2 回目以降が失敗した対策）
     await context.clearCookies();
     const page = await context.newPage();
-    await page.goto('https://www.saucedemo.com/');
+    await page.goto('/');
     await page.evaluate(() => {
       localStorage.clear();
       sessionStorage.clear();
