@@ -75,7 +75,7 @@ test.describe('セッション（ログイン状態）の検証', () => {
       await page.goto(`${BASE}/inventory.html`);
 
       await expect(page).toHaveURL(`${BASE}/`);
-      await expect(page.locator('[data-test="login-button"]')).toBeVisible();
+      await expect(new LoginPage(page).loginButton).toBeVisible();
     });
   }
 
@@ -89,6 +89,6 @@ test.describe('セッション（ログイン状態）の検証', () => {
     await page.goto(`${BASE}/inventory.html`);
 
     await expect(page).toHaveURL(`${BASE}/`);
-    await expect(page.locator('[data-test="login-button"]')).toBeVisible();
+    await expect(new LoginPage(page).loginButton).toBeVisible();
   });
 });
