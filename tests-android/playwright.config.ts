@@ -16,7 +16,7 @@ export default defineConfig({
   testMatch: ['**/saucedemo-visual-regression.spec.ts', '**/saucedemo-e2e-purchase.spec.ts'],
   workers: 1, // 端末が 1 台のため
   // 失敗したときの画面を成果物（test-results/）に残して、原因を調べられるようにする
-  use: { screenshot: 'only-on-failure' },
+  use: { baseURL: 'https://www.saucedemo.com', screenshot: 'only-on-failure' }, // 相対パス（pages の goto）の基準。環境ごとに変えない（#45）
   timeout: 60_000,
   // 外部サイト（TodoMVC 等）への接続が一時的に遅れて 1 件失敗した実績があるため、リトライを 1 回だけ許可する。
   // リトライで通ったテストは、Job Summary に flaky として表示される（見逃さない。#37）

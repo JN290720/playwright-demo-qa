@@ -18,5 +18,5 @@ export default defineConfig({
   timeout: 300_000,
   expect: { timeout: 120_000 },
   reporter: [['list']],
-  projects: [{ name: 'desktop-chrome', use: { ...devices['Desktop Chrome'] } }],
+  projects: [{ name: 'desktop-chrome', use: { ...devices['Desktop Chrome'], baseURL: 'https://www.saucedemo.com' } }], // 相対パス（pages の goto）の基準（#45）
 });
