@@ -13,7 +13,7 @@
 - **Runtime:** Node.js (LTS)
 - **CI/CD:** GitHub Actions
 - **Hosting:** GitHub Pages
-- **Testing Scope:** PC (`desktop-chrome`) & スマホ (`mobile-chrome`) 環境のマルチ対応（`main` 側のテストでは Safari (`desktop-safari`) も実行）
+- **Testing Scope:** PC (`desktop-chrome`) & スマホ (`mobile-chrome`) 環境のマルチ対応（Safari (`desktop-safari`) は、PR では縮小版（`@safari-pr` タグ付きの 16 件）、`main` 側のテストでは全テスト）
 
 ---
 

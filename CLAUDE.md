@@ -20,7 +20,7 @@ Playwright による E2E テスト・ビジュアルレグレッションテス�
 - `tests/pages/`: Page Object Model(`LoginPage` / `InventoryPage` / `TodoPage`)
 - `tests/saucedemo-visual-regression.spec.ts-snapshots/`: VRT のベースライン画像
 - `.env.staging` / `.env.prod`: 環境ごとの設定。`ENV` 環境変数で切り替える(未指定は `prod`)
-- `playwright.config.ts`: プロジェクトは `desktop-chrome` / `mobile-chrome`。`desktop-safari` は PR 以外(main など)のみ
+- `playwright.config.ts`: プロジェクトは `desktop-chrome` / `mobile-chrome` / `desktop-safari`。PR では `desktop-safari` は**縮小版（`@safari-pr` タグ付きの 16 件）だけ**、PR 以外(main など)は全テスト
 - `.github/workflows/`: 一覧と、各ワークフローのトリガー・副作用は [README.md](README.md) の「CI/CD パイプライン」を参照
 
   - 同時実行（`concurrency`）: PR のテストは、同じ PR への新しい push で**古い実行をキャンセル**する。コメントの実行（`/update-vrt`）は、コメントごとに独立したグループで、キャンセルしない。Deploy / Post-Deploy は、キャンセルせず同時に 1 つだけ実行する
@@ -66,6 +66,9 @@ npx playwright show-report
 - 画像を更新するときは、**PR に `/update-vrt` とコメントする**(CI が Linux 環境で撮り直して PR ブランチにコミットする)。ローカルで撮り直した画像をコミットしない。
 - `/update-vrt` で自動コミットされた画像は `[skip ci]` 付きのため、テストは再実行されない。必要なら空コミットなどで再実行する。
 - 画像を更新する PR には、更新した理由(サイト側の変更など)を PR 本文に書く。
+- **PR で動く Safari の縮小版（`@safari-pr` タグ付きの 16 件）**: PR の CI は、Safari では VRT 14 件・購入フロー・ログイン/カートだけを実行する（ユーザー判断 D31、#152）。対象は**タグで選ぶ**（ファイル名・describe の名前に依存しない）。PR で動かすテストを増減するときは、`@safari-pr` を付け外しする
+- **Safari の基準画像（`*-desktop-safari-linux.png`）が、WebKit の更新などで古くなり、Safari の VRT だけが文字の縁の差で失敗したら、`/update-vrt project=desktop-safari`（ユーザーの承認が要る操作）で撮り直す**。ほかの原因（実害・flaky）は、先に切り分ける
+- **試行の期限と、戻す基準**: 2026-11-21 まで（1 か月）。指標: ①PR で Safari の縮小版**だけ**が失敗した件数と原因（実害 / 基準の古さ / flaky）②PR の `test` ジョブの時間（目安: 5 分以内。導入前の平均 196 秒）。①が 0 件で、基準の撮り直しが負担なら、PR は Chrome 2 つに戻す（`playwright.config.ts` の PR 用の `desktop-safari` を削除）
 
 ## PR を出す前の確認(ローカルと CI の役割分担)
 

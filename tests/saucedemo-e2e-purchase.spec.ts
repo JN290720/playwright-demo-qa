@@ -4,7 +4,7 @@ import { InventoryPage } from './pages/InventoryPage';
 import { CheckoutPage } from './pages/CheckoutPage';
 import { CREDENTIALS, SHIPPING_INFO } from './fixtures/users';
 
-test.describe('SauceDemo 正常系 E2E（購入フロー）', { tag: '@prd' }, () => {
+test.describe('SauceDemo 正常系 E2E（購入フロー）', { tag: ['@prd', '@safari-pr'] }, () => {
   test('ログイン → 商品をカートへ追加 → 購入情報入力 → 金額確認 → 注文完了まで行えること', async ({ page }) => {
     const loginPage = new LoginPage(page);
     const inventoryPage = new InventoryPage(page);
