@@ -51,6 +51,14 @@ body:
     validations:
       required: true
   - type: textarea
+    id: impact
+    attributes:
+      label: 影響範囲
+      description: 影響する範囲を書く。調べ方は docs/impact-scope.md。分からなければ「不明」と書く（空欄にしない）。
+      placeholder: "- 影響する画面・機能:\n- 影響する spec・プロジェクト:\n- 実行の段階:\n- 環境:\n- ファイル・ワークフロー:\n- 調べ方（コマンドと件数）:"
+    validations:
+      required: true
+  - type: textarea
     id: done
     attributes:
       label: 完了条件
