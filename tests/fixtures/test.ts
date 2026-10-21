@@ -17,7 +17,8 @@ const androidTest = base.extend<{ page: Page }>({
     const [device] = await android.devices();
     if (!device) throw new Error('Android の端末（エミュレータ）が見つかりません。adb devices を確認してください');
     await device.shell('am force-stop com.android.chrome');
-    const context = await device.launchBrowser();
+    // 相対パス（pages の goto）の基準を、Android の context にも渡す（baseURL は context の設定で決まる。#196 の指摘）
+    const context = await device.launchBrowser({ baseURL: 'https://www.saucedemo.com' });
     // 実機の Chrome は、テスト間でプロフィール（Cookie・localStorage）が残る。
     // 前のテストのログイン状態やカートが影響しないよう、最初に消す（繰り返し実行で 2 回目以降が失敗した対策）
     await context.clearCookies();
