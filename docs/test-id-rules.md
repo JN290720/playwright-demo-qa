@@ -43,7 +43,7 @@
 | `saucedemo-visual-regression.spec.ts` | P | 14 | P1〜P14（1 プロジェクトあたり。3 プロジェクトで実行） |
 | `todomvc-destructive.spec.ts` | P | 7 | P1〜P7（TodoMVC） |
 | `saucedemo-cart-checkout.spec.ts` | C | 6 | C1〜C6 |
-| `saucedemo-checkout-totals.spec.ts` | A | 5 | A1〜A5（A3 の前提の 1 件は、ID なし） |
+| `saucedemo-checkout-totals.spec.ts` | A | 6 | A3 の前提（ID なし・1）・A1〜A5（ループ 5） |
 | `saucedemo-protected-pages.spec.ts` | S | 9 | S1（1）・S2〜S4（ループ 3）・S5・S6・S7（ループ 2）・S8 |
 | `saucedemo-product-detail.spec.ts` | D | 8 | D3（ループ 6）・D4・D5 |
 | `saucedemo-product-detail-errors.spec.ts` | D | 4 | D1（ループ 4） |
@@ -51,7 +51,7 @@
 
 **ID の無い spec（11 件）**: `login`・`saucedemo-checkout-after-purchase`・`saucedemo-checkout-injection`・`saucedemo-checkout-validation`・`saucedemo-e2e-purchase`・`saucedemo-inventory-cart`・`saucedemo-security-input`・`saucedemo-sidebar-logout`・`saucedemo-user-types`・`todomvc-smoke`・`api-demo`。ID は任意（新しく書く場合は、規則 2 に従う）。
 
-**合計**: ID の付いた 11 spec で 93 件（1 プロジェクトあたり）。
+**合計**: ID の付いた 11 spec で 94 件（1 プロジェクトあたり。件数の列の合計）。
 
 ## 5. 参照の例
 
