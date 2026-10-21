@@ -78,7 +78,7 @@ body:
     id: review
     attributes:
       label: レビュー結果（結論と根拠）
-      description: 作成者が、レビュー後に記入・更新する。結論（実施する / 条件つき / 見送り）と、根拠（各コメントの URL つき・5 行以内）。
+      description: 作成者が、レビュー後に記入・更新する（空欄にしない）。結論は「採用」「条件つき」「保留」「却下」のいずれか。根拠は、コメントの URL を貼り、5 行以内。「承認の根拠」（[ユーザー] のコメント）と「影響範囲」とは別に書く。
       placeholder: "- 結論:\n- 根拠（コメントの URL）:"
     validations:
       required: false
