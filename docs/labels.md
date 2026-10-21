@@ -40,5 +40,6 @@ gh pr list --label by-quality --state all  # 品質管理が起票した PR
 
 ## 他のラベル
 
+- `knowledge`: ナレッジ・レポート・記録の Issue。次のアクションが基本無いもの。日次レポートの「優先度ラベルが無い」の確認と、判断待ちの表から除外される。決定記録・日次レポート・観点の親子・体制の一覧・バックログに付ける
 - 優先度（`P0`〜`P3`）: 人が Issue に付ける（[CONTRIBUTING.md](../CONTRIBUTING.md)）
 - 自動で作られる Issue のラベル（失敗の通知・日次・依存関係・観点・既知の不具合）と、運用ラベル（`needs-user-decision`・`blocked-by-merge`・`ready-for-pr`・`backlog`）: [README](../README.md) の「Issue のラベルの意味」を参照
