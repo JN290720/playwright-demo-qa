@@ -75,7 +75,7 @@ async function waitForPasswordMasked(page: Page) {
   await page.waitForFunction((t0) => performance.now() - t0 > 1500, start);
 }
 
-test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対応版)', () => {
+test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対応版)', { tag: '@safari-pr' }, () => {
 
   // 1. ログインページ (PC)
   test('P1: ログインページの見た目に変更がないこと (PC)', async ({ page }) => {

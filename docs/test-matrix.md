@@ -23,7 +23,7 @@
 | ログアウト | ✅ ログイン画面に戻る・入力欄が空（`sidebar-logout`） | ✅ 戻るボタン後の保護（`qa-destructive` P7）、ログアウト後の直リンクの保護（`checkout-validation`。認可の検証） | △ Cookie の操作（`protected-pages` S6・S7。S8 は既知の不具合） | ❌ | ❌ | ❌ |
 
 補足:
-- VRT は、`desktop-chrome` / `mobile-chrome` / `desktop-safari` の 3 プロジェクト × 14 画面（P1〜P14）= 42 枚のベースライン（`*-linux.png`）がある。VRT の spec は、3 プロジェクトすべてで実行される
+- VRT は、`desktop-chrome` / `mobile-chrome` / `desktop-safari` の 3 プロジェクト × 14 画面（P1〜P14）= 42 枚のベースライン（`*-linux.png`）がある。VRT の spec は、3 プロジェクトすべてで実行される（PR では、Safari は縮小版として VRT 14 件だけ）
 - **実行環境（#45）**: stg（PR の CI）は**全テスト**、prd（Post-Deploy）は **`@prd` タグ付きの必須の主要機能のみ**。`@prd` の対象: 購入フロー E2E、ログイン・カート追加、TodoMVC の基本機能。a11y / VRT / network / security / API / ソート・カート / 購入入力の検証 / 破壊的・異常系は、stg のみ
 - **モバイル**: `playwright.config.ts` に `testMatch` の指定が無いため、すべての spec は `mobile-chrome` でも実行される（機能テストも含む）
 - SauceDemo 以外の対象（TodoMVC、`playwright.dev`、jsonplaceholder）は、デモ用として、この表の対象外（`todomvc-*.spec.ts`（basic / smoke / destructive）、`api-demo.spec.ts`。TodoMVC のテストは、名前で対象が分かるようにリネーム済み。#17）
