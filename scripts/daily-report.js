@@ -146,7 +146,10 @@ async function repoSection(repo, title, since) {
     lines.push(`- 着手可能（\`ready-for-pr\`）な Issue: ${ready.length} 件`);
     for (const i of ready) lines.push(`  - ${priorityOf(labelNames(i))} #${i.number} ${esc(i.title)}`);
   }
-  const noPriority = openIssues.filter((i) => priorityOf(labelNames(i)) === 'P?');
+  // ナレッジ（`knowledge`: 知識・報告のための Issue。次のアクションが基本無い）は、優先度の付け忘れの警告から除く
+  const noPriority = openIssues
+    .filter((i) => !labelNames(i).includes('knowledge'))
+    .filter((i) => priorityOf(labelNames(i)) === 'P?');
   if (noPriority.length > 0) lines.push(`- ⚠️ 優先度ラベルが無い Issue: ${noPriority.map((i) => `#${i.number}`).join(', ')}`);
   lines.push('');
   return lines.join('\n');
