@@ -96,7 +96,6 @@ jobs:
       - name: Run Playwright tests
         env:
           ENV: prod
-          BASE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
           PLAYWRIGHT_JSON_OUTPUT_NAME: reports/results.json
         run: npx playwright test --reporter=html,json
 
