@@ -67,6 +67,14 @@ body:
     validations:
       required: true
   - type: textarea
+    id: review
+    attributes:
+      label: レビュー結果（結論と根拠）
+      description: 作成者が、レビュー後に記入・更新する。結論（実施する / 条件つき / 見送り）と、根拠（各コメントの URL つき・5 行以内）。
+      placeholder: "- 結論:\n- 根拠（コメントの URL）:"
+    validations:
+      required: false
+  - type: textarea
     id: related
     attributes:
       label: 関連 Issue / PR
