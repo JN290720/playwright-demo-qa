@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import { LoginPage } from './pages/LoginPage';
 import { InventoryPage } from './pages/InventoryPage';
 import { CREDENTIALS } from './fixtures/users';
@@ -23,11 +24,30 @@ const PROTECTED = [
   { id: 'S4', name: '商品詳細', url: '/inventory-item.html?id=4', shown: '/inventory-item.html' },
 ] as const;
 
+type ProtectedPage = (typeof PROTECTED)[number];
+
+// 未ログインで保護ページを開く（S1〜S4 共通の操作）
+async function openWithoutLogin(page: Page, target: ProtectedPage) {
+  await page.goto(`${BASE}${target.url}`);
+  return new LoginPage(page);
+}
+
+const [CART, ...OTHER_PROTECTED] = PROTECTED;
+
 test.describe('保護ページへの直接アクセス（未ログイン）', () => {
-  for (const page_ of PROTECTED) {
+  // S1（カート）だけ、デプロイ後（Post-Deploy）にも動かす（認証が破れていないことの確認。D33）。
+  // タグは固定の文字列でないと lint（valid-test-tags）を通らないため、S2〜S4 のループとは別のテストにしている
+  test(`${CART.id}: 未ログインで「${CART.name}」(${CART.url}) を開くと、ログイン画面に戻り、ログインを求められること`, { tag: '@prd' }, async ({ page }) => {
+    const loginPage = await openWithoutLogin(page, CART);
+
+    await expect(page).toHaveURL(`${BASE}/`);
+    await expect(loginPage.loginButton).toBeVisible();
+    await expect(loginPage.errorMessage).toContainText(`You can only access '${CART.shown}' when you are logged in`);
+  });
+
+  for (const page_ of OTHER_PROTECTED) {
     test(`${page_.id}: 未ログインで「${page_.name}」(${page_.url}) を開くと、ログイン画面に戻り、ログインを求められること`, async ({ page }) => {
-      const loginPage = new LoginPage(page);
-      await page.goto(`${BASE}${page_.url}`);
+      const loginPage = await openWithoutLogin(page, page_);
 
       await expect(page).toHaveURL(`${BASE}/`);
       await expect(loginPage.loginButton).toBeVisible();
