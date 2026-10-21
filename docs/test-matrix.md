@@ -6,6 +6,7 @@
 - 対象: SauceDemo（`https://www.saucedemo.com`）に対するテスト
 - 凡例: ✅ あり / △ 一部のみ / ❌ なし / ─ 対象外
 - 括弧内は、対応する spec（`tests/` のファイル名）とケース番号、または抜けを扱う Issue です（`#` は `playwright-demo-qa` の Issue）
+- テストの ID（`P1`・`K2` など）の使い方と、台帳は [テスト ID の規則と台帳](test-id-rules.md) を見てください
 - この表は、`tests/` の spec の内容を読んで書いています（2026-10-20 時点）。spec の名前だけで判断しないでください
 
 ## 1. 画面 × 観点
