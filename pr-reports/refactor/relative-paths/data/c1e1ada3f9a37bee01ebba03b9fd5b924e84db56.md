@@ -1,0 +1,160 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: saucedemo-user-types.spec.ts >> ユーザー種別: problem_user（意図的な不具合） >> [既知の不具合] 6 件すべてを、カートに入れられること
+- Location: tests/saucedemo-user-types.spec.ts:56:7
+
+# Error details
+
+```
+Error: expect(locator).toHaveText(expected) failed
+
+Locator:  locator('.shopping_cart_badge')
+Expected: "6"
+Received: "2"
+Timeout:  10000ms
+
+Call log:
+  - Expect "toHaveText" locator('.shopping_cart_badge') with timeout 10000ms
+  - waiting for locator('.shopping_cart_badge')
+    24 × locator resolved to <span class="shopping_cart_badge" data-test="shopping-cart-badge">2</span>
+       - unexpected value "2"
+
+```
+
+```yaml
+- text: "2"
+```
+
+# Test source
+
+```ts
+  1   | import { test, expect } from '@playwright/test';
+  2   | import { CheckoutPage } from './pages/CheckoutPage';
+  3   | import { loginAndShowInventory } from './helpers/login';
+  4   | import { CREDENTIALS, SHIPPING_INFO, STANDARD_PRICES } from './fixtures/users';
+  5   | 
+  6   | /**
+  7   |  * ユーザー種別ごとの挙動のテスト（#15）。
+  8   |  *
+  9   |  * SauceDemo には、標準ユーザー以外に、意図的に遅延や不具合を再現するユーザーが用意されている。
+  10  |  * - performance_glitch_user: ログインに遅延がある（それでも使えること）
+  11  |  * - problem_user / error_user / visual_user: 不具合がある（下の「既知の不具合」）
+  12  |  *
+  13  |  * 💡 既知の不具合の扱い（ユーザー判断 #15）:
+  14  |  *   「正しい挙動」を期待するテストを書き、test.fail()（= 失敗することを期待する）を付ける。
+  15  |  *   - 今は不具合があるので、テストは「失敗」し、期待どおりとして成功扱いになる（CI は赤くならない）
+  16  |  *   - サイトが直って成功すると、テストが失敗して気づける → その時は test.fail() を外す
+  17  |  *   一覧と確認日は docs/known-site-issues.md を参照。
+  18  |  */
+  19  | 
+  20  | // ログイン後、一覧の表示を待つ時間。遅延があるユーザー（performance_glitch_user）に合わせ、全ユーザーで共通にしている
+  21  | const INVENTORY_TIMEOUT = { timeout: 30_000 };
+  22  | 
+  23  | test.describe('ユーザー種別: performance_glitch_user（遅延がある）', () => {
+  24  |   test('ログインに遅延があっても、ログインでき、購入完了まで行えること', async ({ page }) => {
+  25  |     // ログインに約 5 秒かかる。テストのタイムアウト（30 秒）の範囲で完了できること（タイムアウトの妥当性の確認）
+  26  |     const { inventoryPage } = await loginAndShowInventory(page, CREDENTIALS.performanceGlitch, INVENTORY_TIMEOUT);
+  27  | 
+  28  |     await inventoryPage.addItemToCart('add-to-cart-sauce-labs-backpack');
+  29  |     await expect(inventoryPage.cartBadge).toHaveText('1');
+  30  |     await inventoryPage.cartLink.click();
+  31  | 
+  32  |     const checkoutPage = new CheckoutPage(page);
+  33  |     await checkoutPage.checkoutButton.click();
+  34  |     await checkoutPage.fillShippingInfo(SHIPPING_INFO.firstName, SHIPPING_INFO.lastName, SHIPPING_INFO.postalCode);
+  35  |     await checkoutPage.finishButton.click();
+  36  |     await expect(checkoutPage.completeHeader).toHaveText('Thank you for your order!');
+  37  |   });
+  38  | });
+  39  | 
+  40  | test.describe('ユーザー種別: problem_user（意図的な不具合）', () => {
+  41  |   test('[既知の不具合] 商品画像が、商品ごとに異なること', async ({ page }) => {
+  42  |     test.fail(true, 'problem_user は、全商品の画像が同じになる（docs/known-site-issues.md）');
+  43  |     await loginAndShowInventory(page, CREDENTIALS.problem, INVENTORY_TIMEOUT);
+  44  |     const sources = await page.locator('.inventory_item_img img').evaluateAll((imgs) => imgs.map((img) => img.getAttribute('src')));
+  45  |     expect(new Set(sources).size).toBe(sources.length);
+  46  |   });
+  47  | 
+  48  |   test('[既知の不具合] 「価格の安い順」で並び替えられること', async ({ page }) => {
+  49  |     test.fail(true, 'problem_user は、並び替えが効かない（docs/known-site-issues.md）');
+  50  |     const { inventoryPage } = await loginAndShowInventory(page, CREDENTIALS.problem, INVENTORY_TIMEOUT);
+  51  |     await inventoryPage.selectSortOption('lohi');
+  52  |     const prices = (await inventoryPage.itemPrices.allTextContents()).map((text) => parseFloat(text.replace('$', '')));
+  53  |     expect(prices).toEqual([...prices].sort((a, b) => a - b));
+  54  |   });
+  55  | 
+  56  |   test('[既知の不具合] 6 件すべてを、カートに入れられること', async ({ page }) => {
+  57  |     test.fail(true, 'problem_user は、一部の商品の「Add to cart」が効かない（docs/known-site-issues.md）');
+  58  |     const { inventoryPage } = await loginAndShowInventory(page, CREDENTIALS.problem, INVENTORY_TIMEOUT);
+  59  |     const buttons = page.locator('[data-test^="add-to-cart"]');
+  60  |     const count = await buttons.count();
+  61  |     for (let i = 0; i < count; i++) {
+  62  |       await buttons.nth(0).click(); // 押すたびに、次の「Add to cart」が先頭に来る（押せたものは Remove に変わる）
+  63  |     }
+> 64  |     await expect(inventoryPage.cartBadge).toHaveText(String(count));
+      |                                           ^ Error: expect(locator).toHaveText(expected) failed
+  65  |   });
+  66  | 
+  67  |   test('[既知の不具合] 購入者情報の「姓」の入力が、姓の欄に保持されること', async ({ page }) => {
+  68  |     test.fail(true, 'problem_user は、姓の入力が名の欄に入る（docs/known-site-issues.md）');
+  69  |     const { inventoryPage } = await loginAndShowInventory(page, CREDENTIALS.problem, INVENTORY_TIMEOUT);
+  70  |     await inventoryPage.cartLink.click();
+  71  |     const checkoutPage = new CheckoutPage(page);
+  72  |     await checkoutPage.checkoutButton.click();
+  73  |     await checkoutPage.firstNameInput.fill(SHIPPING_INFO.firstName);
+  74  |     await checkoutPage.lastNameInput.fill(SHIPPING_INFO.lastName);
+  75  |     await expect(checkoutPage.lastNameInput).toHaveValue(SHIPPING_INFO.lastName);
+  76  |   });
+  77  | });
+  78  | 
+  79  | test.describe('ユーザー種別: error_user（操作時にエラーが起きる）', () => {
+  80  |   test('[既知の不具合] 「価格の安い順」で並び替えられること', async ({ page }) => {
+  81  |     test.fail(true, 'error_user は、並び替えが効かない（docs/known-site-issues.md）');
+  82  |     const { inventoryPage } = await loginAndShowInventory(page, CREDENTIALS.error, INVENTORY_TIMEOUT);
+  83  |     await inventoryPage.selectSortOption('lohi');
+  84  |     const prices = (await inventoryPage.itemPrices.allTextContents()).map((text) => parseFloat(text.replace('$', '')));
+  85  |     expect(prices).toEqual([...prices].sort((a, b) => a - b));
+  86  |   });
+  87  | 
+  88  |   test('[既知の不具合] 6 件すべてを、カートに入れられること', async ({ page }) => {
+  89  |     test.fail(true, 'error_user は、一部の商品の「Add to cart」が効かない（docs/known-site-issues.md）');
+  90  |     const { inventoryPage } = await loginAndShowInventory(page, CREDENTIALS.error, INVENTORY_TIMEOUT);
+  91  |     const buttons = page.locator('[data-test^="add-to-cart"]');
+  92  |     const count = await buttons.count();
+  93  |     for (let i = 0; i < count; i++) {
+  94  |       await buttons.nth(0).click();
+  95  |     }
+  96  |     await expect(inventoryPage.cartBadge).toHaveText(String(count));
+  97  |   });
+  98  | 
+  99  |   test('[既知の不具合] 購入を完了できること', async ({ page }) => {
+  100 |     test.fail(true, 'error_user は、購入情報の入力・確定でエラーになり、完了できない（docs/known-site-issues.md）');
+  101 |     const { inventoryPage } = await loginAndShowInventory(page, CREDENTIALS.error, INVENTORY_TIMEOUT);
+  102 |     await inventoryPage.addItemToCart('add-to-cart-sauce-labs-backpack');
+  103 |     await inventoryPage.cartLink.click();
+  104 |     const checkoutPage = new CheckoutPage(page);
+  105 |     await checkoutPage.checkoutButton.click();
+  106 |     await checkoutPage.fillShippingInfo(SHIPPING_INFO.firstName, SHIPPING_INFO.lastName, SHIPPING_INFO.postalCode);
+  107 |     await checkoutPage.finishButton.click();
+  108 |     await expect(checkoutPage.completeHeader).toHaveText('Thank you for your order!', { timeout: 5_000 });
+  109 |   });
+  110 | });
+  111 | 
+  112 | test.describe('ユーザー種別: visual_user（見た目・表示が崩れる）', () => {
+  113 |   test('[既知の不具合] 商品の価格が、標準ユーザーと同じであること', async ({ page }) => {
+  114 |     test.fail(true, 'visual_user は、価格が標準と異なる値で表示される（docs/known-site-issues.md）');
+  115 |     const { inventoryPage } = await loginAndShowInventory(page, CREDENTIALS.visual, INVENTORY_TIMEOUT);
+  116 |     const names = await inventoryPage.itemNames.allTextContents();
+  117 |     const prices = (await inventoryPage.itemPrices.allTextContents()).map((text) => parseFloat(text.replace('$', '')));
+  118 |     const actual = Object.fromEntries(names.map((name, i) => [name, prices[i]]));
+  119 |     expect(actual).toEqual(STANDARD_PRICES);
+  120 |   });
+  121 | });
+  122 | 
+```
