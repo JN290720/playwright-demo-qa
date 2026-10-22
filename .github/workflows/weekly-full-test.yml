@@ -11,6 +11,8 @@ name: Weekly Full Test
 # - 失敗 → GitHub Issue（ラベル weekly-failure）で通知。復旧したら自動でクローズ（notify-failure.js）
 # - 既知の不具合のテスト（test.fail()）が予期せず成功 → 「サイトが直った可能性」を、サイト不具合の一覧 Issue（ラベル site-defect）にコメント
 # - このファイルを変更した PR でも動く（変更の検証用。通知は送らない）
+# - 最新のレポートを gh-pages の weekly-report/ に上書き公開する（D35。URL: https://<owner>.github.io/<repo>/weekly-report/）。
+#   履歴は残さない（過去分は成果物 weekly-playwright-report を 14 日保持）。main の実行だけで公開する（PR では触らない）
 on:
   schedule:
     - cron: '37 18 * * 0' # 日曜 18:37 UTC = 月曜 3:37 JST（毎時 0 分は定時実行が遅れやすいため、ずらしている。#88）
@@ -34,7 +36,7 @@ concurrency:
 jobs:
   full-test:
     permissions:
-      contents: read
+      contents: write # gh-pages の weekly-report/ への公開（この Job だけ。D35）。PR のイベントでは公開しない
       issues: write # 失敗の通知（Issue の作成・コメント・クローズ）、サイト不具合の Issue へのコメント
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -110,6 +112,29 @@ jobs:
           npx playwright test -c tests-perf/playwright.config.ts || echo "::warning::表示速度の記録に失敗しました（失敗にはしません）"
           node scripts/summarize-perf.js reports/perf.json >> "$GITHUB_STEP_SUMMARY" || true
 
+      # 最新のレポートを gh-pages の weekly-report/ に上書きで公開する（D35。履歴なし）。
+      # 💡 公開先は PR 用の pr-reports/ と別のフォルダ。PR のイベントでは触らない（main の実行だけ）
+      # 💡 失敗しても Job は失敗にしない（continue-on-error）。失敗時は、Job Summary と失敗の通知にその旨を書く
+      - name: Checkout gh-pages (weekly report)
+        if: always() && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: gh-pages
+          path: pages
+          fetch-depth: 1
+
+      - name: Publish weekly report to gh-pages
+        id: publish-weekly-report
+        if: always() && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        continue-on-error: true
+        run: |
+          if bash scripts/publish-weekly-report.sh pages playwright-report; then
+            echo "🌟 **[最新の週次テストレポートを見る](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/weekly-report/)**" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "⚠️ 週次テストレポートの公開に失敗しました（成果物 weekly-playwright-report を確認してください）" >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+
       # 既知の不具合のテストが予期せず成功していれば、「サイトが直った可能性」を知らせる（PR では送らない）
       - name: Notify possible site fixes
         if: always() && github.event_name != 'pull_request'
@@ -130,6 +155,7 @@ jobs:
             （既知の不具合のテストが「予期せず成功」して失敗になっている場合は、サイトが直ったということです。サイト不具合の一覧の Issue も確認してください）
 
             - 実行: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            - 最新のレポート: ${{ steps.publish-weekly-report.outcome == 'success' && format('https://{0}.github.io/{1}/weekly-report/', github.repository_owner, github.event.repository.name) || '（公開に失敗しました。成果物 weekly-playwright-report を確認してください）' }}
             - コミット: ${{ github.sha }}
         run: node scripts/notify-failure.js
 
