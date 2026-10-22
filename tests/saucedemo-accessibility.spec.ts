@@ -4,6 +4,7 @@ import { InventoryPage } from './pages/InventoryPage';
 import { CheckoutPage } from './pages/CheckoutPage';
 import { CREDENTIALS, SHIPPING_INFO } from './fixtures/users';
 import { expectNoA11yViolations } from './helpers/a11y';
+import { TIMEOUTS } from './helpers/timeouts';
 
 /**
  * アクセシビリティ（a11y = 障害のある人や高齢の人でも使えるか）のテスト。
@@ -204,7 +205,7 @@ test.describe('SauceDemo Accessibility (a11y) Tests', () => {
 
       // フォーカスできること（今は、focus() を呼んでもフォーカスされない）
       await inventoryPage.cartLink.focus();
-      await expect(inventoryPage.cartLink).toBeFocused({ timeout: 2_000 });
+      await expect(inventoryPage.cartLink).toBeFocused({ timeout: TIMEOUTS.FOCUS });
       await page.keyboard.press('Enter');
       await expect(page).toHaveURL(/cart\.html/);
     });

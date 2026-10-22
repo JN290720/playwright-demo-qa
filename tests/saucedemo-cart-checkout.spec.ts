@@ -5,6 +5,7 @@ import { InventoryPage } from './pages/InventoryPage';
 import { CheckoutPage } from './pages/CheckoutPage';
 import { CREDENTIALS, SHIPPING_INFO } from './fixtures/users';
 import { openSideMenu } from './helpers/side-menu';
+import { TIMEOUTS } from './helpers/timeouts';
 
 /**
  * カートと購入手続きの、途中でやめる・戻る・開き直すといった操作のテスト（#132）。
@@ -41,7 +42,7 @@ test.describe('カート・購入手続きの異常系・やり直し', () => {
 
     await checkoutPage.checkoutButton.click();
 
-    await expect(page).not.toHaveURL(/checkout-step-one/, { timeout: 3_000 });
+    await expect(page).not.toHaveURL(/checkout-step-one/, { timeout: TIMEOUTS.SHORT });
   });
 
   test('C2: 購入手続き（入力画面）で「Cancel」を押すと、カートに戻り、カートの中身が保たれること', async ({ page }) => {
@@ -97,7 +98,7 @@ test.describe('カート・購入手続きの異常系・やり直し', () => {
     await expect(async () => {
       const removed = await removeButtons.count();
       await expect(inventoryPage.cartBadge).toHaveCount(Math.min(removed, 1));
-    }).toPass({ timeout: 5_000 });
+    }).toPass({ timeout: TIMEOUTS.PASS });
   });
 
   // 💡 既知のサイト側の不備（Issue #145）: ログアウトしても、カートの中身が消えず、別のユーザーでログインしても、
@@ -118,6 +119,6 @@ test.describe('カート・購入手続きの異常系・やり直し', () => {
     // 商品一覧のボタンが描画されてから、バッジを確認する（描画前に「バッジ 0 件」と判定して、「予期せず成功」にならないように。レビューエージェントの提案）
     await expect(page.locator('[data-test^="add-to-cart-"]').first()).toBeVisible();
 
-    await expect(inventoryPage.cartBadge).toHaveCount(0, { timeout: 3_000 });
+    await expect(inventoryPage.cartBadge).toHaveCount(0, { timeout: TIMEOUTS.SHORT });
   });
 });
