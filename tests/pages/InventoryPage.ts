@@ -47,7 +47,23 @@ export class InventoryPage {
    * @param itemDataTest 例: 'add-to-cart-sauce-labs-backpack' などの data-test 識別子
    */
   async addItemToCart(itemDataTest: string) {
-    await this.page.locator(`[data-test="${itemDataTest}"]`).click();
+    await this.dataTestLocator(itemDataTest).click();
+  }
+
+  /**
+   * 指定した data-test 属性の要素（商品のボタン・商品名のリンクなど）を返す
+   * @param dataTest 例: 'add-to-cart-sauce-labs-backpack' / 'remove-sauce-labs-backpack' / 'item-4-title-link'
+   */
+  dataTestLocator(dataTest: string): Locator {
+    return this.page.locator(`[data-test="${dataTest}"]`);
+  }
+
+  /**
+   * 商品名のリンクをクリックして、商品詳細ページを開く
+   * @param itemTitleLinkDataTest 例: 'item-4-title-link'
+   */
+  async openItemDetail(itemTitleLinkDataTest: string) {
+    await this.dataTestLocator(itemTitleLinkDataTest).click();
   }
 
   /**
