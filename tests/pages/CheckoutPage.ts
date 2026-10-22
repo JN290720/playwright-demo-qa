@@ -28,6 +28,7 @@ export class CheckoutPage {
 
   // 購入完了画面
   readonly completeHeader: Locator;    // 完了メッセージ
+  readonly backHomeButton: Locator;    // 「Back Home」ボタン（商品一覧に戻る）
 
   /**
    * コンストラクタ：ページ上の各要素を特定するためのロケータ（セレクター）を定義
@@ -52,6 +53,7 @@ export class CheckoutPage {
     this.finishButton = page.locator('[data-test="finish"]');
 
     this.completeHeader = page.locator('[data-test="complete-header"]');
+    this.backHomeButton = page.locator('[data-test="back-to-products"]');
   }
 
   /**

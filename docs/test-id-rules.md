@@ -31,6 +31,7 @@
 | `A` | `saucedemo-checkout-totals`（金額） | A1〜A5 |
 | `S` | `saucedemo-protected-pages`（保護ページ・セッション） | S1〜S8 |
 | `D` | `saucedemo-product-detail`・`saucedemo-product-detail-errors` | D1（存在しない商品）と、D3〜D5（詳細ページ） |
+| `B` | `saucedemo-back-navigation`（戻る系の画面遷移） | B1・B2 |
 | 番号 | `todomvc-basic` | 1〜6（接頭辞ではなく、番号だけ） |
 
 ## 4. 台帳（`tests/` の spec、`origin/main` の宣言から実測）
@@ -48,10 +49,11 @@
 | `saucedemo-product-detail.spec.ts` | D | 8 | D3（ループ 6）・D4・D5 |
 | `saucedemo-product-detail-errors.spec.ts` | D | 4 | D1（ループ 4） |
 | `todomvc-basic.spec.ts` | 番号 | 6 | 1〜6 |
+| `saucedemo-back-navigation.spec.ts` | B | 2 | B1（購入完了の「Back Home」）・B2（詳細からブラウザの「戻る」） |
 
 **ID の無い spec（11 件）**: `login`・`saucedemo-checkout-after-purchase`・`saucedemo-checkout-injection`・`saucedemo-checkout-validation`・`saucedemo-e2e-purchase`・`saucedemo-inventory-cart`・`saucedemo-security-input`・`saucedemo-sidebar-logout`・`saucedemo-user-types`・`todomvc-smoke`・`api-demo`。ID は任意（新しく書く場合は、規則 2 に従う）。
 
-**合計**: ID の付いた 11 spec で 94 件（1 プロジェクトあたり。件数の列の合計）。
+**合計**: ID の付いた 12 spec で 96 件（1 プロジェクトあたり。件数の列の合計）。
 
 ## 5. 参照の例
 
