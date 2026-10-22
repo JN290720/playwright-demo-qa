@@ -14,6 +14,9 @@ export class ProductDetailPage {
   readonly price: Locator;            // 価格
   readonly image: Locator;            // 商品画像（alt 属性の確認に使用）
   readonly addToCartButton: Locator;  // 「Add to cart（カートに追加）」ボタン
+  readonly description: Locator;      // 商品の説明
+  readonly removeButton: Locator;     // 「Remove（カートから削除）」ボタン
+  readonly backToProductsButton: Locator; // 「Back to products（一覧に戻る）」ボタン
 
   /**
    * コンストラクタ：ページ上の各要素を特定するためのロケータ（セレクター）を定義
@@ -27,5 +30,8 @@ export class ProductDetailPage {
     this.price = page.locator('.inventory_details_price');
     this.image = page.locator('img.inventory_details_img');
     this.addToCartButton = page.locator('[data-test="add-to-cart"]');
+    this.description = page.locator('.inventory_details_desc');
+    this.removeButton = page.locator('[data-test="remove"]');
+    this.backToProductsButton = page.locator('[data-test="back-to-products"]');
   }
 }
