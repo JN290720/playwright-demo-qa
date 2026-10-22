@@ -64,10 +64,10 @@ test.describe('SauceDemo 保護されたページへの未認証アクセス（�
 
   for (const path of protectedPaths) {
     test(`未ログインで /${path} に直接アクセスすると、ログイン画面へ戻されること`, async ({ page }) => {
-      await page.goto(`https://www.saucedemo.com/${path}`);
+      await page.goto(`/${path}`);
 
       const loginPage = new LoginPage(page);
-      await expect(page).toHaveURL('https://www.saucedemo.com/');
+      await expect(page).toHaveURL('/');
       await expect(loginPage.errorMessage).toContainText('when you are logged in');
     });
   }
@@ -78,11 +78,11 @@ test.describe('SauceDemo 保護されたページへの未認証アクセス（�
     await loginPage.loginAs(CREDENTIALS.standard);
     await page.locator('#react-burger-menu-btn').click();
     await page.locator('#logout_sidebar_link').click();
-    await expect(page).toHaveURL('https://www.saucedemo.com/');
+    await expect(page).toHaveURL('/');
 
     for (const path of ['cart.html', 'checkout-step-one.html']) {
-      await page.goto(`https://www.saucedemo.com/${path}`);
-      await expect(page).toHaveURL('https://www.saucedemo.com/');
+      await page.goto(`/${path}`);
+      await expect(page).toHaveURL('/');
       await expect(loginPage.errorMessage).toContainText('when you are logged in');
     }
   });

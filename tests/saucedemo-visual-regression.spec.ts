@@ -79,7 +79,7 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
 
   // 1. ログインページ (PC)
   test('P1: ログインページの見た目に変更がないこと (PC)', async ({ page }) => {
-    await page.goto('https://www.saucedemo.com/');
+    await page.goto('/');
     await waitForRenderComplete(page);
 
     await expectPageScreenshot(page, 'login-page-pc');

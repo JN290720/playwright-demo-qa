@@ -24,7 +24,7 @@ test.describe('商品詳細ページ（機能）', () => {
 
       // （一覧の要素が、切り替わる間、残るため、詳細ページ専用のクラスで特定する。#71 と同じ）
       await expect(page.locator('.inventory_details_container')).toBeVisible();
-      await expect(page).toHaveURL(`https://www.saucedemo.com/inventory-item.html?id=${id}`);
+      await expect(page).toHaveURL(`/inventory-item.html?id=${id}`);
       await expect(page.locator('.inventory_details_name')).toHaveText(name);
       await expect(page.locator('.inventory_details_price')).toHaveText(price);
       await expect(page.locator('.inventory_details_desc')).toHaveText(description);
