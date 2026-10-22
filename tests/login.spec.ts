@@ -43,7 +43,7 @@ test.describe('パターン2: ログインとショッピングカート操作',
     await loginPage.loginAs(CREDENTIALS.standard);
 
     // 2. 商品一覧ページへ遷移したか確認
-    await expect(page).toHaveURL('https://www.saucedemo.com/inventory.html');
+    await expect(page).toHaveURL('/inventory.html');
 
     // 3. 最初の商品の「Add to cart」ボタンをクリック（InventoryPage のメソッドを使用）
     await inventoryPage.addItemToCart('add-to-cart-sauce-labs-backpack');

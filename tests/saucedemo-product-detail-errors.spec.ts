@@ -26,7 +26,7 @@ test.describe('商品詳細ページ（存在しない商品）', () => {
       await loginPage.loginAs(CREDENTIALS.standard);
       await expect(inventoryPage.title).toHaveText('Products');
 
-      await page.goto(`https://www.saucedemo.com${item.url}`);
+      await page.goto(item.url);
 
       // 💡 外部サイトの文言が変わっても壊れにくいよう、見出しの文言は、部分一致（大文字・小文字を区別しない）で確認する
       await expect(page.getByText(/item not found/i)).toBeVisible();

@@ -14,6 +14,7 @@ import { openSideMenu } from './helpers/side-menu';
  *
  * 既存: 商品一覧（P6）と購入完了（P12）の直接アクセスは saucedemo-qa-destructive.spec.ts にある。ここでは、残りの画面を、一覧（データ駆動）で確認する。
  */
+// addCookies の url は絶対 URL が必要なため、ドメインの定数を残す
 const BASE = 'https://www.saucedemo.com';
 
 // 保護されている画面（パスと、エラーメッセージに出るパス）
@@ -28,7 +29,7 @@ type ProtectedPage = (typeof PROTECTED)[number];
 
 // 未ログインで保護ページを開く（S1〜S4 共通の操作）
 async function openWithoutLogin(page: Page, target: ProtectedPage) {
-  await page.goto(`${BASE}${target.url}`);
+  await page.goto(target.url);
   return new LoginPage(page);
 }
 
@@ -40,7 +41,7 @@ test.describe('保護ページへの直接アクセス（未ログイン）', ()
   test(`${CART.id}: 未ログインで「${CART.name}」(${CART.url}) を開くと、ログイン画面に戻り、ログインを求められること`, { tag: '@prd' }, async ({ page }) => {
     const loginPage = await openWithoutLogin(page, CART);
 
-    await expect(page).toHaveURL(`${BASE}/`);
+    await expect(page).toHaveURL('/');
     await expect(loginPage.loginButton).toBeVisible();
     await expect(loginPage.errorMessage).toContainText(`You can only access '${CART.shown}' when you are logged in`);
   });
@@ -49,7 +50,7 @@ test.describe('保護ページへの直接アクセス（未ログイン）', ()
     test(`${page_.id}: 未ログインで「${page_.name}」(${page_.url}) を開くと、ログイン画面に戻り、ログインを求められること`, async ({ page }) => {
       const loginPage = await openWithoutLogin(page, page_);
 
-      await expect(page).toHaveURL(`${BASE}/`);
+      await expect(page).toHaveURL('/');
       await expect(loginPage.loginButton).toBeVisible();
       await expect(loginPage.errorMessage).toContainText(`You can only access '${page_.shown}' when you are logged in`);
     });
@@ -81,20 +82,20 @@ test.describe('セッション（ログイン状態）の検証', () => {
     await expect(new InventoryPage(page).title).toHaveText('Products');
 
     await context.clearCookies();
-    await page.goto(`${BASE}/inventory.html`);
+    await page.goto('/inventory.html');
 
-    await expect(page).toHaveURL(`${BASE}/`);
+    await expect(page).toHaveURL('/');
     await expect(loginPage.errorMessage).toContainText("You can only access '/inventory.html' when you are logged in");
   });
 
   // Cookie の値を「ロックされたユーザー」「存在しないユーザー」にすると、ログイン状態として扱われない
   for (const value of ['locked_out_user', 'nonexistent_user']) {
     test(`S7: Cookie（session-username）の値を「${value}」にしても、保護ページを開けないこと`, async ({ page, context }) => {
-      await page.goto(BASE);
+      await page.goto('/');
       await context.addCookies([{ name: 'session-username', value, url: BASE }]);
-      await page.goto(`${BASE}/inventory.html`);
+      await page.goto('/inventory.html');
 
-      await expect(page).toHaveURL(`${BASE}/`);
+      await expect(page).toHaveURL('/');
       await expect(new LoginPage(page).loginButton).toBeVisible();
     });
   }
@@ -104,11 +105,11 @@ test.describe('セッション（ログイン状態）の検証', () => {
   //    test.fail() = 「失敗すること」を期待するテスト。サイトが直って成功すると、テストが失敗して気づける。
   test('S8: [既知の不具合] ログインせずに、Cookie（session-username）だけを手で作っても、保護ページを開けないこと', async ({ page, context }) => {
     test.fail(true, 'Cookie に有効なユーザー名を設定するだけで、パスワードなしでログインできる（#141 / docs/known-site-issues.md）');
-    await page.goto(BASE);
+    await page.goto('/');
     await context.addCookies([{ name: 'session-username', value: CREDENTIALS.standard.username, url: BASE }]);
-    await page.goto(`${BASE}/inventory.html`);
+    await page.goto('/inventory.html');
 
-    await expect(page).toHaveURL(`${BASE}/`);
+    await expect(page).toHaveURL('/');
     await expect(new LoginPage(page).loginButton).toBeVisible();
   });
 });

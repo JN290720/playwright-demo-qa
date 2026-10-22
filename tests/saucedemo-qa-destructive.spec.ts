@@ -120,7 +120,7 @@ test.describe('SauceDemo 破壊的・異常系テストスイート（全12ケ�
     const loginPage = new LoginPage(page);
     await loginPage.loginAs(CREDENTIALS.standard);
 
-    await page.goto('https://www.saucedemo.com/checkout-step-one.html');
+    await page.goto('/checkout-step-one.html');
     await page.locator('[data-test="continue"]').click();
 
     // チェックアウトフォームのバリデーションエラーを確認
@@ -130,11 +130,11 @@ test.describe('SauceDemo 破壊的・異常系テストスイート（全12ケ�
 
   test('P12: セッション切れや無効なパラメータでの注文完了画面直リンクを防止できること', async ({ page }) => {
     // 完了画面への不正直リンクアクセス時の拒否状態を確認
-    await page.goto('https://www.saucedemo.com/checkout-complete.html');
+    await page.goto('/checkout-complete.html');
     const loginPage = new LoginPage(page);
 
     // ログイン画面へ戻され、未認証アクセスを拒否するメッセージが表示されること
-    await expect(page).toHaveURL('https://www.saucedemo.com/');
+    await expect(page).toHaveURL('/');
     await expect(loginPage.errorMessage).toBeVisible();
     await expect(loginPage.errorMessage).toContainText("You can only access '/checkout-complete.html' when you are logged in");
   });

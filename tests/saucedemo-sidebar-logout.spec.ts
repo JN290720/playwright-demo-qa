@@ -56,12 +56,12 @@ test.describe('サイドメニューとログアウト', () => {
 
     // ログイン画面に戻り、前のユーザー名が残っていない
     await expect(loginPage.loginButton).toBeVisible();
-    await expect(page).toHaveURL('https://www.saucedemo.com/');
+    await expect(page).toHaveURL('/');
     await expect(loginPage.usernameInput).toHaveValue('');
     await expect(loginPage.passwordInput).toHaveValue('');
 
     // ログアウト後は、商品一覧へ直接アクセスしてもログインを求められる
-    await page.goto('https://www.saucedemo.com/inventory.html');
+    await page.goto('/inventory.html');
     await expect(loginPage.errorMessage).toContainText('You can only access \'/inventory.html\' when you are logged in');
   });
 
