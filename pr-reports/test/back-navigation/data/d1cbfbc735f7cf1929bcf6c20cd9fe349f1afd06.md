@@ -1,0 +1,242 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: saucedemo-cart-checkout.spec.ts >> カート・購入手続きの異常系・やり直し >> C5: [既知の不具合] ログアウト後に別のユーザーでログインしても、前のユーザーのカートが見えないこと
+- Location: tests/saucedemo-cart-checkout.spec.ts:107:7
+
+# Error details
+
+```
+Error: expect(locator).toHaveCount(expected) failed
+
+Locator:  locator('.shopping_cart_badge')
+Expected: 0
+Received: 1
+Timeout:  3000ms
+
+Call log:
+  - Expect "toHaveCount" locator('.shopping_cart_badge') with timeout 3000ms
+  - waiting for locator('.shopping_cart_badge')
+    10 × locator resolved to 1 element
+       - unexpected value "1"
+
+```
+
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - banner [ref=e5]:
+      - generic [ref=e6]:
+        - generic [ref=e7]:
+          - button "Open Menu" [ref=e8] [cursor=pointer]
+          - img "Open Menu" [ref=e9]
+        - generic [ref=e10]: Swag Labs
+        - button "Cart, 1 items" [ref=e13]:
+          - generic [ref=e14]: "1"
+      - generic [ref=e15]:
+        - generic [ref=e16]: Products
+        - generic [ref=e18] [cursor=pointer]:
+          - generic [ref=e19]: Name (A to Z)
+          - combobox "Sort products" [ref=e20]:
+            - option "Name (A to Z)" [selected]
+            - option "Name (Z to A)"
+            - option "Price (low to high)"
+            - option "Price (high to low)"
+    - main [ref=e21]:
+      - generic [ref=e24]:
+        - generic [ref=e25]:
+          - button "View details for Sauce Labs Backpack" [ref=e27] [cursor=pointer]:
+            - img "Sauce Labs Backpack" [ref=e28]
+          - generic [ref=e29]:
+            - generic [ref=e30]:
+              - button "View details for Sauce Labs Backpack" [ref=e31] [cursor=pointer]:
+                - generic [ref=e32]: Sauce Labs Backpack
+              - generic [ref=e33]: carry.allTheThings() with the sleek, streamlined Sly Pack that melds uncompromising style with unequaled laptop and tablet protection.
+            - generic [ref=e34]:
+              - generic [ref=e35]: $88.11
+              - button "Remove" [ref=e36] [cursor=pointer]
+        - generic [ref=e37]:
+          - button "View details for Sauce Labs Bike Light" [ref=e39] [cursor=pointer]:
+            - img "Sauce Labs Bike Light" [ref=e40]
+          - generic [ref=e41]:
+            - generic [ref=e42]:
+              - button "View details for Sauce Labs Bike Light" [ref=e43] [cursor=pointer]:
+                - generic [ref=e44]: Sauce Labs Bike Light
+              - generic [ref=e45]: A red light isn't the desired state in testing but it sure helps when riding your bike at night. Water-resistant with 3 lighting modes, 1 AAA battery included.
+            - generic [ref=e46]:
+              - generic [ref=e47]: $81.44
+              - button "Add to cart" [ref=e48] [cursor=pointer]
+        - generic [ref=e49]:
+          - button "View details for Sauce Labs Bolt T-Shirt" [ref=e51] [cursor=pointer]:
+            - img "Sauce Labs Bolt T-Shirt" [ref=e52]
+          - generic [ref=e53]:
+            - generic [ref=e54]:
+              - button "View details for Sauce Labs Bolt T-Shirt" [ref=e55] [cursor=pointer]:
+                - generic [ref=e56]: Sauce Labs Bolt T-Shirt
+              - generic [ref=e57]: Get your testing superhero on with the Sauce Labs bolt T-shirt. From American Apparel, 100% ringspun combed cotton, heather gray with red bolt.
+            - generic [ref=e58]:
+              - generic [ref=e59]: $32.63
+              - button "Add to cart" [ref=e60] [cursor=pointer]
+        - generic [ref=e61]:
+          - button "View details for Sauce Labs Fleece Jacket" [ref=e63] [cursor=pointer]:
+            - img "Sauce Labs Fleece Jacket" [ref=e64]
+          - generic [ref=e65]:
+            - generic [ref=e66]:
+              - button "View details for Sauce Labs Fleece Jacket" [ref=e67] [cursor=pointer]:
+                - generic [ref=e68]: Sauce Labs Fleece Jacket
+              - generic [ref=e69]: It's not every day that you come across a midweight quarter-zip fleece jacket capable of handling everything from a relaxing day outdoors to a busy day at the office.
+            - generic [ref=e70]:
+              - generic [ref=e71]: $38.3
+              - button "Add to cart" [ref=e72] [cursor=pointer]
+        - generic [ref=e73]:
+          - button "View details for Sauce Labs Onesie" [ref=e75] [cursor=pointer]:
+            - img "Sauce Labs Onesie" [ref=e76]
+          - generic [ref=e77]:
+            - generic [ref=e78]:
+              - button "View details for Sauce Labs Onesie" [ref=e79] [cursor=pointer]:
+                - generic [ref=e80]: Sauce Labs Onesie
+              - generic [ref=e81]: Rib snap infant onesie for the junior automation engineer in development. Reinforced 3-snap bottom closure, two-needle hemmed sleeved and bottom won't unravel.
+            - generic [ref=e82]:
+              - generic [ref=e83]: $70.31
+              - button "Add to cart" [ref=e84] [cursor=pointer]
+        - generic [ref=e85]:
+          - button "View details for Test.allTheThings() T-Shirt (Red)" [ref=e87] [cursor=pointer]:
+            - img "Test.allTheThings() T-Shirt (Red)" [ref=e88]
+          - generic [ref=e89]:
+            - generic [ref=e90]:
+              - button "View details for Test.allTheThings() T-Shirt (Red)" [ref=e91] [cursor=pointer]:
+                - generic [ref=e92]: Test.allTheThings() T-Shirt (Red)
+              - generic [ref=e93]: This classic Sauce Labs t-shirt is perfect to wear when cozying up to your keyboard to automate a few tests. Super-soft and comfy ringspun combed cotton.
+            - generic [ref=e94]:
+              - generic [ref=e95]: $85.05
+              - button "Add to cart" [ref=e96] [cursor=pointer]
+  - contentinfo [ref=e97]:
+    - list [ref=e98]:
+      - listitem [ref=e99]:
+        - link "X" [ref=e100] [cursor=pointer]:
+          - /url: https://x.com/saucelabs
+      - listitem [ref=e101]:
+        - link "Facebook" [ref=e102] [cursor=pointer]:
+          - /url: https://www.facebook.com/saucelabs
+      - listitem [ref=e103]:
+        - link "LinkedIn" [ref=e104] [cursor=pointer]:
+          - /url: https://www.linkedin.com/company/sauce-labs/
+    - generic [ref=e105]: © 2026 Sauce Labs. All Rights Reserved. Terms of Service | Privacy Policy
+```
+
+# Test source
+
+```ts
+  21  |   await expect(inventoryPage.title).toHaveText('Products');
+  22  |   await inventoryPage.addItemToCart('add-to-cart-sauce-labs-backpack');
+  23  |   await expect(inventoryPage.cartBadge).toHaveText('1');
+  24  |   return { inventoryPage };
+  25  | }
+  26  | 
+  27  | test.describe('カート・購入手続きの異常系・やり直し', () => {
+  28  |   // 💡 既知のサイト側の不備（Issue #140）: 空のカートで「Checkout」を押すと、エラーなしで、購入者情報の入力画面に進める。
+  29  |   //    期待値は不明（一般には、空のカートでは進めない）。docs/known-site-issues.md 参照。
+  30  |   //    test.fail() = 「失敗すること」を期待するテスト。サイトが直って成功すると、テストが失敗して気づける。
+  31  |   test('C1: [既知の不具合] 空のカートでは、「Checkout」で購入者情報の入力画面に進めないこと', async ({ page }) => {
+  32  |     test.fail(true, '空のカートで Checkout を押すと、入力画面に進める（#140 / docs/known-site-issues.md）');
+  33  |     const loginPage = new LoginPage(page);
+  34  |     const inventoryPage = new InventoryPage(page);
+  35  |     await loginPage.goto();
+  36  |     await loginPage.loginAs(CREDENTIALS.standard);
+  37  |     await expect(inventoryPage.title).toHaveText('Products');
+  38  |     await inventoryPage.cartLink.click();
+  39  |     const checkoutPage = new CheckoutPage(page);
+  40  |     await expect(checkoutPage.cartItems).toHaveCount(0);
+  41  | 
+  42  |     await checkoutPage.checkoutButton.click();
+  43  | 
+  44  |     await expect(page).not.toHaveURL(/checkout-step-one/, { timeout: 3_000 });
+  45  |   });
+  46  | 
+  47  |   test('C2: 購入手続き（入力画面）で「Cancel」を押すと、カートに戻り、カートの中身が保たれること', async ({ page }) => {
+  48  |     const { inventoryPage } = await loginAndAddBackpack(page);
+  49  |     const checkoutPage = new CheckoutPage(page);
+  50  |     await inventoryPage.cartLink.click();
+  51  |     await checkoutPage.checkoutButton.click();
+  52  |     await expect(checkoutPage.firstNameInput).toBeVisible();
+  53  | 
+  54  |     await page.locator('[data-test="cancel"]').click();
+  55  | 
+  56  |     await expect(page).toHaveURL(/cart\.html/);
+  57  |     await expect(checkoutPage.cartItems).toHaveCount(1);
+  58  |     await expect(inventoryPage.cartBadge).toHaveText('1');
+  59  |   });
+  60  | 
+  61  |   test('C3: 購入確認画面で「Cancel」を押すと、商品一覧に戻ること', async ({ page }) => {
+  62  |     const { inventoryPage } = await loginAndAddBackpack(page);
+  63  |     const checkoutPage = new CheckoutPage(page);
+  64  |     await inventoryPage.cartLink.click();
+  65  |     await checkoutPage.checkoutButton.click();
+  66  |     await checkoutPage.fillShippingInfo(SHIPPING_INFO.firstName, SHIPPING_INFO.lastName, SHIPPING_INFO.postalCode);
+  67  |     await expect(checkoutPage.finishButton).toBeVisible();
+  68  | 
+  69  |     await page.locator('[data-test="cancel"]').click();
+  70  | 
+  71  |     await expect(page).toHaveURL(/inventory\.html/);
+  72  |     await expect(inventoryPage.title).toHaveText('Products');
+  73  |   });
+  74  | 
+  75  |   test('C4: ページを再読み込みしても、カートの中身（バッジと「Remove」の表示）が保たれること', async ({ page }) => {
+  76  |     const { inventoryPage } = await loginAndAddBackpack(page);
+  77  | 
+  78  |     await page.reload();
+  79  | 
+  80  |     await expect(inventoryPage.title).toHaveText('Products');
+  81  |     await expect(inventoryPage.cartBadge).toHaveText('1');
+  82  |     await expect(page.locator('[data-test="remove-sauce-labs-backpack"]')).toBeVisible();
+  83  |   });
+  84  | 
+  85  |   test('C6: 「Add to cart」を素早く 2 回押しても、カートのバッジと商品のボタンの表示が食い違わないこと', async ({ page }) => {
+  86  |     // 実測: 2 回目の押下は、追加された直後の同じボタン（「Remove」に変わっている）を押すため、追加が取り消される。
+  87  |     // 「何件になるか」ではなく、「バッジの件数と、「Remove」の表示が、一致している（カートが壊れない）」ことを確認する
+  88  |     const loginPage = new LoginPage(page);
+  89  |     const inventoryPage = new InventoryPage(page);
+  90  |     await loginPage.goto();
+  91  |     await loginPage.loginAs(CREDENTIALS.standard);
+  92  |     await expect(inventoryPage.title).toHaveText('Products');
+  93  | 
+  94  |     await page.locator('[data-test="add-to-cart-sauce-labs-bike-light"]').dblclick();
+  95  | 
+  96  |     const removeButtons = page.locator('[data-test^="remove-"]');
+  97  |     await expect(async () => {
+  98  |       const removed = await removeButtons.count();
+  99  |       await expect(inventoryPage.cartBadge).toHaveCount(Math.min(removed, 1));
+  100 |     }).toPass({ timeout: 5_000 });
+  101 |   });
+  102 | 
+  103 |   // 💡 既知のサイト側の不備（Issue #145）: ログアウトしても、カートの中身が消えず、別のユーザーでログインしても、
+  104 |   //    前のユーザーのカートが見える（共用のパソコンでは、前の人のカートが次の人に見える）。
+  105 |   //    期待値は不明（一般には、ログアウトでカートの表示は消える、または、ユーザーごとに分けられる）。docs/known-site-issues.md 参照。
+  106 |   //    test.fail() = 「失敗すること」を期待するテスト。サイトが直って成功すると、テストが失敗して気づける。
+  107 |   test('C5: [既知の不具合] ログアウト後に別のユーザーでログインしても、前のユーザーのカートが見えないこと', async ({ page }) => {
+  108 |     test.fail(true, 'ログアウトしても、カートの中身が残り、別のユーザーに見える（#145 / docs/known-site-issues.md）');
+  109 |     const { inventoryPage } = await loginAndAddBackpack(page);
+  110 |     const loginPage = new LoginPage(page);
+  111 | 
+  112 |     await openSideMenu(loginPage);
+  113 |     await page.locator('[data-test="logout-sidebar-link"]').click();
+  114 |     await expect(loginPage.loginButton).toBeVisible();
+  115 | 
+  116 |     await loginPage.loginAs(CREDENTIALS.visual); // 別のユーザー
+  117 |     await expect(inventoryPage.title).toHaveText('Products');
+  118 |     // 商品一覧のボタンが描画されてから、バッジを確認する（描画前に「バッジ 0 件」と判定して、「予期せず成功」にならないように。レビューエージェントの提案）
+  119 |     await expect(page.locator('[data-test^="add-to-cart-"]').first()).toBeVisible();
+  120 | 
+> 121 |     await expect(inventoryPage.cartBadge).toHaveCount(0, { timeout: 3_000 });
+      |                                           ^ Error: expect(locator).toHaveCount(expected) failed
+  122 |   });
+  123 | });
+  124 | 
+```
