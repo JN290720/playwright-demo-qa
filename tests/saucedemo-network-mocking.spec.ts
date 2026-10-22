@@ -1,5 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { LoginPage } from './pages/LoginPage';
+import { InventoryPage } from './pages/InventoryPage';
+import { ProductDetailPage } from './pages/ProductDetailPage';
 import { CREDENTIALS } from './fixtures/users';
 
 test.describe('SauceDemo Network Mocking & Resilience Tests', () => {
@@ -18,13 +20,14 @@ test.describe('SauceDemo Network Mocking & Resilience Tests', () => {
     });
 
     const loginPage = new LoginPage(page);
+    const inventoryPage = new InventoryPage(page);
     await loginPage.goto();
     await loginPage.loginAs(CREDENTIALS.standard);
 
     // 💡 検証: 画像が読み込めなくても画面タイトルや商品名テキスト、ボタンが正しく表示されていること
-    await expect(page.locator('.title')).toHaveText('Products');
-    await expect(page.locator('.inventory_item_name').first()).toBeVisible();
-    await expect(page.locator('[data-test="add-to-cart-sauce-labs-backpack"]')).toBeEnabled();
+    await expect(inventoryPage.title).toHaveText('Products');
+    await expect(inventoryPage.itemNames.first()).toBeVisible();
+    await expect(inventoryPage.dataTestLocator('add-to-cart-sauce-labs-backpack')).toBeEnabled();
   });
 
   // -------------------------------------------------------------
@@ -38,15 +41,16 @@ test.describe('SauceDemo Network Mocking & Resilience Tests', () => {
     });
 
     const loginPage = new LoginPage(page);
+    const inventoryPage = new InventoryPage(page);
     await loginPage.goto();
     await loginPage.loginAs(CREDENTIALS.standard);
 
     // 遅延があっても最終的にログイン後の商品一覧が表示されること（タイムアウト設定を拡張）
-    await expect(page.locator('.title')).toBeVisible({ timeout: 10000 });
+    await expect(inventoryPage.title).toBeVisible({ timeout: 10000 });
 
     // 遅延下でも、カートへの追加が完了し、バッジに反映されること
-    await page.locator('[data-test="add-to-cart-sauce-labs-backpack"]').click();
-    await expect(page.locator('.shopping_cart_badge')).toHaveText('1', { timeout: 10000 });
+    await inventoryPage.addItemToCart('add-to-cart-sauce-labs-backpack');
+    await expect(inventoryPage.cartBadge).toHaveText('1', { timeout: 10000 });
   });
 
   // -------------------------------------------------------------
@@ -54,30 +58,31 @@ test.describe('SauceDemo Network Mocking & Resilience Tests', () => {
   // -------------------------------------------------------------
   test('P3: 商品一覧を表示後にオフラインになっても、既存描画が維持されること', async ({ page, context }) => {
     const loginPage = new LoginPage(page);
+    const inventoryPage = new InventoryPage(page);
     await loginPage.goto();
     await loginPage.loginAs(CREDENTIALS.standard);
-    await page.locator('.title').waitFor({ state: 'visible' });
+    await inventoryPage.title.waitFor({ state: 'visible' });
 
     // 💡 ログイン成功後にネットワークを切断（オフライン化）
     await context.setOffline(true);
 
     try {
       // 【検証】オフラインになっても、既に描画された商品一覧が残っていること
-      await expect(page.locator('.title')).toHaveText('Products');
-      await expect(page.locator('.inventory_item')).not.toHaveCount(0);
+      await expect(inventoryPage.title).toHaveText('Products');
+      await expect(inventoryPage.productItems).not.toHaveCount(0);
 
       // 【検証】SPA のクライアント側の状態は、通信なしでも動くこと（カートへの追加がバッジに反映される）
-      await page.locator('[data-test="add-to-cart-sauce-labs-backpack"]').click();
-      await expect(page.locator('.shopping_cart_badge')).toHaveText('1');
-      await expect(page.locator('[data-test="remove-sauce-labs-backpack"]')).toBeVisible();
+      await inventoryPage.addItemToCart('add-to-cart-sauce-labs-backpack');
+      await expect(inventoryPage.cartBadge).toHaveText('1');
+      await expect(inventoryPage.dataTestLocator('remove-sauce-labs-backpack')).toBeVisible();
     } finally {
       // 検証の成否に関わらず、ネットワーク状態を復元する
       await context.setOffline(false);
     }
 
     // 【検証】通信を復旧したあとも、画面とカートの状態が維持されていること
-    await expect(page.locator('.title')).toHaveText('Products');
-    await expect(page.locator('.shopping_cart_badge')).toHaveText('1');
+    await expect(inventoryPage.title).toHaveText('Products');
+    await expect(inventoryPage.cartBadge).toHaveText('1');
   });
 
   // -------------------------------------------------------------
@@ -88,19 +93,21 @@ test.describe('SauceDemo Network Mocking & Resilience Tests', () => {
     await page.route(/\.(jpg|jpeg|png|webp|svg)(\?.*)?$/, (route) => route.abort());
 
     const loginPage = new LoginPage(page);
+    const inventoryPage = new InventoryPage(page);
+    const detailPage = new ProductDetailPage(page);
     await loginPage.goto();
     await loginPage.loginAs(CREDENTIALS.standard);
-    await expect(page.locator('.title')).toHaveText('Products');
-    await page.locator('[data-test="item-4-title-link"]').click();
+    await expect(inventoryPage.title).toHaveText('Products');
+    await inventoryPage.openItemDetail('item-4-title-link');
 
     // 💡 検証: 画像が無くても、商品名・価格・「Add to cart」が表示され、使える。画像には代わりの説明文（alt）がある
     // （一覧の要素が、切り替わる間、残るため、詳細ページ専用のクラスで特定する。#71 と同じ）
-    await expect(page.locator('.inventory_details_container')).toBeVisible();
-    await expect(page.locator('.inventory_details_name')).toHaveText('Sauce Labs Backpack');
-    await expect(page.locator('.inventory_details_price')).toHaveText('$29.99');
-    await expect(page.locator('img.inventory_details_img')).toHaveAttribute('alt', 'Sauce Labs Backpack');
-    await page.locator('[data-test="add-to-cart"]').click();
-    await expect(page.locator('.shopping_cart_badge')).toHaveText('1');
+    await expect(detailPage.container).toBeVisible();
+    await expect(detailPage.name).toHaveText('Sauce Labs Backpack');
+    await expect(detailPage.price).toHaveText('$29.99');
+    await expect(detailPage.image).toHaveAttribute('alt', 'Sauce Labs Backpack');
+    await detailPage.addToCartButton.click();
+    await expect(inventoryPage.cartBadge).toHaveText('1');
   });
 
   // -------------------------------------------------------------
@@ -111,13 +118,14 @@ test.describe('SauceDemo Network Mocking & Resilience Tests', () => {
     await page.route((url) => url.hostname !== 'www.saucedemo.com', (route) => route.abort());
 
     const loginPage = new LoginPage(page);
+    const inventoryPage = new InventoryPage(page);
     await loginPage.goto();
     await loginPage.loginAs(CREDENTIALS.standard);
 
     // 💡 検証: 外部のリソースが無くても、ログイン → 商品一覧 → カートへの追加が行える
-    await expect(page.locator('.title')).toHaveText('Products');
-    await expect(page.locator('.inventory_item')).toHaveCount(6);
-    await page.locator('[data-test="add-to-cart-sauce-labs-backpack"]').click();
-    await expect(page.locator('.shopping_cart_badge')).toHaveText('1');
+    await expect(inventoryPage.title).toHaveText('Products');
+    await expect(inventoryPage.productItems).toHaveCount(6);
+    await inventoryPage.addItemToCart('add-to-cart-sauce-labs-backpack');
+    await expect(inventoryPage.cartBadge).toHaveText('1');
   });
 });
