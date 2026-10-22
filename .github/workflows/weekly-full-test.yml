@@ -15,7 +15,9 @@ name: Weekly Full Test
 #   履歴は残さない（過去分は成果物 weekly-playwright-report を 14 日保持）。main の実行だけで公開する（PR では触らない）
 on:
   schedule:
-    - cron: '37 18 * * 0' # 日曜 18:37 UTC = 月曜 3:37 JST（毎時 0 分は定時実行が遅れやすいため、ずらしている。#88）
+    # 【一時的な変更・戻し忘れ注意】schedule の動作確認のため、一時的に毎日 04:05 UTC（13:05 JST）にしている。
+    # 確認が済んだら、必ず元に戻す（戻す手順は PR 本文）: 元の値は '37 18 * * 0'（日曜 18:37 UTC = 月曜 3:37 JST。#88）
+    - cron: '5 4 * * *'
   workflow_dispatch:
   pull_request:
     branches: [ main ]
