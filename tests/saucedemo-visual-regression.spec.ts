@@ -1,6 +1,9 @@
 import { test, expect } from './fixtures/test';
 import type { Page } from '@playwright/test';
 import { LoginPage } from './pages/LoginPage';
+import { InventoryPage } from './pages/InventoryPage';
+import { ProductDetailPage } from './pages/ProductDetailPage';
+import { CheckoutPage } from './pages/CheckoutPage';
 import { CREDENTIALS, SHIPPING_INFO } from './fixtures/users';
 import { TIMEOUTS } from './helpers/timeouts';
 
@@ -91,7 +94,7 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
     const loginPage = new LoginPage(page);
     await loginPage.goto();
     await loginPage.loginAs(CREDENTIALS.invalid);
-    await page.locator('[data-test="error"]').waitFor({ state: 'visible' });
+    await loginPage.errorMessage.waitFor({ state: 'visible' });
     await waitForPasswordMasked(page);
     await waitForRenderComplete(page);
 
@@ -103,7 +106,7 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
     const loginPage = new LoginPage(page);
     await loginPage.goto();
     await loginPage.loginAs(CREDENTIALS.lockedOut);
-    await page.locator('[data-test="error"]').waitFor({ state: 'visible' });
+    await loginPage.errorMessage.waitFor({ state: 'visible' });
     await waitForPasswordMasked(page);
     await waitForRenderComplete(page);
 
@@ -118,7 +121,7 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
       const loginPage = new LoginPage(page);
       await loginPage.goto();
       await loginPage.loginAs(CREDENTIALS.standard);
-      await page.locator('.title').waitFor({ state: 'visible' });
+      await new InventoryPage(page).title.waitFor({ state: 'visible' });
     });
 
     // 2. 商品一覧ページ
@@ -130,8 +133,10 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
 
     // 3. 商品詳細ページ
     test('P3: 商品詳細ページの見た目に変更がないこと (PC)', async ({ page }) => {
-      await page.locator('.inventory_item_name').first().click();
-      await page.locator('[data-test="back-to-products"]').waitFor({ state: 'visible' });
+      const inventoryPage = new InventoryPage(page);
+      const detailPage = new ProductDetailPage(page);
+      await inventoryPage.itemNames.first().click();
+      await detailPage.backToProductsButton.waitFor({ state: 'visible' });
 
       await waitForRenderComplete(page);
 
@@ -140,8 +145,10 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
 
     // 4. ショッピングカートページ
     test('P4: カート画面の見た目に変更がないこと (PC)', async ({ page }) => {
-      await page.locator('.shopping_cart_link').click();
-      await page.locator('[data-test="checkout"]').waitFor({ state: 'visible' });
+      const inventoryPage = new InventoryPage(page);
+      const checkoutPage = new CheckoutPage(page);
+      await inventoryPage.cartLink.click();
+      await checkoutPage.checkoutButton.waitFor({ state: 'visible' });
 
       await waitForRenderComplete(page);
 
@@ -150,9 +157,11 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
 
     // 5. 購入手続き情報入力画面 (Step One)
     test('P5: 購入手続き入力画面の見た目に変更がないこと (PC)', async ({ page }) => {
-      await page.locator('.shopping_cart_link').click();
-      await page.locator('[data-test="checkout"]').click();
-      await page.locator('[data-test="firstName"]').waitFor({ state: 'visible' });
+      const inventoryPage = new InventoryPage(page);
+      const checkoutPage = new CheckoutPage(page);
+      await inventoryPage.cartLink.click();
+      await checkoutPage.checkoutButton.click();
+      await checkoutPage.firstNameInput.waitFor({ state: 'visible' });
 
       await waitForRenderComplete(page);
 
@@ -161,13 +170,12 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
 
     // 6. 購入確認画面 (Step Two)
     test('P6: 購入確認画面の見た目に変更がないこと (PC)', async ({ page }) => {
-      await page.locator('.shopping_cart_link').click();
-      await page.locator('[data-test="checkout"]').click();
-      await page.locator('[data-test="firstName"]').fill(SHIPPING_INFO.firstName);
-      await page.locator('[data-test="lastName"]').fill(SHIPPING_INFO.lastName);
-      await page.locator('[data-test="postalCode"]').fill(SHIPPING_INFO.postalCode);
-      await page.locator('[data-test="continue"]').click();
-      await page.locator('[data-test="finish"]').waitFor({ state: 'visible' });
+      const inventoryPage = new InventoryPage(page);
+      const checkoutPage = new CheckoutPage(page);
+      await inventoryPage.cartLink.click();
+      await checkoutPage.checkoutButton.click();
+      await checkoutPage.fillShippingInfo(SHIPPING_INFO.firstName, SHIPPING_INFO.lastName, SHIPPING_INFO.postalCode);
+      await checkoutPage.finishButton.waitFor({ state: 'visible' });
 
       await waitForRenderComplete(page);
 
@@ -176,14 +184,13 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
 
     // 7. 購入完了画面 (Complete)
     test('P7: 購入完了画面の見た目に変更がないこと (PC)', async ({ page }) => {
-      await page.locator('.shopping_cart_link').click();
-      await page.locator('[data-test="checkout"]').click();
-      await page.locator('[data-test="firstName"]').fill(SHIPPING_INFO.firstName);
-      await page.locator('[data-test="lastName"]').fill(SHIPPING_INFO.lastName);
-      await page.locator('[data-test="postalCode"]').fill(SHIPPING_INFO.postalCode);
-      await page.locator('[data-test="continue"]').click();
-      await page.locator('[data-test="finish"]').click();
-      await page.locator('[data-test="back-to-products"]').waitFor({ state: 'visible' });
+      const inventoryPage = new InventoryPage(page);
+      const checkoutPage = new CheckoutPage(page);
+      await inventoryPage.cartLink.click();
+      await checkoutPage.checkoutButton.click();
+      await checkoutPage.fillShippingInfo(SHIPPING_INFO.firstName, SHIPPING_INFO.lastName, SHIPPING_INFO.postalCode);
+      await checkoutPage.finishButton.click();
+      await checkoutPage.backHomeButton.waitFor({ state: 'visible' });
 
       await waitForRenderComplete(page);
 
@@ -192,11 +199,12 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
 
     // 8. サイドメニュー展開状態
     test('P8: サイドメニュー展開時の見た目に変更がないこと (PC)', async ({ page }) => {
+      const loginPage = new LoginPage(page);
       // Android の実機の Chrome では、タップが取りこぼされてメニューが開かないことがあった（#85）ため、
       // 「ボタンを押す → メニューが表示される」までを、表示されるまで繰り返す
       await expect(async () => {
-        await page.locator('#react-burger-menu-btn').click();
-        await expect(page.locator('.bm-menu-wrap')).toBeVisible({ timeout: TIMEOUTS.SHORT });
+        await loginPage.menuButton.click();
+        await expect(loginPage.sideMenu).toBeVisible({ timeout: TIMEOUTS.SHORT });
       }).toPass({ timeout: TIMEOUTS.VRT_PASS });
 
       await waitForRenderComplete(page);
@@ -206,10 +214,12 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
 
     // 11. 購入手続きの入力エラー表示（何も入力せず Continue）（#135 V3）
     test('P11: 購入手続きの入力エラー表示の見た目に変更がないこと (PC)', async ({ page }) => {
-      await page.locator('.shopping_cart_link').click();
-      await page.locator('[data-test="checkout"]').click();
-      await page.locator('[data-test="continue"]').click();
-      await page.locator('[data-test="error"]').waitFor({ state: 'visible' });
+      const inventoryPage = new InventoryPage(page);
+      const checkoutPage = new CheckoutPage(page);
+      await inventoryPage.cartLink.click();
+      await checkoutPage.checkoutButton.click();
+      await checkoutPage.continueButton.click();
+      await checkoutPage.errorMessage.waitFor({ state: 'visible' });
 
       await waitForRenderComplete(page);
 
@@ -218,8 +228,10 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
 
     // 12. 空のカート（#135 V4）
     test('P12: 空のカート画面の見た目に変更がないこと (PC)', async ({ page }) => {
-      await page.locator('.shopping_cart_link').click();
-      await page.locator('[data-test="checkout"]').waitFor({ state: 'visible' });
+      const inventoryPage = new InventoryPage(page);
+      const checkoutPage = new CheckoutPage(page);
+      await inventoryPage.cartLink.click();
+      await checkoutPage.checkoutButton.waitFor({ state: 'visible' });
 
       await waitForRenderComplete(page);
 
@@ -228,10 +240,12 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
 
     // 13. 商品が入ったカート（2 商品）（#135 V5）
     test('P13: 商品が入ったカート画面の見た目に変更がないこと (PC)', async ({ page }) => {
-      await page.locator('[data-test="add-to-cart-sauce-labs-backpack"]').click();
-      await page.locator('[data-test="add-to-cart-sauce-labs-bike-light"]').click();
-      await page.locator('.shopping_cart_link').click();
-      await page.locator('[data-test="checkout"]').waitFor({ state: 'visible' });
+      const inventoryPage = new InventoryPage(page);
+      const checkoutPage = new CheckoutPage(page);
+      await inventoryPage.addItemToCart('add-to-cart-sauce-labs-backpack');
+      await inventoryPage.addItemToCart('add-to-cart-sauce-labs-bike-light');
+      await inventoryPage.cartLink.click();
+      await checkoutPage.checkoutButton.waitFor({ state: 'visible' });
 
       await waitForRenderComplete(page);
 
@@ -240,10 +254,11 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
 
     // 14. 並び替え後の商品一覧（価格の高い順）（#135 V6）
     test('P14: 並び替え（価格の高い順）後の商品一覧の見た目に変更がないこと (PC)', async ({ page }) => {
-      await page.locator('[data-test="product-sort-container"]').selectOption('hilo');
+      const inventoryPage = new InventoryPage(page);
+      await inventoryPage.selectSortOption('hilo');
       // 並び替えが反映されたことの確認（前提）。最高額の商品（Fleece Jacket $49.99）が先頭に来る。
       // この値の直書きは、「並び替え後の画面の撮影」の前提を確かめるためのもので、価格の検証が目的ではない
-      await expect(page.locator('.inventory_item_price').first()).toHaveText('$49.99');
+      await expect(inventoryPage.itemPrices.first()).toHaveText('$49.99');
 
       await waitForRenderComplete(page);
 
