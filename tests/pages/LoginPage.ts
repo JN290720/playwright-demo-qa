@@ -15,6 +15,7 @@ export class LoginPage {
   readonly errorMessage: Locator;  // エラーメッセージ表示エリア
   readonly menuButton: Locator;    // 左上のハンバーガーメニューボタン（スマホ表示時など）
   readonly sideMenu: Locator;      // 開いたサイドナビゲーションメニュー
+  readonly logoutLink: Locator;    // サイドメニュー内の「Logout」リンク
 
   /**
    * コンストラクタ：ページ上の各要素の識別子（ロケータ）を定義
@@ -30,6 +31,7 @@ export class LoginPage {
     this.errorMessage = page.locator('[data-test="error"]');
     this.menuButton = page.locator('#react-burger-menu-btn');
     this.sideMenu = page.locator('.bm-menu-wrap');
+    this.logoutLink = page.locator('#logout_sidebar_link');
   }
 
   /**
