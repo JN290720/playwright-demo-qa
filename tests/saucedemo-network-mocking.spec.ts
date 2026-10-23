@@ -3,6 +3,7 @@ import { LoginPage } from './pages/LoginPage';
 import { InventoryPage } from './pages/InventoryPage';
 import { ProductDetailPage } from './pages/ProductDetailPage';
 import { CREDENTIALS } from './fixtures/users';
+import { TIMEOUTS } from './helpers/timeouts';
 
 test.describe('SauceDemo Network Mocking & Resilience Tests', () => {
 
@@ -46,11 +47,11 @@ test.describe('SauceDemo Network Mocking & Resilience Tests', () => {
     await loginPage.loginAs(CREDENTIALS.standard);
 
     // 遅延があっても最終的にログイン後の商品一覧が表示されること（タイムアウト設定を拡張）
-    await expect(inventoryPage.title).toBeVisible({ timeout: 10000 });
+    await expect(inventoryPage.title).toBeVisible({ timeout: TIMEOUTS.NETWORK });
 
     // 遅延下でも、カートへの追加が完了し、バッジに反映されること
     await inventoryPage.addItemToCart('add-to-cart-sauce-labs-backpack');
-    await expect(inventoryPage.cartBadge).toHaveText('1', { timeout: 10000 });
+    await expect(inventoryPage.cartBadge).toHaveText('1', { timeout: TIMEOUTS.NETWORK });
   });
 
   // -------------------------------------------------------------
