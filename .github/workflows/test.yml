@@ -62,7 +62,14 @@ jobs:
       - name: Install Playwright System Dependencies
         timeout-minutes: 12
         run: |
-          echo 'Acquire::Retries "3";' | sudo tee /etc/apt/apt.conf.d/80-retries > /dev/null
+          # apt の設定（全ての apt-get に効く。install-deps の内部の呼び出しには、コマンドラインの -o を付けられないため、設定ファイルで渡す）
+          #   DPkg::Lock::Timeout: dpkg の lock を、最大 120 秒まで待つ（残った apt-get が lock を握っていても、次の試行が lock 待ちで即失敗しないように）
+          #   Acquire::http::Timeout: 取得が 30 秒止まったら打ち切る（止まった取得を、180 秒まで待たない）
+          sudo tee /etc/apt/apt.conf.d/80-retries > /dev/null <<'APTCONF'
+          Acquire::Retries "3";
+          Acquire::http::Timeout "30";
+          DPkg::Lock::Timeout "120";
+          APTCONF
           for i in 1 2 3; do
             if timeout 180 npx playwright install-deps; then
               exit 0
