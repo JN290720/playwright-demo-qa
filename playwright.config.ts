@@ -35,7 +35,7 @@ export default defineConfig({
   forbidOnly: isCI,
   /* Retry on CI only */
   retries: isCI ? 2 : 0,
-  /* 💡 CIでの並列実行ワーカー数：PC＋スマホの並列処理のため 2 ワーカーを指定 */
+  /* 💡 CIでの並列実行ワーカー数：PC＋スマホの並列処理のため CI では 4 ワーカーを指定（ローカルは Playwright の既定値） */
   workers: isCI ? 4 : undefined,
   /* 💡 タイムアウト（#19、ユーザー承認済み）: 既定では actionTimeout / navigationTimeout が「無制限」で、
      ハングしても原因が分かりにくいため、明示して早く失敗させます。 */
