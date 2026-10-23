@@ -43,7 +43,7 @@ stateDiagram-v2
 | 入力に注入文字列（姓・名・郵便番号） | saucedemo-checkout-injection「購入入力欄に {種類} を入れても、スクリプトが動かないこと」（種類は 4 つ: XSS（img の onerror）・XSS（script タグ）・SQL インジェクション・300 文字の長い文字列。#169。ダイアログ 0 件・注入要素 0 件を判定） | ✅ |
 | 確認 → 一覧（Cancel） | `cart-checkout` C3（商品一覧に戻る） | ✅ |
 | カート → 一覧（Continue Shopping） | `inventory-cart`「カート: 『Continue Shopping』で商品一覧に戻り、カートの内容が維持される」 | ✅ |
-| 完了 → 一覧（Back to Home） | なし | なし |
+| 完了 → 一覧（Back to Home） | `back-navigation` B1（「Back Home」ボタンで商品一覧に戻ること） | ✅ |
 
 ### 2-2. 操作（戻る・再読み込み・ログアウト）
 

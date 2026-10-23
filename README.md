@@ -95,6 +95,7 @@ npx playwright show-report
 
 - 優先度 `P0`〜`P3` は、人が Issue に付ける（[CONTRIBUTING.md](CONTRIBUTING.md)）。自動で作られる失敗の Issue だけ、`P1` が付く
 - 「閉じない」ものは、スクリプトが閉じない。閉じるかどうかは、人が判断する
+- その他のラベル（`by-quality`・`by-reviewer` など）は [docs/labels.md](docs/labels.md) を参照
 
 ---
 
