@@ -73,6 +73,7 @@ jobs:
           APTCONF
           # apt の再試行（#152）: 試行ごとに、新しいプロセスグループで起動し、打ち切りのときはグループごと止める
           #   timeout は直接の子（npx）しか止めないため、その孫の apt-get が lock を持ったまま残っていた（#227 の run で確認）
+          #   install-deps は apt-get を sudo で起動する（root のプロセス）。ランナーのユーザーの kill は権限で失敗するため、sudo で止める（#229 の下での再発・run 39945654296 で確認）
           attempt_install() {
             setsid npx playwright install-deps &
             local pid=$!
@@ -80,9 +81,9 @@ jobs:
             while kill -0 "$pid" 2>/dev/null; do
               if [ "$waited" -ge 180 ]; then
                 echo "::warning::install-deps が 180 秒で打ち切られたため、プロセスグループ $pid ごと止めます"
-                kill -TERM -- "-$pid" 2>/dev/null || true
+                sudo kill -TERM -- "-$pid" 2>/dev/null || true
                 sleep 5
-                kill -KILL -- "-$pid" 2>/dev/null || true
+                sudo kill -KILL -- "-$pid" 2>/dev/null || true
                 wait "$pid" 2>/dev/null || true
                 return 124
               fi
