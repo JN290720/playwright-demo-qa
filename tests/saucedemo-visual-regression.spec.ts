@@ -2,6 +2,7 @@ import { test, expect } from './fixtures/test';
 import type { Page } from '@playwright/test';
 import { LoginPage } from './pages/LoginPage';
 import { CREDENTIALS, SHIPPING_INFO } from './fixtures/users';
+import { TIMEOUTS } from './helpers/timeouts';
 
 /**
  * 💡 レンダリング完了を 100% 待つためのカスタムヘルパー関数
@@ -195,8 +196,8 @@ test.describe('SauceDemo Visual Regression Tests (完全同期・全ページ対
       // 「ボタンを押す → メニューが表示される」までを、表示されるまで繰り返す
       await expect(async () => {
         await page.locator('#react-burger-menu-btn').click();
-        await expect(page.locator('.bm-menu-wrap')).toBeVisible({ timeout: 3_000 });
-      }).toPass({ timeout: 20_000 });
+        await expect(page.locator('.bm-menu-wrap')).toBeVisible({ timeout: TIMEOUTS.SHORT });
+      }).toPass({ timeout: TIMEOUTS.VRT_PASS });
 
       await waitForRenderComplete(page);
 

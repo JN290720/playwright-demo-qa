@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import { CheckoutPage } from './pages/CheckoutPage';
 import { loginAndShowInventory } from './helpers/login';
 import { CREDENTIALS, SHIPPING_INFO, STANDARD_PRICES } from './fixtures/users';
+import { TIMEOUTS } from './helpers/timeouts';
 
 /**
  * ユーザー種別ごとの挙動のテスト（#15）。
@@ -18,7 +19,7 @@ import { CREDENTIALS, SHIPPING_INFO, STANDARD_PRICES } from './fixtures/users';
  */
 
 // ログイン後、一覧の表示を待つ時間。遅延があるユーザー（performance_glitch_user）に合わせ、全ユーザーで共通にしている
-const INVENTORY_TIMEOUT = { timeout: 30_000 };
+const INVENTORY_TIMEOUT = { timeout: TIMEOUTS.SLOW_USER };
 
 test.describe('ユーザー種別: performance_glitch_user（遅延がある）', () => {
   test('ログインに遅延があっても、ログインでき、購入完了まで行えること', async ({ page }) => {
@@ -105,7 +106,7 @@ test.describe('ユーザー種別: error_user（操作時にエラーが起き�
     await checkoutPage.checkoutButton.click();
     await checkoutPage.fillShippingInfo(SHIPPING_INFO.firstName, SHIPPING_INFO.lastName, SHIPPING_INFO.postalCode);
     await checkoutPage.finishButton.click();
-    await expect(checkoutPage.completeHeader).toHaveText('Thank you for your order!', { timeout: 5_000 });
+    await expect(checkoutPage.completeHeader).toHaveText('Thank you for your order!', { timeout: TIMEOUTS.PASS });
   });
 });
 

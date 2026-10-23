@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import { CheckoutPage } from './pages/CheckoutPage';
 import { loginAndShowInventory } from './helpers/login';
 import { openSideMenu } from './helpers/side-menu';
+import { TIMEOUTS } from './helpers/timeouts';
 
 /**
  * サイドメニュー（左上のハンバーガーメニュー）とログアウトの機能のテスト（#57）。
@@ -95,7 +96,7 @@ test.describe('サイドメニューとログアウト', () => {
     await openSideMenu(loginPage);
     await page.locator(sideMenuLinks.reset).click();
 
-    await expect(page.locator('[data-test="add-to-cart-sauce-labs-backpack"]')).toBeVisible({ timeout: 3_000 });
+    await expect(page.locator('[data-test="add-to-cart-sauce-labs-backpack"]')).toBeVisible({ timeout: TIMEOUTS.SHORT });
   });
 
   test('メニューを閉じる: ×ボタンで閉じられること', async ({ page }) => {
