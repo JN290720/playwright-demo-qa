@@ -39,6 +39,20 @@ test.describe('ユーザー種別: performance_glitch_user（遅延がある）'
 });
 
 test.describe('ユーザー種別: problem_user（意図的な不具合）', () => {
+  test('前提: problem_user でログインでき、商品一覧に 6 件が表示されること', async ({ page }) => {
+    const { inventoryPage } = await loginAndShowInventory(page, CREDENTIALS.problem, INVENTORY_TIMEOUT);
+    await expect(inventoryPage.productItems).toHaveCount(6);
+  });
+
+  test('前提: problem_user で、購入者情報の入力欄まで進めること', async ({ page }) => {
+    const { inventoryPage } = await loginAndShowInventory(page, CREDENTIALS.problem, INVENTORY_TIMEOUT);
+    await inventoryPage.cartLink.click();
+    const checkoutPage = new CheckoutPage(page);
+    await checkoutPage.checkoutButton.click();
+    await expect(checkoutPage.firstNameInput).toBeVisible();
+    await expect(checkoutPage.lastNameInput).toBeVisible();
+  });
+
   test('[既知の不具合] 商品画像が、商品ごとに異なること', async ({ page }) => {
     test.fail(true, 'problem_user は、全商品の画像が同じになる（docs/known-site-issues.md）');
     await loginAndShowInventory(page, CREDENTIALS.problem, INVENTORY_TIMEOUT);
@@ -78,6 +92,22 @@ test.describe('ユーザー種別: problem_user（意図的な不具合）', () 
 });
 
 test.describe('ユーザー種別: error_user（操作時にエラーが起きる）', () => {
+  test('前提: error_user でログインでき、商品一覧に 6 件が表示されること', async ({ page }) => {
+    const { inventoryPage } = await loginAndShowInventory(page, CREDENTIALS.error, INVENTORY_TIMEOUT);
+    await expect(inventoryPage.productItems).toHaveCount(6);
+  });
+
+  test('前提: error_user で、購入者情報を入力して確認画面まで進めること', async ({ page }) => {
+    const { inventoryPage } = await loginAndShowInventory(page, CREDENTIALS.error, INVENTORY_TIMEOUT);
+    await inventoryPage.addItemToCart('add-to-cart-sauce-labs-backpack');
+    await inventoryPage.cartLink.click();
+    const checkoutPage = new CheckoutPage(page);
+    await checkoutPage.checkoutButton.click();
+    await checkoutPage.fillShippingInfo(SHIPPING_INFO.firstName, SHIPPING_INFO.lastName, SHIPPING_INFO.postalCode);
+    await expect(page).toHaveURL(/checkout-step-two/);
+    await expect(checkoutPage.finishButton).toBeVisible();
+  });
+
   test('[既知の不具合] 「価格の安い順」で並び替えられること', async ({ page }) => {
     test.fail(true, 'error_user は、並び替えが効かない（docs/known-site-issues.md）');
     const { inventoryPage } = await loginAndShowInventory(page, CREDENTIALS.error, INVENTORY_TIMEOUT);
@@ -111,6 +141,11 @@ test.describe('ユーザー種別: error_user（操作時にエラーが起き�
 });
 
 test.describe('ユーザー種別: visual_user（見た目・表示が崩れる）', () => {
+  test('前提: visual_user でログインでき、商品一覧に 6 件が表示されること', async ({ page }) => {
+    const { inventoryPage } = await loginAndShowInventory(page, CREDENTIALS.visual, INVENTORY_TIMEOUT);
+    await expect(inventoryPage.productItems).toHaveCount(6);
+  });
+
   test('[既知の不具合] 商品の価格が、標準ユーザーと同じであること', async ({ page }) => {
     test.fail(true, 'visual_user は、価格が標準と異なる値で表示される（docs/known-site-issues.md）');
     const { inventoryPage } = await loginAndShowInventory(page, CREDENTIALS.visual, INVENTORY_TIMEOUT);
