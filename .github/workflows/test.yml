@@ -60,7 +60,7 @@ jobs:
       # （過去に、このステップが約 60 分ハングして Job が打ち切られた実績があります）
       # timeout-minutes は、再試行を使い切った場合の合計より少し長い「最後の砦」です。
       - name: Install Playwright System Dependencies
-        timeout-minutes: 17
+        timeout-minutes: 12
         run: |
           # apt の設定（全ての apt-get に効く。install-deps の内部の呼び出しには、コマンドラインの -o を付けられないため、設定ファイルで渡す）
           #   DPkg::Lock::Timeout: dpkg の lock を、最大 120 秒まで待つ（残った apt-get が lock を握っていても、次の試行が lock 待ちで即失敗しないように）
@@ -78,8 +78,8 @@ jobs:
             local pid=$!
             local waited=0
             while kill -0 "$pid" 2>/dev/null; do
-              if [ "$waited" -ge 300 ]; then
-                echo "::warning::install-deps が 300 秒で打ち切られたため、プロセスグループ $pid ごと止めます"
+              if [ "$waited" -ge 90 ]; then
+                echo "::warning::install-deps が 90 秒で打ち切られたため、プロセスグループ $pid ごと止めます"
                 sudo kill -TERM -- "-$pid" 2>/dev/null || true
                 sleep 5
                 sudo kill -KILL -- "-$pid" 2>/dev/null || true
@@ -91,7 +91,7 @@ jobs:
             done
             wait "$pid"
           }
-          for i in 1 2 3; do
+          for i in 1 2 3 4 5; do
             if attempt_install; then
               exit 0
             fi
@@ -101,7 +101,7 @@ jobs:
             sudo dpkg --configure -a || true
             sleep 10
           done
-          echo "::error::install-deps failed after 3 attempts"
+          echo "::error::install-deps failed after 5 attempts"
           exit 1
 
       # 💡 キャッシュがヒットしなかった場合のみ、ブラウザ本体（Chromium / WebKit）をダウンロード
