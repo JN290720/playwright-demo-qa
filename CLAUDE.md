@@ -17,7 +17,7 @@ Playwright による E2E テスト・ビジュアルレグレッションテス�
 ## 構成
 
 - `tests/*.spec.ts`: テスト本体
-- `tests/pages/`: Page Object Model(`LoginPage` / `InventoryPage` / `TodoPage`)
+- `tests/pages/`: Page Object Model(画面ごとの部品。一覧は書かず、このフォルダを見る)
 - `tests/saucedemo-visual-regression.spec.ts-snapshots/`: VRT のベースライン画像
 - `.env.staging` / `.env.prod`: 環境ごとの設定。`ENV` 環境変数で切り替える(未指定は `prod`)
 - `playwright.config.ts`: プロジェクトは `desktop-chrome` / `mobile-chrome` / `desktop-safari`。PR では `desktop-safari` は**縮小版（`@safari-pr` タグ付きの 16 件）だけ**、PR 以外(main など)は全テスト
