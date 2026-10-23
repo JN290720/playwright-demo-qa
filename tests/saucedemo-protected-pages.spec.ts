@@ -112,4 +112,19 @@ test.describe('セッション（ログイン状態）の検証', () => {
     await expect(page).toHaveURL('/');
     await expect(new LoginPage(page).loginButton).toBeVisible();
   });
+
+  test('S9: ログアウトしたあと、カートや購入手続きのページに直接アクセスしても、保護されていること', async ({ page }) => {
+    const loginPage = new LoginPage(page);
+    await loginPage.goto();
+    await loginPage.loginAs(CREDENTIALS.standard);
+    await loginPage.menuButton.click();
+    await loginPage.logoutLink.click();
+    await expect(page).toHaveURL('/');
+
+    for (const path of ['cart.html', 'checkout-step-one.html']) {
+      await page.goto(`/${path}`);
+      await expect(page).toHaveURL('/');
+      await expect(loginPage.errorMessage).toContainText('when you are logged in');
+    }
+  });
 });
