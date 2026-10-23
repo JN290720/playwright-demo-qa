@@ -453,7 +453,11 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: pr-playwright-report
+          # VRT の差分画像（失敗したときの actual / diff）も残す。成功時は 0 件のため、警告を出さない（#152）
           path: |
             playwright-report/
             reports/
+            test-results/**/*-actual.png
+            test-results/**/*-diff.png
+          if-no-files-found: ignore
           retention-days: 7
