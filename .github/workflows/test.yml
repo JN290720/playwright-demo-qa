@@ -70,11 +70,34 @@ jobs:
           Acquire::http::Timeout "30";
           DPkg::Lock::Timeout "120";
           APTCONF
+          # apt の再試行（#152）: 試行ごとに、新しいプロセスグループで起動し、打ち切りのときはグループごと止める
+          #   timeout は直接の子（npx）しか止めないため、その孫の apt-get が lock を持ったまま残っていた（#227 の run で確認）
+          attempt_install() {
+            setsid npx playwright install-deps &
+            local pid=$!
+            local waited=0
+            while kill -0 "$pid" 2>/dev/null; do
+              if [ "$waited" -ge 180 ]; then
+                echo "::warning::install-deps が 180 秒で打ち切られたため、プロセスグループ $pid ごと止めます"
+                kill -TERM -- "-$pid" 2>/dev/null || true
+                sleep 5
+                kill -KILL -- "-$pid" 2>/dev/null || true
+                wait "$pid" 2>/dev/null || true
+                return 124
+              fi
+              sleep 1
+              waited=$((waited + 1))
+            done
+            wait "$pid"
+          }
           for i in 1 2 3; do
-            if timeout 180 npx playwright install-deps; then
+            if attempt_install; then
               exit 0
             fi
             echo "::warning::install-deps attempt $i failed or timed out"
+            # 止めた途中の dpkg の状態を戻す（失敗しても続行）。lock の持ち主の確認用に、残った apt 系のプロセスを記録する
+            ps -o pid,pgid,etime,args -C apt-get,dpkg || true
+            sudo dpkg --configure -a || true
             sleep 10
           done
           echo "::error::install-deps failed after 3 attempts"
