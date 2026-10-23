@@ -7,7 +7,7 @@
 // 書き方（指定が無ければ、今までどおり全部）:
 //   /update-vrt
 //   /update-vrt project=desktop-safari            プロジェクトを指定（複数はカンマ区切り。別名: pc / mobile / safari）
-//   /update-vrt test=P3,P8                        画面（VRT のテスト名の P1〜P8）を指定
+//   /update-vrt test=P3,P8                        画面（VRT のテスト名の P1〜P14）を指定
 //   /update-vrt project=mobile-chrome test=P2     両方を指定
 //
 // 安全のため、許可リスト方式（決まった名前・形式だけを受け付ける）。コメントの文字列を、そのままシェルに渡さない。
@@ -19,7 +19,7 @@ const fs = require('fs');
 
 const ALL_PROJECTS = ['desktop-chrome', 'mobile-chrome', 'desktop-safari'];
 const ALIASES = { pc: 'desktop-chrome', chrome: 'desktop-chrome', mobile: 'mobile-chrome', safari: 'desktop-safari' };
-const USAGE = '使い方: `/update-vrt`（全部）、`/update-vrt project=desktop-safari`（プロジェクト指定。別名: pc / mobile / safari。複数はカンマ区切り）、`/update-vrt test=P3,P8`（画面指定。P1〜P8）、両方の併用も可。';
+const USAGE = '使い方: `/update-vrt`（全部）、`/update-vrt project=desktop-safari`（プロジェクト指定。別名: pc / mobile / safari。複数はカンマ区切り）、`/update-vrt test=P3,P8`（画面指定。P1〜P14）、両方の併用も可。';
 
 function parse(body) {
   const m = /\/update-vrt\b([^\n]*)/.exec(body || '');
@@ -43,7 +43,7 @@ function parse(body) {
       tests = tests || [];
       for (const v of values) {
         const t = /^[Pp](\d{1,2})$/.exec(v);
-        if (!t) return fail(`画面（テスト）の指定が不正です: \`${v.slice(0, 40)}\`（P1〜P8 の形式）`);
+        if (!t) return fail(`画面（テスト）の指定が不正です: \`${v.slice(0, 40)}\`（P1〜P14 の形式）`);
         const name = `P${Number(t[1])}`;
         if (!tests.includes(name)) tests.push(name);
       }
