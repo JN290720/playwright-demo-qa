@@ -67,6 +67,27 @@ export class InventoryPage {
   }
 
   /**
+   * 商品名のリンクの data-test で特定される、一覧の 1 商品の行を返す
+   * @param itemTitleLinkDataTest 例: 'item-4-title-link'
+   */
+  productRow(itemTitleLinkDataTest: string): Locator {
+    return this.productItems.filter({ has: this.dataTestLocator(itemTitleLinkDataTest) });
+  }
+
+  /**
+   * 一覧の 1 商品の、商品名・価格・説明の表示を返す（詳細ページの表示と比べるための値）
+   * @param itemTitleLinkDataTest 例: 'item-4-title-link'
+   */
+  productInfo(itemTitleLinkDataTest: string) {
+    const row = this.productRow(itemTitleLinkDataTest);
+    return {
+      name: row.locator('.inventory_item_name'),
+      price: row.locator('.inventory_item_price'),
+      description: row.locator('.inventory_item_desc'),
+    };
+  }
+
+  /**
    * 商品の並び順（ソート）を変更する
    * @param option 'az' (AtoZ) | 'za' (ZtoA) | 'lohi' (価格の安い順) | 'hilo' (価格の高い順)
    */
