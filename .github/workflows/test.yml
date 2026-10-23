@@ -60,11 +60,11 @@ jobs:
       # （過去に、このステップが約 60 分ハングして Job が打ち切られた実績があります）
       # timeout-minutes は、再試行を使い切った場合の合計より少し長い「最後の砦」です。
       - name: Install Playwright System Dependencies
-        timeout-minutes: 12
+        timeout-minutes: 17
         run: |
           # apt の設定（全ての apt-get に効く。install-deps の内部の呼び出しには、コマンドラインの -o を付けられないため、設定ファイルで渡す）
           #   DPkg::Lock::Timeout: dpkg の lock を、最大 120 秒まで待つ（残った apt-get が lock を握っていても、次の試行が lock 待ちで即失敗しないように）
-          #   Acquire::http::Timeout: 取得が 30 秒止まったら打ち切る（止まった取得を、180 秒まで待たない）
+          #   Acquire::http::Timeout: 取得が 30 秒止まったら打ち切る（止まった取得を、長く待たない）
           sudo tee /etc/apt/apt.conf.d/80-retries > /dev/null <<'APTCONF'
           Acquire::Retries "3";
           Acquire::http::Timeout "30";
@@ -78,8 +78,8 @@ jobs:
             local pid=$!
             local waited=0
             while kill -0 "$pid" 2>/dev/null; do
-              if [ "$waited" -ge 180 ]; then
-                echo "::warning::install-deps が 180 秒で打ち切られたため、プロセスグループ $pid ごと止めます"
+              if [ "$waited" -ge 300 ]; then
+                echo "::warning::install-deps が 300 秒で打ち切られたため、プロセスグループ $pid ごと止めます"
                 sudo kill -TERM -- "-$pid" 2>/dev/null || true
                 sleep 5
                 sudo kill -KILL -- "-$pid" 2>/dev/null || true
