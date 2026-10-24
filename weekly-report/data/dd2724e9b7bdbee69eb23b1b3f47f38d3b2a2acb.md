@@ -60,7 +60,7 @@ Call log:
                 - generic [ref=e32]: Sauce Labs Backpack
               - generic [ref=e33]: carry.allTheThings() with the sleek, streamlined Sly Pack that melds uncompromising style with unequaled laptop and tablet protection.
             - generic [ref=e34]:
-              - generic [ref=e35]: $83.69
+              - generic [ref=e35]: $97.55
               - button "Remove" [ref=e36] [cursor=pointer]
         - generic [ref=e37]:
           - button "View details for Sauce Labs Bike Light" [ref=e39] [cursor=pointer]:
@@ -71,7 +71,7 @@ Call log:
                 - generic [ref=e44]: Sauce Labs Bike Light
               - generic [ref=e45]: A red light isn't the desired state in testing but it sure helps when riding your bike at night. Water-resistant with 3 lighting modes, 1 AAA battery included.
             - generic [ref=e46]:
-              - generic [ref=e47]: $45.43
+              - generic [ref=e47]: $6.89
               - button "Add to cart" [ref=e48] [cursor=pointer]
         - generic [ref=e49]:
           - button "View details for Sauce Labs Bolt T-Shirt" [ref=e51] [cursor=pointer]:
@@ -82,7 +82,7 @@ Call log:
                 - generic [ref=e56]: Sauce Labs Bolt T-Shirt
               - generic [ref=e57]: Get your testing superhero on with the Sauce Labs bolt T-shirt. From American Apparel, 100% ringspun combed cotton, heather gray with red bolt.
             - generic [ref=e58]:
-              - generic [ref=e59]: $24.27
+              - generic [ref=e59]: $52.17
               - button "Add to cart" [ref=e60] [cursor=pointer]
         - generic [ref=e61]:
           - button "View details for Sauce Labs Fleece Jacket" [ref=e63] [cursor=pointer]:
@@ -93,7 +93,7 @@ Call log:
                 - generic [ref=e68]: Sauce Labs Fleece Jacket
               - generic [ref=e69]: It's not every day that you come across a midweight quarter-zip fleece jacket capable of handling everything from a relaxing day outdoors to a busy day at the office.
             - generic [ref=e70]:
-              - generic [ref=e71]: $23.7
+              - generic [ref=e71]: $40.99
               - button "Add to cart" [ref=e72] [cursor=pointer]
         - generic [ref=e73]:
           - button "View details for Sauce Labs Onesie" [ref=e75] [cursor=pointer]:
@@ -104,7 +104,7 @@ Call log:
                 - generic [ref=e80]: Sauce Labs Onesie
               - generic [ref=e81]: Rib snap infant onesie for the junior automation engineer in development. Reinforced 3-snap bottom closure, two-needle hemmed sleeved and bottom won't unravel.
             - generic [ref=e82]:
-              - generic [ref=e83]: $47.99
+              - generic [ref=e83]: $85.99
               - button "Add to cart" [ref=e84] [cursor=pointer]
         - generic [ref=e85]:
           - button "View details for Test.allTheThings() T-Shirt (Red)" [ref=e87] [cursor=pointer]:
@@ -115,7 +115,7 @@ Call log:
                 - generic [ref=e92]: Test.allTheThings() T-Shirt (Red)
               - generic [ref=e93]: This classic Sauce Labs t-shirt is perfect to wear when cozying up to your keyboard to automate a few tests. Super-soft and comfy ringspun combed cotton.
             - generic [ref=e94]:
-              - generic [ref=e95]: $93.85
+              - generic [ref=e95]: $51.46
               - button "Add to cart" [ref=e96] [cursor=pointer]
   - contentinfo [ref=e97]:
     - list [ref=e98]:
