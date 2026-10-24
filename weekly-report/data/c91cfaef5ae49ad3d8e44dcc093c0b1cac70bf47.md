@@ -1,0 +1,104 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: saucedemo-cart-checkout.spec.ts >> カート・購入手続きの異常系・やり直し >> C5: [既知の不具合] ログアウト後に別のユーザーでログインしても、前のユーザーのカートが見えないこと
+- Location: tests/saucedemo-cart-checkout.spec.ts:108:7
+
+# Error details
+
+```
+Error: expect(locator).toBeVisible() failed
+
+Locator:  locator('.bm-menu-wrap')
+Expected: visible
+Received: hidden
+Timeout:  10000ms
+
+Call log:
+  - Expect "toBeVisible" locator('.bm-menu-wrap') with timeout 10000ms
+  - waiting for locator('.bm-menu-wrap')
+    23 × locator resolved to <div id="" hidden="true" aria-hidden="false" class="bm-menu-wrap">…</div>
+       - unexpected value "hidden"
+
+```
+
+```yaml
+- banner:
+  - button "Open Menu"
+  - img "Open Menu"
+  - text: Swag Labs
+  - button "Cart, 1 items": "1"
+  - text: Products Name (A to Z)
+  - combobox "Sort products":
+    - option "Name (A to Z)" [selected]
+    - option "Name (Z to A)"
+    - option "Price (low to high)"
+    - option "Price (high to low)"
+- main:
+  - button "View details for Sauce Labs Backpack":
+    - img "Sauce Labs Backpack"
+  - button "View details for Sauce Labs Backpack": Sauce Labs Backpack
+  - text: carry.allTheThings() with the sleek, streamlined Sly Pack that melds uncompromising style with unequaled laptop and tablet protection. $29.99
+  - button "Remove"
+  - button "View details for Sauce Labs Bike Light":
+    - img "Sauce Labs Bike Light"
+  - button "View details for Sauce Labs Bike Light": Sauce Labs Bike Light
+  - text: A red light isn't the desired state in testing but it sure helps when riding your bike at night. Water-resistant with 3 lighting modes, 1 AAA battery included. $9.99
+  - button "Add to cart"
+  - button "View details for Sauce Labs Bolt T-Shirt":
+    - img "Sauce Labs Bolt T-Shirt"
+  - button "View details for Sauce Labs Bolt T-Shirt": Sauce Labs Bolt T-Shirt
+  - text: Get your testing superhero on with the Sauce Labs bolt T-shirt. From American Apparel, 100% ringspun combed cotton, heather gray with red bolt. $15.99
+  - button "Add to cart"
+  - button "View details for Sauce Labs Fleece Jacket":
+    - img "Sauce Labs Fleece Jacket"
+  - button "View details for Sauce Labs Fleece Jacket": Sauce Labs Fleece Jacket
+  - text: It's not every day that you come across a midweight quarter-zip fleece jacket capable of handling everything from a relaxing day outdoors to a busy day at the office. $49.99
+  - button "Add to cart"
+  - button "View details for Sauce Labs Onesie":
+    - img "Sauce Labs Onesie"
+  - button "View details for Sauce Labs Onesie": Sauce Labs Onesie
+  - text: Rib snap infant onesie for the junior automation engineer in development. Reinforced 3-snap bottom closure, two-needle hemmed sleeved and bottom won't unravel. $7.99
+  - button "Add to cart"
+  - button "View details for Test.allTheThings() T-Shirt (Red)":
+    - img "Test.allTheThings() T-Shirt (Red)"
+  - button "View details for Test.allTheThings() T-Shirt (Red)": Test.allTheThings() T-Shirt (Red)
+  - text: This classic Sauce Labs t-shirt is perfect to wear when cozying up to your keyboard to automate a few tests. Super-soft and comfy ringspun combed cotton. $15.99
+  - button "Add to cart"
+- contentinfo:
+  - list:
+    - listitem:
+      - link "X":
+        - /url: https://x.com/saucelabs
+    - listitem:
+      - link "Facebook":
+        - /url: https://www.facebook.com/saucelabs
+    - listitem:
+      - link "LinkedIn":
+        - /url: https://www.linkedin.com/company/sauce-labs/
+  - text: © 2026 Sauce Labs. All Rights Reserved. Terms of Service | Privacy Policy
+```
+
+# Test source
+
+```ts
+  1  | import { expect } from '@playwright/test';
+  2  | import type { LoginPage } from '../pages/LoginPage';
+  3  | 
+  4  | /**
+  5  |  * サイドメニューを開き、開くアニメーション（左からスライド）が終わるまで待つ。
+  6  |  * 途中で操作すると、クリックやフォーカスが取りこぼされることがあるため（#57 で確認）。
+  7  |  */
+  8  | export async function openSideMenu(loginPage: LoginPage) {
+  9  |   await loginPage.openSideMenu();
+> 10 |   await expect(loginPage.sideMenu).toBeVisible();
+     |                                    ^ Error: expect(locator).toBeVisible() failed
+  11 |   await expect.poll(async () => (await loginPage.sideMenu.boundingBox())?.x).toBe(0);
+  12 | }
+  13 | 
+```
