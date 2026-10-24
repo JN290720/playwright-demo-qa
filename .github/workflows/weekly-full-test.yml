@@ -65,7 +65,7 @@ jobs:
         run: |
           # apt の設定（全ての apt-get に効く。install-deps の内部の呼び出しには、コマンドラインの -o を付けられないため、設定ファイルで渡す）
           #   DPkg::Lock::Timeout: dpkg の lock を、最大 120 秒まで待つ（残った apt-get が lock を握っていても、次の試行が lock 待ちで即失敗しないように）
-          #   Acquire::http::Timeout: 取得が 30 秒止まったら打ち切る（止まった取得を、180 秒まで待たない）
+          #   Acquire::http::Timeout: 取得が 30 秒止まったら打ち切る（止まった取得を、長く待たない）
           sudo tee /etc/apt/apt.conf.d/80-retries > /dev/null <<'APTCONF'
           Acquire::Retries "3";
           Acquire::http::Timeout "30";
@@ -73,16 +73,17 @@ jobs:
           APTCONF
           # apt の再試行（#152）: 試行ごとに、新しいプロセスグループで起動し、打ち切りのときはグループごと止める
           #   timeout は直接の子（npx）しか止めないため、その孫の apt-get が lock を持ったまま残っていた（#227 の run で確認）
+          #   install-deps は apt-get を sudo で起動する（root のプロセス）。ランナーのユーザーの kill は権限で失敗するため、sudo で止める（#229 の下での再発・run 39945654296 で確認）
           attempt_install() {
             setsid npx playwright install-deps &
             local pid=$!
             local waited=0
             while kill -0 "$pid" 2>/dev/null; do
-              if [ "$waited" -ge 180 ]; then
-                echo "::warning::install-deps が 180 秒で打ち切られたため、プロセスグループ $pid ごと止めます"
-                kill -TERM -- "-$pid" 2>/dev/null || true
+              if [ "$waited" -ge 90 ]; then
+                echo "::warning::install-deps が 90 秒で打ち切られたため、プロセスグループ $pid ごと止めます"
+                sudo kill -TERM -- "-$pid" 2>/dev/null || true
                 sleep 5
-                kill -KILL -- "-$pid" 2>/dev/null || true
+                sudo kill -KILL -- "-$pid" 2>/dev/null || true
                 wait "$pid" 2>/dev/null || true
                 return 124
               fi
@@ -91,7 +92,7 @@ jobs:
             done
             wait "$pid"
           }
-          for i in 1 2 3; do
+          for i in 1 2 3 4 5; do
             if attempt_install; then
               exit 0
             fi
@@ -101,7 +102,7 @@ jobs:
             sudo dpkg --configure -a || true
             sleep 10
           done
-          echo "::error::install-deps failed after 3 attempts"
+          echo "::error::install-deps failed after 5 attempts"
           exit 1
 
       - name: Install Playwright Browsers
