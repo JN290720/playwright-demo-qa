@@ -39,12 +39,12 @@ test.describe('ユーザー種別: performance_glitch_user（遅延がある）'
 });
 
 test.describe('ユーザー種別: problem_user（意図的な不具合）', () => {
-  test('前提: problem_user でログインでき、商品一覧に 6 件が表示されること', async ({ page }) => {
+  test('前提: problem_user でログインでき、商品一覧に 6 件が表示されること', { tag: '@safari-pr' }, async ({ page }) => {
     const { inventoryPage } = await loginAndShowInventory(page, CREDENTIALS.problem, INVENTORY_TIMEOUT);
     await expect(inventoryPage.productItems).toHaveCount(6);
   });
 
-  test('前提: problem_user で、購入者情報の入力欄まで進めること', async ({ page }) => {
+  test('前提: problem_user で、購入者情報の入力欄まで進めること', { tag: '@safari-pr' }, async ({ page }) => {
     const { inventoryPage } = await loginAndShowInventory(page, CREDENTIALS.problem, INVENTORY_TIMEOUT);
     await inventoryPage.cartLink.click();
     const checkoutPage = new CheckoutPage(page);
