@@ -7,7 +7,7 @@ Claude 向けの作業ルールは [CLAUDE.md](CLAUDE.md) にまとめていま�
 
 1. **Issue を作る**(または既存の Issue を選ぶ)。優先度ラベル(`P0`〜`P3`)を付ける
 2. `main` からブランチを作る(`種別/内容`。例: `ci/fix-timeout`、`test/add-checkout-case`)
-3. 変更する。ローカルでのテストは任意です(先に確認すると、速く・安く直せます。下記。`npm run test:stg` が、PR の CI と同じ範囲です)
+3. 変更する。ローカルでのテストは任意です(先に確認すると、速く・安く直せます。下記。`npm run test:stg` は 3 プロジェクトの全テストです。PR の CI は、Safari だけ縮小版（`@safari-pr` タグ付きのテスト）です)
 4. PR を作る([PR テンプレート](.github/PULL_REQUEST_TEMPLATE.md)に沿って書く)。ローカルの確認を終えてからでなくてもかまいません。失敗は CI で検知します
 5. CI(`PR Test & VRT Update`)の結果を確認する。失敗したら原因を調べて直す。方針が変わったら PR を閉じる。失敗のまま放置・マージしない
 6. レビュー後、`main` へマージする
@@ -15,6 +15,7 @@ Claude 向けの作業ルールは [CLAUDE.md](CLAUDE.md) にまとめていま�
    - いつ: QA 側の変更が `main` にマージされ、CI と Post-Deploy Test が成功した後。区切りの良いタイミングで行う
    - 誰: PR の作成までは、担当者（または自動化）が進めてよい。本体のマージは、責任者の指示を受けて行う
    - 確認: 本体 PR の CI（`test`）の成功、本体の Deploy App と Post-Deploy Test の成功、本体の差分が QA の同じ変更と一致していること
+   - 手順（順番）: (1) 本体に、同じ変更の PR を作る → (2) 本体の CI が成功することを確認する → (3) 責任者の指示で、本体をマージする → (4) マージ後、本体の Deploy App と Post-Deploy Test の成功を確認する（詳細は [README.md](README.md) の「リポジトリ構成と検証フロー」）
 
 詳しい流れは、[README.md](README.md) の「リポジトリ構成と検証フロー」を参照してください。
 
@@ -24,7 +25,7 @@ Claude 向けの作業ルールは [CLAUDE.md](CLAUDE.md) にまとめていま�
 npm ci
 npx playwright install --with-deps
 npm run test              # 既定（ENV 未指定 = prod）。@prd タグの主要機能のみ
-npm run test:stg          # staging。全テスト（PR の CI と同じ範囲）
+npm run test:stg          # staging。3 プロジェクトの全テスト（PR の CI は Safari だけ縮小版）
 npx playwright test --ui  # UI モード
 ```
 
