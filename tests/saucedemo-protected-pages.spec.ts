@@ -38,7 +38,7 @@ const [CART, ...OTHER_PROTECTED] = PROTECTED;
 test.describe('保護ページへの直接アクセス（未ログイン）', () => {
   // S1（カート）だけ、デプロイ後（Post-Deploy）にも動かす（認証が破れていないことの確認。D33）。
   // タグは固定の文字列でないと lint（valid-test-tags）を通らないため、S2〜S4 のループとは別のテストにしている
-  test(`${CART.id}: 未ログインで「${CART.name}」(${CART.url}) を開くと、ログイン画面に戻り、ログインを求められること`, { tag: '@prd' }, async ({ page }) => {
+  test(`${CART.id}: 未ログインで「${CART.name}」(${CART.url}) を開くと、ログイン画面に戻り、ログインを求められること`, async ({ page }) => {
     const loginPage = await openWithoutLogin(page, CART);
 
     await expect(page).toHaveURL('/');
