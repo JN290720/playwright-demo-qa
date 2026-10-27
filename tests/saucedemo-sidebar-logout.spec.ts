@@ -50,7 +50,7 @@ test.describe('サイドメニューとログアウト', () => {
     await expect(page).toHaveURL('https://saucelabs.com/');
   });
 
-  test('Logout: ログイン画面に戻り、入力欄が空で、直接アクセスしても商品一覧が見られないこと', { tag: '@prd' }, async ({ page }) => {
+  test('Logout: ログイン画面に戻り、入力欄が空で、直接アクセスしても商品一覧が見られないこと', async ({ page }) => {
     const { loginPage } = await loginAndShowInventory(page);
     await openSideMenu(loginPage);
     await page.locator(sideMenuLinks.logout).click();
