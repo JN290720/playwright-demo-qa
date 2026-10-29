@@ -27,7 +27,7 @@
 - VRT は、`desktop-chrome` / `mobile-chrome` / `desktop-safari` の 3 プロジェクト × 14 画面（P1〜P14）= 42 枚のベースライン（`*-linux.png`）がある。VRT の spec は、3 プロジェクトすべてで実行される（PR では、Safari は縮小版として VRT 14 件だけ）
 - **実行環境（#45）**: stg（PR の CI）は**全テスト**、prd（Post-Deploy）は **`@prd` タグ付きの必須の主要機能のみ**。`@prd` の対象: 購入フロー E2E、ログイン・カート追加、TodoMVC の基本機能。a11y / VRT / network / security / API / ソート・カート / 購入入力の検証 / 破壊的・異常系は、stg のみ
 - **モバイル**: `playwright.config.ts` に `testMatch` の指定が無いため、すべての spec は `mobile-chrome` でも実行される（機能テストも含む）
-- **ユーザー種別の前提（5 件）**: prd（`@prd`）の対象外。PR の Safari では problem_user の前提 2 件（P1・P2。`@safari-pr`）だけ実行され、error_user・visual_user の前提（E1・E2・V1）は実行されない（Safari の追加の採否は未決。#155 の判断待ち）
+- **ユーザー種別の前提（5 件）**: prd（`@prd`）の対象外。PR の Safari では problem_user の前提 2 件（P1・P2。`@safari-pr`）だけ実行され、error_user・visual_user の前提（E1・E2・V1）は実行されない（根拠: D45 の S-1。ユーザーの決定は #155 のコメント https://github.com/JN290720/playwright-demo-qa/issues/155#issuecomment-6383435670。QA #240 でマージ済み）
 - SauceDemo 以外の対象（TodoMVC、`playwright.dev`、jsonplaceholder）は、デモ用として、この表の対象外（`todomvc-*.spec.ts`（basic / smoke / destructive）、`api-demo.spec.ts`。TodoMVC のテストは、名前で対象が分かるようにリネーム済み。#17）。全体の対象は [プロジェクト概要](overview.md) を参照。
 
 ## 2. 不足している観点（リスク順）
