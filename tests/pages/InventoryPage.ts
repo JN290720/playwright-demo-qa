@@ -16,6 +16,8 @@ export class InventoryPage {
   readonly itemNames: Locator;         // 商品名の一覧（並び順の検証に使用）
   readonly itemPrices: Locator;        // 商品価格の一覧（並び順の検証に使用）
   readonly itemButtons: Locator;       // 各商品の「Add to cart / Remove」ボタンの一覧（カートの状態の検証に使用）
+  readonly itemImages: Locator;        // 各商品の画像（商品ごとに異なるかの検証に使用）
+  readonly addToCartButtons: Locator;  // 「Add to cart」ボタンの一覧（押せるかの検証に使用。Remove は含まない）
 
   /**
    * コンストラクタ：ページ上の各要素を特定するためのロケータ（セレクター）を定義
@@ -33,6 +35,8 @@ export class InventoryPage {
     this.itemNames = page.locator('.inventory_item_name');
     this.itemPrices = page.locator('.inventory_item_price');
     this.itemButtons = page.locator('.inventory_item button');
+    this.itemImages = page.locator('.inventory_item_img img');
+    this.addToCartButtons = page.locator('[data-test^="add-to-cart"]');
   }
 
   /**
