@@ -55,8 +55,8 @@ test.describe('ユーザー種別: problem_user（意図的な不具合）', () 
 
   test('[既知の不具合] 商品画像が、商品ごとに異なること', async ({ page }) => {
     test.fail(true, 'problem_user は、全商品の画像が同じになる（docs/known-site-issues.md）');
-    await loginAndShowInventory(page, CREDENTIALS.problem, INVENTORY_TIMEOUT);
-    const sources = await page.locator('.inventory_item_img img').evaluateAll((imgs) => imgs.map((img) => img.getAttribute('src')));
+    const { inventoryPage } = await loginAndShowInventory(page, CREDENTIALS.problem, INVENTORY_TIMEOUT);
+    const sources = await inventoryPage.itemImages.evaluateAll((imgs) => imgs.map((img) => img.getAttribute('src')));
     expect(new Set(sources).size).toBe(sources.length);
   });
 
@@ -71,7 +71,7 @@ test.describe('ユーザー種別: problem_user（意図的な不具合）', () 
   test('[既知の不具合] 6 件すべてを、カートに入れられること', async ({ page }) => {
     test.fail(true, 'problem_user は、一部の商品の「Add to cart」が効かない（docs/known-site-issues.md）');
     const { inventoryPage } = await loginAndShowInventory(page, CREDENTIALS.problem, INVENTORY_TIMEOUT);
-    const buttons = page.locator('[data-test^="add-to-cart"]');
+    const buttons = inventoryPage.addToCartButtons;
     const count = await buttons.count();
     for (let i = 0; i < count; i++) {
       await buttons.nth(0).click(); // 押すたびに、次の「Add to cart」が先頭に来る（押せたものは Remove に変わる）
@@ -119,7 +119,7 @@ test.describe('ユーザー種別: error_user（操作時にエラーが起き�
   test('[既知の不具合] 6 件すべてを、カートに入れられること', async ({ page }) => {
     test.fail(true, 'error_user は、一部の商品の「Add to cart」が効かない（docs/known-site-issues.md）');
     const { inventoryPage } = await loginAndShowInventory(page, CREDENTIALS.error, INVENTORY_TIMEOUT);
-    const buttons = page.locator('[data-test^="add-to-cart"]');
+    const buttons = inventoryPage.addToCartButtons;
     const count = await buttons.count();
     for (let i = 0; i < count; i++) {
       await buttons.nth(0).click();
