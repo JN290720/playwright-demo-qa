@@ -25,7 +25,7 @@ jobs:
 
     # テスト観点表（何を、どこまでテストしているか）を、テストのコードから自動生成して、public/ に置く（#39）。
     # 手で書いた表はコードとずれていくため、デプロイのたびに作り直す
-    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+    - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
       with:
         node-version-file: '.nvmrc'
         cache: 'npm'
@@ -97,7 +97,7 @@ jobs:
       issues: write  # Issue の本文の更新
     steps:
     - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
-    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+    - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
       with:
         node-version-file: '.nvmrc'
         cache: 'npm'
