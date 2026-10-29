@@ -42,7 +42,7 @@ npx playwright install --with-deps
 ```
 npx playwright test
 ```
-#### 全テストを実行（staging。PR の CI と同じ範囲）
+#### 全テストを実行（staging。PR の CI と同じ範囲。ただし PR の Safari は `@safari-pr` の縮小版のみ）
 ```
 npm run test:stg
 ```
