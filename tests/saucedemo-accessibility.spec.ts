@@ -241,6 +241,9 @@ test.describe('SauceDemo Accessibility (a11y) Tests', () => {
       await page.keyboard.press('Enter');
       await expect(checkoutPage.finishButton).toBeVisible();
       await checkoutPage.finishButton.focus();
+      // フォーカスが Finish に移ったことを確かめてから Enter を押す（flaky の切り分け。#265）。
+      // ここで落ちれば「フォーカスが移らなかった」、通って次で落ちれば「Enter が効かなかった」
+      await expect(checkoutPage.finishButton, 'Finish にフォーカスが移らなかった（Enter の前）').toBeFocused();
       await page.keyboard.press('Enter');
 
       await expect(checkoutPage.completeHeader).toHaveText('Thank you for your order!');
