@@ -53,7 +53,7 @@ jobs:
       # 対象のコメントに👀（Eyes）リアクションを追加します。
       - name: Add Eyes Reaction to Command Comment
         if: "github.event_name == 'issue_comment' && contains(github.event.comment.body, '/update-vrt')"
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             await github.rest.reactions.createForIssueComment({
@@ -70,7 +70,7 @@ jobs:
       # イベントペイロードのJSON構造が異なるため、GitHub APIを使って対象PRのブランチ名（head.ref）を取得します。
       - name: Get PR Branch Name
         id: pr-branch
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             if (context.eventName === 'issue_comment') {
@@ -361,7 +361,7 @@ jobs:
       # ・通常テスト完了時：既存のレポート案内コメントを上書き更新（新規作成）
       - name: Comment PR Status or VRT Reply
         if: always()
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           VRT_SCOPE: ${{ steps.vrt-opts.outputs.scope }}
           VRT_ERROR: ${{ steps.vrt-opts.outputs.error }}
