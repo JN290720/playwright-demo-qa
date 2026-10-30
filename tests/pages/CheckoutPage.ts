@@ -11,6 +11,7 @@ export class CheckoutPage {
   // カート画面
   readonly cartItems: Locator;       // カート内の商品行
   readonly checkoutButton: Locator;  // 「Checkout」ボタン
+  readonly cancelButton: Locator;    // 「Cancel」ボタン（購入手続きの途中で、前の画面に戻る）
 
   // 購入情報入力画面
   readonly firstNameInput: Locator;   // 名
@@ -39,6 +40,7 @@ export class CheckoutPage {
 
     this.cartItems = page.locator('.cart_item');
     this.checkoutButton = page.locator('[data-test="checkout"]');
+    this.cancelButton = page.locator('[data-test="cancel"]');
 
     this.firstNameInput = page.locator('[data-test="firstName"]');
     this.lastNameInput = page.locator('[data-test="lastName"]');

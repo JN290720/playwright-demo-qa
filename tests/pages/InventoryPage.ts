@@ -18,6 +18,7 @@ export class InventoryPage {
   readonly itemButtons: Locator;       // 各商品の「Add to cart / Remove」ボタンの一覧（カートの状態の検証に使用）
   readonly itemImages: Locator;        // 各商品の画像（商品ごとに異なるかの検証に使用）
   readonly addToCartButtons: Locator;  // 「Add to cart」ボタンの一覧（押せるかの検証に使用。Remove は含まない）
+  readonly removeButtons: Locator;     // 「Remove」ボタンの一覧（カートに入っている商品の検証に使用）
 
   /**
    * コンストラクタ：ページ上の各要素を特定するためのロケータ（セレクター）を定義
@@ -37,6 +38,7 @@ export class InventoryPage {
     this.itemButtons = page.locator('.inventory_item button');
     this.itemImages = page.locator('.inventory_item_img img');
     this.addToCartButtons = page.locator('[data-test^="add-to-cart"]');
+    this.removeButtons = page.locator('[data-test^="remove-"]');
   }
 
   /**
