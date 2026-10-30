@@ -5,6 +5,7 @@ import { InventoryPage } from './pages/InventoryPage';
 import { CheckoutPage } from './pages/CheckoutPage';
 import { CREDENTIALS, SHIPPING_INFO } from './fixtures/users';
 import { openSideMenu } from './helpers/side-menu';
+import { loginAndShowInventory } from './helpers/login';
 import { TIMEOUTS } from './helpers/timeouts';
 
 /**
@@ -15,11 +16,7 @@ import { TIMEOUTS } from './helpers/timeouts';
  * Cancel = 購入手続きの途中で、前の画面に戻るボタン。保持 = 画面を開き直しても、カートの中身が残ること。
  */
 async function loginAndAddBackpack(page: Page) {
-  const loginPage = new LoginPage(page);
-  const inventoryPage = new InventoryPage(page);
-  await loginPage.goto();
-  await loginPage.loginAs(CREDENTIALS.standard);
-  await expect(inventoryPage.title).toHaveText('Products');
+  const { inventoryPage } = await loginAndShowInventory(page);
   await inventoryPage.addItemToCart('add-to-cart-sauce-labs-backpack');
   await expect(inventoryPage.cartBadge).toHaveText('1');
   return { inventoryPage };
@@ -52,7 +49,7 @@ test.describe('カート・購入手続きの異常系・やり直し', () => {
     await checkoutPage.checkoutButton.click();
     await expect(checkoutPage.firstNameInput).toBeVisible();
 
-    await page.locator('[data-test="cancel"]').click();
+    await checkoutPage.cancelButton.click();
 
     await expect(page).toHaveURL(/cart\.html/);
     await expect(checkoutPage.cartItems).toHaveCount(1);
@@ -67,7 +64,7 @@ test.describe('カート・購入手続きの異常系・やり直し', () => {
     await checkoutPage.fillShippingInfo(SHIPPING_INFO.firstName, SHIPPING_INFO.lastName, SHIPPING_INFO.postalCode);
     await expect(checkoutPage.finishButton).toBeVisible();
 
-    await page.locator('[data-test="cancel"]').click();
+    await checkoutPage.cancelButton.click();
 
     await expect(page).toHaveURL(/inventory\.html/);
     await expect(inventoryPage.title).toHaveText('Products');
@@ -80,7 +77,7 @@ test.describe('カート・購入手続きの異常系・やり直し', () => {
 
     await expect(inventoryPage.title).toHaveText('Products');
     await expect(inventoryPage.cartBadge).toHaveText('1');
-    await expect(page.locator('[data-test="remove-sauce-labs-backpack"]')).toBeVisible();
+    await expect(inventoryPage.dataTestLocator('remove-sauce-labs-backpack')).toBeVisible();
   });
 
   test('C6: 「Add to cart」を素早く 2 回押しても、カートのバッジと商品のボタンの表示が食い違わないこと', async ({ page }) => {
@@ -92,11 +89,10 @@ test.describe('カート・購入手続きの異常系・やり直し', () => {
     await loginPage.loginAs(CREDENTIALS.standard);
     await expect(inventoryPage.title).toHaveText('Products');
 
-    await page.locator('[data-test="add-to-cart-sauce-labs-bike-light"]').dblclick();
+    await inventoryPage.dataTestLocator('add-to-cart-sauce-labs-bike-light').dblclick();
 
-    const removeButtons = page.locator('[data-test^="remove-"]');
     await expect(async () => {
-      const removed = await removeButtons.count();
+      const removed = await inventoryPage.removeButtons.count();
       await expect(inventoryPage.cartBadge).toHaveCount(Math.min(removed, 1));
     }).toPass({ timeout: TIMEOUTS.PASS });
   });
@@ -111,13 +107,13 @@ test.describe('カート・購入手続きの異常系・やり直し', () => {
     const loginPage = new LoginPage(page);
 
     await openSideMenu(loginPage);
-    await page.locator('[data-test="logout-sidebar-link"]').click();
+    await loginPage.logoutLink.click();
     await expect(loginPage.loginButton).toBeVisible();
 
     await loginPage.loginAs(CREDENTIALS.visual); // 別のユーザー
     await expect(inventoryPage.title).toHaveText('Products');
     // 商品一覧のボタンが描画されてから、バッジを確認する（描画前に「バッジ 0 件」と判定して、「予期せず成功」にならないように。レビューエージェントの提案）
-    await expect(page.locator('[data-test^="add-to-cart-"]').first()).toBeVisible();
+    await expect(inventoryPage.addToCartButtons.first()).toBeVisible();
 
     await expect(inventoryPage.cartBadge).toHaveCount(0, { timeout: TIMEOUTS.SHORT });
   });
