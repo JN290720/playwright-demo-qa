@@ -7,7 +7,7 @@
 - **テスト対象のサイト（SauceDemo）**: ログイン・商品一覧・商品詳細・カート・購入手続き・サイドメニュー。意図的な不具合や遅延を再現するユーザー（`problem_user` など）も含む
 - **TodoMVC**: 基本操作（追加・完了・削除）と、破壊的な操作
 - **API**: jsonplaceholder（テスト用の公開 API）
-- **端末・ブラウザ**: PC（Chrome）、スマホ（Chrome。Pixel 5 の画面サイズ）、Safari（PR では縮小版の 16 件、`main` では全テスト）、Android エミュレータ（Chrome）
+- **端末・ブラウザ**: PC（Chrome）、スマホ（Chrome。Pixel 5 の画面サイズ）、Safari（PR では縮小版の 18 件、`main` では全テスト）、Android エミュレータ（Chrome）
 - 観点ごとに、どの画面を何で確認しているかは [テスト観点表](test-matrix.md) を参照
 
 ## 2. 今できること
