@@ -132,7 +132,8 @@ jobs:
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-pr-${{ hashFiles('**/package-lock.json') }}
+          # キーに、ランナーの OS の版（ImageOS）を含める: ubuntu-latest の版が変わったときに、別の版のキャッシュに当たらないようにする
+          key: ${{ runner.os }}-${{ env.ImageOS }}-playwright-pr-${{ hashFiles('**/package-lock.json') }}
 
       # 💡 WebKit (Safari) 等の起動に必要な OS 依存ライブラリ (libevent 等) を常にインストール
       # ※ OS パッケージは Actions キャッシュ対象外となるため、キャッシュヒット時でも必ず実行します

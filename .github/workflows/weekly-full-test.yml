@@ -57,7 +57,8 @@ jobs:
         with:
           path: ~/.cache/ms-playwright
           # キーに、入れるブラウザ（chromium-webkit）を含める: ブラウザの構成を変えたときに、古いキャッシュに当たって、入れ直されないのを防ぐ
-          key: ${{ runner.os }}-playwright-weekly-chromium-webkit-${{ hashFiles('**/package-lock.json') }}
+          # キーに、ランナーの OS の版（ImageOS。例: ubuntu2604）を含める: ubuntu-latest の版が変わったとき、別の版で作られたキャッシュ（WebKit が読む ICU の版が違う）に当たらないようにする
+          key: ${{ runner.os }}-${{ env.ImageOS }}-playwright-weekly-chromium-webkit-${{ hashFiles('**/package-lock.json') }}
 
       # WebKit (Safari) 等の起動に必要な OS 依存ライブラリ。キャッシュ対象外のため常に実行（apt のハング対策で再試行。#19）
       - name: Install Playwright System Dependencies
