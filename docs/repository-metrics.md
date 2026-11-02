@@ -61,9 +61,9 @@
 | ワークフローの本数 | 9 | 2026-11-03 | `.github/workflows/*.yml` の数 |
 | ワークフローの起動条件 | 下の表 | 2026-11-03 | 各 YAML の `on:` |
 | PR テストの所要時間（pull_request の成功した直近 20 件） | 平均 245 秒、最短 192 秒、最長 385 秒 | 2026-11-03 | `gh run list --workflow pull-request.yml --event pull_request --created ">=2026-10-04" --limit 300 --json conclusion,createdAt,updatedAt,status`。基準点より前に作成されたもの（`createdAt < 2026-11-02T23:35:00Z`）、`conclusion` が `success`、`createdAt` の新しい順に 20 件。所要時間 = `updatedAt − createdAt`（秒）。平均は小数第 1 位で計算し、整数に四捨五入（245.3 → 245） |
-| 週次フルテストの所要時間（成功した直近 20 件） | 平均 2,669 秒、最短 210 秒、最長 47,901 秒（外れ値あり） | 2026-11-03 | `gh run list --workflow weekly-full-test.yml`（同じ方法） |
-| Android 夜間テストの所要時間（成功した直近 20 件） | 平均 380 秒、最短 317 秒、最長 466 秒 | 2026-11-03 | `gh run list --workflow android-test.yml`（同じ方法） |
-| デプロイ後テスト（`test.yml`）の所要時間（成功した直近 20 件） | 平均 107 秒、最短 61 秒、最長 277 秒 | 2026-11-03 | `gh run list --workflow test.yml`（同じ方法） |
+| 週次フルテストの所要時間（成功した直近 20 件） | 平均 2,669 秒（2668.8 を四捨五入）、最短 210 秒、最長 47,901 秒（外れ値あり） | 2026-11-03 | 基準点: 2026-11-03 08:35 JST（`origin/main` の `5288679`）。対象: `weekly-full-test.yml` の実行のうち、作成日時が基準点より前・`conclusion` が `success` のもの。作成日時の新しい順に先頭 20 件。所要時間 = `updatedAt − createdAt`（秒）。コマンド: `gh run list --workflow weekly-full-test.yml --created ">=2026-10-04" --limit 300 --json conclusion,createdAt,updatedAt,status`（期間の上限は取得の範囲）。対象の期間: 2026-10-23（最古）〜 2026-11-02（最新）。基準点より前の完了 44 件のうち成功 36 件 |
+| Android 夜間テストの所要時間（成功した直近 20 件） | 平均 380 秒（380.2 を四捨五入）、最短 317 秒、最長 466 秒 | 2026-11-03 | 基準点: 2026-11-03 08:35 JST（`origin/main` の `5288679`）。対象: `android-test.yml` の実行のうち、作成日時が基準点より前・`conclusion` が `success` のもの。作成日時の新しい順に先頭 20 件。所要時間 = `updatedAt − createdAt`（秒）。コマンド: `gh run list --workflow android-test.yml --created ">=2026-10-04" --limit 300 --json conclusion,createdAt,updatedAt,status`（期間の上限は取得の範囲）。対象の期間: 2026-10-20（最古）〜 2026-11-01（最新）。基準点より前の完了 59 件のうち成功 45 件 |
+| デプロイ後テスト（`test.yml`）の所要時間（成功した直近 20 件） | 平均 107 秒（106.8 を四捨五入）、最短 61 秒、最長 277 秒 | 2026-11-03 | 基準点: 2026-11-03 08:35 JST（`origin/main` の `5288679`）。対象: `test.yml` の実行のうち、作成日時が基準点より前・`conclusion` が `success` のもの。作成日時の新しい順に先頭 20 件。所要時間 = `updatedAt − createdAt`（秒）。コマンド: `gh run list --workflow test.yml --created ">=2026-10-04" --limit 300 --json conclusion,createdAt,updatedAt,status`（期間の上限は取得の範囲）。対象の期間: 2026-10-24（最古）〜 2026-11-01（最新）。基準点より前の完了 154 件のうち成功 147 件 |
 
 ### ワークフローの起動条件
 
