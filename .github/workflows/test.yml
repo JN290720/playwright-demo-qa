@@ -28,7 +28,7 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     # 通常は約 2〜3 分。ハング時に 1 時間待たずに気づけるよう 15 分に短縮（#19、ユーザー承認済み）
     timeout-minutes: 15
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     
     steps:
       # -----------------------------------------------------------------------
@@ -47,12 +47,18 @@ jobs:
         run: npm ci
 
       # 💡 Playwright のブラウザバイナリをキャッシュ
+      # キーに使う、ランナーの OS の版（例: 24.04 → 2404）。環境変数の ImageOS は、このランナーでは空だった（PR #288 の CI で確認）
+      - name: OS の版を取得
+        id: os
+        run: echo "version=$(. /etc/os-release && echo "$VERSION_ID" | tr -d .)" >> "$GITHUB_OUTPUT"
+
       - name: Cache Playwright Browsers
         id: playwright-cache
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-post-deploy-${{ hashFiles('**/package-lock.json') }}
+          # キーに、ランナーの OS の版を含める: ubuntu-latest の版が変わったときに、別の版のキャッシュに当たらないようにする
+          key: ${{ runner.os }}-${{ steps.os.outputs.version }}-playwright-post-deploy-${{ hashFiles('**/package-lock.json') }}
 
       # 💡 WebKit (Safari) 等の起動に必要な OS 依存ライブラリ (libevent 等) を常にインストール
       # ※ OS パッケージは Actions キャッシュ対象外となるため、キャッシュヒット時でも必ず実行します
