@@ -103,7 +103,16 @@
 
 - **PR のテストの成功率（キャンセルを除く）**: 97%（221 / 228。228 = 成功 221 + 失敗 7）。キャンセル 18 件は、同じブランチへの新しい push による打ち切りの想定です（ログとの照合は未実施）。
 - **注意（定義の違い）**: 「全イベント合算」は、定時の実行・手動実行・PR 上の実行をすべて含みます。定時（`schedule`）だけの件数は、週次が 3 回、Android が 14 回、日次が 26 回で、少ない行は傾向の目安にとどめてください。特に週次の定時は 3 回のみです。
-- **再集計の手順**: `gh run list` は 1 回で最大 1,000 件しか返さず、`--limit 300` では件数が切れるため、件数は REST API を期間ごとに分けて取る（例: `pull-request.yml` の `issue_comment`。期間は 5 日程度に分ける）。`gh api --paginate "repos/JN290720/playwright-demo-qa/actions/workflows/pull-request.yml/runs?event=issue_comment&per_page=100&created=2026-10-04..2026-10-18" --jq '.workflow_runs[] | select(.status=="completed" and .created_at < "2026-11-02T23:35:00Z" and .created_at >= "2026-10-04") | .conclusion'` を、期間を分けて実行し、件数を数える（この手順で、`skipped` 1,097・`success` 13・`failure` 1 を再現）
+- **再集計の手順**（`issue_comment` の件数。そのままコピーして実行できる）: `gh run list` は 1 回で最大 1,000 件しか返さないため、REST API を期間ごとに分けて取り、`completed` の結果を数えます。期間は 5 日程度に分けます。
+
+  ```bash
+  for r in 2026-10-04..2026-10-18 2026-10-19..2026-10-23 2026-10-24..2026-10-28 2026-10-29..2026-11-02; do
+    gh api --paginate "repos/JN290720/playwright-demo-qa/actions/workflows/pull-request.yml/runs?event=issue_comment&per_page=100&created=$r" \
+      --jq '.workflow_runs[] | select(.status=="completed" and .created_at >= "2026-10-04" and .created_at < "2026-11-02T23:35:00Z") | .conclusion'
+  done | sort | uniq -c
+  ```
+
+  期待される結果（2026-11-03 時点）: `1097 skipped`・`13 success`・`1 failure`（計 1,111 件）。
 - **定時（`schedule`）で失敗した実行の分類**（ログを読んで確認。計 2 件）:
   - テスト側の不具合: 0 件
   - 対象サイト側の変化: 0 件
