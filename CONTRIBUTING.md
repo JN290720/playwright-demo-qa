@@ -34,8 +34,10 @@ npx playwright test --ui  # UI モード
 ローカルの確認を速くするための手段（`--only-changed` = Git の差分で変わった spec ファイルだけを実行する Playwright のオプション）。**CI では使わない**（CI は全件を回して網羅を守る）。
 
 ```
-ENV=staging npx playwright test --only-changed   # 未コミットの変更（差分）のある spec だけ
+npm run test:stg -- --only-changed   # 未コミットの変更（差分）のある spec だけ（PowerShell でも動く）
 ```
+
+`npm run test:stg` の後ろの `--` に続けた引数は、Playwright に渡される（`ENV=staging` の前置きは使わない。PowerShell では `VAR=値 コマンド` が動かないため）。
 
 - **全件を実行する条件**（`--only-changed` を使わない）: `tests/pages/`・`tests/helpers/`・`tests/fixtures/`・`playwright.config.ts`・`.env.*` を変えたとき。これらを使う spec は、spec 自体が変わらないと実行されず、影響を見落とすおそれがあるため
 - 新規・変更したテストは、`--only-changed` で絞った後も、3 ブラウザ × リトライなし × 繰り返し（CLAUDE.md の「PR を出す前の確認」の表）で確かめる
