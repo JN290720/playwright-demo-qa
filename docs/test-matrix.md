@@ -21,10 +21,12 @@
 | 購入手続き入力 | ✅ 日本語の氏名・郵便番号で確認へ進む（`checkout-validation`）、C2（Cancel。`cart-checkout`）、K4（キーボードで完走）、problem の入力欄（名・姓）まで進む（`user-types` 前提 P2） | ✅ 項目ごとの欠落（`checkout-validation`）、全項目未入力（`qa-destructive` P11）。空のカートで進める既知の不具合（C1） | ✅ 姓・名・郵便番号へのインジェクション風文字列 4 種で、ダイアログ・注入要素が 0 件（`checkout-injection`。#169） | ✅ `accessibility` P5・P5b（入力エラー表示）・K4 | ✅ VRT P5・P11 | ─ |
 | 購入確認 | ✅ 小計・税・合計と、各商品の価格（`checkout-totals` の全ケース。`e2e-purchase` の 5）、C3（Cancel。`cart-checkout`）、error で確認画面（`checkout-step-two`）まで進み Finish が見える（`user-types` 前提 E2。Finish の不具合は台帳 7） | ❌ | ❌ | ✅ `accessibility` P6 | ✅ VRT P6 | ─ |
 | 購入完了 | ✅ 注文完了まで（`e2e-purchase`。`@prd`）、完了後に「戻る」で一覧まで戻ってもカートが空（`checkout-after-purchase`。#168）、「Back Home」で一覧に戻る（`back-navigation` B1） | ✅ `qa-destructive` P12（完了画面の直リンク） | △ 直リンクの扱い（`qa-destructive` P12） | ✅ `accessibility` P7 | ✅ VRT P7 | ─ |
-| サイドメニュー | ✅ 各リンク（All Items / About / Logout / Reset App State）、閉じる（×・Esc）（`sidebar-logout`） | ❌ | ❌ | ✅ `accessibility` P8・K3（キーボードで開閉） | ✅ VRT P8 | ❌ |
-| ログアウト | ✅ ログイン画面に戻る・入力欄が空（`sidebar-logout`） | ✅ 戻るボタン後の保護（`qa-destructive` P7）、ログアウト後の直リンクの保護（`checkout-validation`。認可の検証） | △ Cookie の操作（`protected-pages` S6・S7。S8 は既知の不具合） | ❌ | ❌ | ❌ |
+| サイドメニュー | ✅ 各リンク（All Items / About / Logout / Reset App State）、閉じる（×・Esc）（`sidebar-logout`） | ❌ | ❌ | ✅ `accessibility` P8・K3（キーボードで開閉） | ✅ VRT P8 | ─（対象外）※1 |
+| ログアウト | ✅ ログイン画面に戻る・入力欄が空（`sidebar-logout`） | ✅ 戻るボタン後の保護（`qa-destructive` P7）、ログアウト後の直リンクの保護（`checkout-validation`。認可の検証） | △ Cookie の操作（`protected-pages` S6・S7。S8 は既知の不具合） | ❌※2 | ❌ | ─（対象外）※1 |
 
 補足:
+- ※1 **ネットワークは対象外（2026-11-06 実測）**: 操作の後 2 秒までを計測し、それ以降は未計測。3 ブラウザ × 3 回で、外部ホストへの通信は 0 件（9/9 回）。外部への通信が見つかれば ❌ に戻す（実測: [#284](https://github.com/JN290720/playwright-demo-qa/issues/284#issuecomment-6677013904)）
+- ※2 **ログアウト・a11y は要確認（❌のまま）**: ログアウトのリンクは、P8（メニュー展開時の axe 走査）で間接的に含まれるだけ。K3 はメニューの開閉のみで、ログアウトの操作は含まない。ログアウトのリンクを対象にした a11y は未確認。ログアウト後の画面は P1・P9 で見ている（根拠: [#284](https://github.com/JN290720/playwright-demo-qa/issues/284#issuecomment-6676533242)）
 - **❌ の起票先**: 「（起票: #N）」は、その抜けを扱う Issue。書かれていない ❌（購入確認・購入完了・サイドメニュー・ログアウトなど）は、まだ起票していない（未トリアージ）。#279 は、観点の抜けの案（商品一覧の異常系・カートのセキュリティ・購入手続きの途中の再読み込み）をまとめた Issue。購入手続き入力のネットワークは、実測により対象外（PR #298）
 - VRT は、`desktop-chrome` / `mobile-chrome` / `desktop-safari` の 3 プロジェクト × 14 画面（P1〜P14）= 42 枚のベースライン（`*-linux.png`）がある。VRT の spec は、3 プロジェクトすべてで実行される（PR では、Safari は縮小版として VRT 14 件だけ）
 - **実行環境（#45）**: stg（PR の CI）は**全テスト**、prd（Post-Deploy）は **`@prd` タグ付きの必須の主要機能のみ**。`@prd` の対象: 購入フロー E2E、ログイン・カート追加、TodoMVC の基本機能。a11y / VRT / network / security / API / ソート・カート / 購入入力の検証 / 破壊的・異常系は、stg のみ
