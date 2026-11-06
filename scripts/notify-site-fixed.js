@@ -33,7 +33,9 @@ const walk = (suite) => {
   for (const spec of suite.specs || []) {
     if (!KNOWN.test(spec.title)) continue;
     for (const t of spec.tests || []) {
-      if (t.status !== 'unexpected') continue;
+      // 「予期せず成功」（unexpected）には、ブラウザ起動失敗などの環境エラーも含まれる（フィクスチャで起動に失敗すると、テストの本文は走らず、全リトライが失敗する）
+      // 本文が 1 回でも成功したものだけを、「直った」と判定する（#152 の 6673843670・案 A）
+      if (t.status !== 'unexpected' || !(t.results || []).some((r) => r.status === 'passed')) continue;
       const key = `${spec.file} › ${spec.title}`;
       fixed.set(key, [...(fixed.get(key) || []), t.projectName]);
     }
