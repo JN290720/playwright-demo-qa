@@ -41,8 +41,7 @@ test.describe('SauceDemo カートの書き換え（cart-contents）', () => {
   test('W3 前提: 書き換える前は、カート画面の読み込みが完了し、商品が 1 件表示されること', async ({ page }) => {
     // 環境の故障（ブラウザの起動・ログイン・サイトの停止）を、次の W3（test.fail）が隠さないための確認
     const cart = new CheckoutPage(page);
-    // 直リンクの /cart.html は、画面が出ても 404 を返す（2026-11-10 実測。作業・レビューで再現）。状態コードは確かめない
-    // 応答の HTTP ステータスは確かめない（実測で、/cart.html の直リンクは、画面が表示されても 404 を返す。#307 に報告）
+    // 直リンクの /cart.html は、画面が出ても 404 を返す（2026-11-10 実測。作業・レビューで再現。#307 6768099888）。状態コードは確かめない
     await page.goto('/cart.html');
 
     await expect(cart.cartList).toBeVisible();
