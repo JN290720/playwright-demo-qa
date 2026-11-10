@@ -7,7 +7,7 @@
 - 凡例: ✅ あり / △ 一部のみ / ❌ なし / ─ 対象外 / ❌※ 要確認（なしとは扱わない。理由は、同じ行の補足の ※ に書く）
 - 購入系（購入手続き入力・購入確認・購入完了）の「ネットワーク」列を ─ にした根拠: 2026-11-03 に実サイトで実測（Chromium・Firefox・WebKit 各 3 回）。外部ホストへの通信 0 件（全ブラウザ・3 回。同じサイトの画像 1 件は除く。Firefox の完了画面で 1 回のみ読まれた）。サーバー側の注文 API の有無は未確認。注文 API が見つかれば ❌ に戻す（実測: #152 の 6596549288・6596576981）
 - 括弧内は、対応する spec（`tests/` のファイル名）とケース番号、または抜けを扱う Issue です（`#` は `playwright-demo-qa` の Issue）
-- テストの ID（`P1`・`K2` など）の使い方と、台帳は [テスト ID の規則と台帳](test-id-rules.md) を見てください
+- テストの ID（`P1`・`K2` など）の使い方と、テスト ID 台帳は [テスト ID の規則と台帳](test-id-rules.md) を見てください
 - この表は、`tests/` の spec の内容を読んで書いています（2026-10-23 時点）。spec の名前だけで判断しないでください
 
 ## 1. 画面 × 観点
@@ -19,7 +19,7 @@
 | 商品詳細 | ✅ `product-detail` D3（一覧と同じ内容）、D4（カート追加と削除）、D5（一覧へ戻る）、ブラウザの「戻る」で一覧に戻りバッジが保たれる（`back-navigation` B2） | ✅ `product-detail-errors` D1（存在しない商品） | ❌ 未実施（ID の改ざんなど）（起票: #272） | ✅ `accessibility` P3 | ✅ VRT P3 | ✅ `network-mocking` P4（画像の読み込み失敗） |
 | カート | ✅ 削除・再読み込みの保持・「Continue Shopping」（`inventory-cart`）、C2（Cancel）・C4（再読み込み）（`cart-checkout`） | ✅ C6（素早い 2 回押し。`cart-checkout`） | ❌（起票: #279） | ✅ `accessibility` P4・P4b。※カートのリンクはキーボードで開けない（K3b。`docs/a11y-known-issues.md`） | ✅ VRT P4・P12（空）・P13（商品あり） | △ `network-mocking` P2（遅延下のカート追加） |
 | 購入手続き入力 | ✅ 日本語の氏名・郵便番号で確認へ進む（`checkout-validation`）、C2（Cancel。`cart-checkout`）、K4（キーボードで完走）、problem の入力欄（名・姓）まで進む（`user-types` 前提 P2） | ✅ 項目ごとの欠落（`checkout-validation`）、全項目未入力（`qa-destructive` P11）。空のカートで進める既知の不具合（C1） | ✅ 姓・名・郵便番号へのインジェクション風文字列 4 種で、ダイアログ・注入要素が 0 件（`checkout-injection`。#169） | ✅ `accessibility` P5・P5b（入力エラー表示）・K4 | ✅ VRT P5・P11 | ─ |
-| 購入確認 | ✅ 小計・税・合計と、各商品の価格（`checkout-totals` の全ケース。`e2e-purchase` の 5）、C3（Cancel。`cart-checkout`）、error で確認画面（`checkout-step-two`）まで進み Finish が見える（`user-types` 前提 E2。Finish の不具合は台帳 7） | ❌ | ❌ | ✅ `accessibility` P6 | ✅ VRT P6 | ─ |
+| 購入確認 | ✅ 小計・税・合計と、各商品の価格（`checkout-totals` の全ケース。`e2e-purchase` の 5）、C3（Cancel。`cart-checkout`）、error で確認画面（`checkout-step-two`）まで進み Finish が見える（`user-types` 前提 E2。Finish の不具合はサイト不具合の台帳 7） | ❌ | ❌ | ✅ `accessibility` P6 | ✅ VRT P6 | ─ |
 | 購入完了 | ✅ 注文完了まで（`e2e-purchase`。`@prd`）、完了後に「戻る」で一覧まで戻ってもカートが空（`checkout-after-purchase`。#168）、「Back Home」で一覧に戻る（`back-navigation` B1） | ✅ `qa-destructive` P12（完了画面の直リンク） | △ 直リンクの扱い（`qa-destructive` P12） | ✅ `accessibility` P7 | ✅ VRT P7 | ─ |
 | サイドメニュー | ✅ 各リンク（All Items / About / Logout / Reset App State）、閉じる（×・Esc）（`sidebar-logout`） | ❌ | ❌ | ✅ `accessibility` P8・K3（キーボードで開閉） | ✅ VRT P8 | ─（対象外）※1 |
 | ログアウト | ✅ ログイン画面に戻る・入力欄が空（`sidebar-logout`） | ✅ 戻るボタン後の保護（`qa-destructive` P7）、ログアウト後の直リンクの保護（`checkout-validation`。認可の検証） | △ Cookie の操作（`protected-pages` S6・S7。S8 は既知の不具合） | ❌※2 | ❌ | ─（対象外）※1 |
@@ -65,7 +65,7 @@
 - 認証情報・URL の直書き: #18（CLOSED）/ #41（CLOSED）。大部分は解消済み。`saucedemo-protected-pages.spec.ts` の `const BASE` は Cookie 操作（`context.addCookies`）に必要な URL 指定のため意図的な残存（件数: 1 か所）
 - ログイン手順が a11y / VRT / network の各 spec に重複 → POM に寄せる（`CLAUDE.md` の規約。#185 で順次リファクタリング中）
 - `retries: 2` により、リトライで通った不安定なテストは結果上は成功になる。ただし flaky として警告表示される（Job Summary・PR コメント。#37）
-- a11y の除外・既知の不備は、`docs/a11y-known-issues.md` に台帳として記録（カートのリンクがキーボードで開けない不備、ホバー時のコントラスト不足など。`select-name` の除外は、サイトの修正を確認して外した）。失敗を期待するテスト（`test.fail()`）は、サイトが直ると失敗して気づける（#58）
+- a11y の除外・既知の不備は、`docs/a11y-known-issues.md` にサイト不具合の台帳（a11y）として記録（カートのリンクがキーボードで開けない不備、ホバー時のコントラスト不足など。`select-name` の除外は、サイトの修正を確認して外した）。失敗を期待するテスト（`test.fail()`）は、サイトが直ると失敗して気づける（#58）
 
 ## 4. 重視する観点（決定済み）
 
