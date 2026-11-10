@@ -33,6 +33,7 @@
 | `S` | `saucedemo-protected-pages`（保護ページ・セッション） | S1〜S8 |
 | `D` | `saucedemo-product-detail`・`saucedemo-product-detail-errors` | D1（存在しない商品）と、D3〜D5（詳細ページ） |
 | `B` | `saucedemo-back-navigation`（戻る系の画面遷移） | B1・B2 |
+| `R` | `saucedemo-checkout-reload`（購入手続きの途中の再読み込み） | R1 |
 | 番号 | `todomvc-basic` | 1〜6（接頭辞ではなく、番号だけ） |
 
 ## 4. 台帳（`tests/` の spec、`origin/main` の宣言から実測）
@@ -51,6 +52,7 @@
 | `saucedemo-product-detail-errors.spec.ts` | D | 4 | D1（ループ 4） |
 | `todomvc-basic.spec.ts` | 番号 | 6 | 1〜6 |
 | `saucedemo-back-navigation.spec.ts` | B | 2 | B1（購入完了の「Back Home」）・B2（詳細からブラウザの「戻る」） |
+| `saucedemo-checkout-reload.spec.ts` | R | 1 | R1（購入の途中の再読み込み。現状の記録） |
 
 **ID の無い spec（11 件）**: `login`・`saucedemo-checkout-after-purchase`・`saucedemo-checkout-injection`・`saucedemo-checkout-validation`・`saucedemo-e2e-purchase`・`saucedemo-inventory-cart`・`saucedemo-security-input`・`saucedemo-sidebar-logout`・`saucedemo-user-types`・`todomvc-smoke`・`api-demo`。ID は任意（新しく書く場合は、規則 2 に従う）。
 
