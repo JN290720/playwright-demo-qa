@@ -41,7 +41,7 @@ jobs:
        contains(github.event.comment.body, '/update-vrt') &&
        contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association))
 
-    # 通常は約 3〜4 分。ハング時に 1 時間待たずに気づけるよう 20 分に短縮（#19、ユーザー承認済み）
+    # 35 分（install-deps の延長に合わせて延長。元は #19 で 20 分。[監査] 承認と追認の扱いは #321 6825272092）
     timeout-minutes: 35
     runs-on: ubuntu-24.04
 
