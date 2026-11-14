@@ -9,7 +9,7 @@ name: Weekly Full Test
 #
 # - 実行内容: ENV=staging（全テスト）。PC の Chrome / スマホ表示の Chrome / Safari（WebKit。PR 以外のイベントなので、設定により含まれる）
 # - 失敗 → GitHub Issue（ラベル weekly-failure）で通知。復旧したら自動でクローズ（notify-failure.js）
-# - 既知の不具合のテスト（test.fail()）が予期せず成功 → 「サイトが直った可能性」を、サイト不具合の一覧 Issue（ラベル site-defect）にコメント
+# - 既知の不具合のテスト（test.fail()）が予期せず成功 → 「サイトが直った可能性」を、サイト不具合の親の一覧 #97 にコメント
 # - このファイルを変更した PR でも動く（変更の検証用。通知は送らない）
 # - 最新のレポートを gh-pages の weekly-report/ に上書き公開する（D35。URL: https://<owner>.github.io/<repo>/weekly-report/）。
 #   履歴は残さない（過去分は成果物 weekly-playwright-report を 14 日保持）。main の実行だけで公開する（PR では触らない）
