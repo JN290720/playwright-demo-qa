@@ -7,7 +7,8 @@
 //   （それ以外の失敗は、通常の失敗として notify-failure.js が通知する）
 //
 // 使い方: node scripts/notify-site-fixed.js [reports/results.json]
-// 環境変数: GH_TOKEN, GITHUB_REPOSITORY（必須）, RUN_URL（実行へのリンク）, DRY_RUN=1（投稿せず、予定を表示）
+// 環境変数: GH_TOKEN, GITHUB_REPOSITORY（必須）, RUN_URL（実行へのリンク）, DRY_RUN=1（投稿せず、予定を表示）,
+//   SITE_DEFECT_ISSUE（通知先の Issue 番号。既定は 97 = サイト不具合の親の一覧）
 //
 // 同じ内容を、毎週コメントしないよう、目印（隠しコメント）で重複を避ける。
 'use strict';
@@ -19,7 +20,8 @@ const TOKEN = process.env.GH_TOKEN || process.env.GITHUB_TOKEN;
 const REPO = process.env.GITHUB_REPOSITORY;
 const RUN_URL = process.env.RUN_URL || '';
 const DRY = process.env.DRY_RUN === '1';
-const LABEL = 'site-defect';
+// 通知先は、親の一覧 #97 に固定する（ラベルでの検索は、site-defect の最新の 1 件 = 個別の不具合の Issue を返し、誤って投稿していた）
+const number = Number(process.env.SITE_DEFECT_ISSUE || 97);
 const KNOWN = /既知の(不具合|不備)/;
 
 if (!fs.existsSync(input)) {
@@ -80,12 +82,7 @@ async function main() {
     return;
   }
   if (!TOKEN || !REPO) throw new Error('GH_TOKEN と GITHUB_REPOSITORY が必要です');
-  const issues = (await api(`/repos/${REPO}/issues?state=open&labels=${LABEL}&per_page=1`)).filter((i) => !i.pull_request);
-  if (issues.length === 0) {
-    console.log(`ラベル ${LABEL} の open な Issue が無いため、投稿しません。`);
-    return;
-  }
-  const number = issues[0].number;
+  if (!Number.isInteger(number) || number <= 0) throw new Error(`SITE_DEFECT_ISSUE が不正です: ${process.env.SITE_DEFECT_ISSUE}`);
   const comments = await api(`/repos/${REPO}/issues/${number}/comments?per_page=100&sort=created&direction=desc`);
   if (comments.some((c) => (c.body || '').includes(marker))) {
     console.log(`Issue #${number} に、同じ内容のコメントが既にあります。投稿しません。`);
