@@ -86,7 +86,7 @@ npx playwright show-report
 | `post-deploy-failure` | Post-Deploy Test（本番の `@prd` テスト）が失敗したとき。`P1` も付く | 次に成功したら、自動で閉じる | 開発者: 本番で主要機能が壊れていないか確認する |
 | `weekly-failure` | 週次の全テスト（staging）が失敗したとき。`P1` も付く | 次に成功したら、自動で閉じる | 開発者: 失敗の原因（アプリの不具合か、テスト対象サイトの変化か）を確認する |
 | `android-failure` | Android の夜間・手動実行が失敗したとき（PR の実行では作らない）。`P1` も付く | 次に成功したら、自動で閉じる | 開発者: エミュレータ上の VRT・購入テストの失敗を確認する |
-| `site-defect` | 既知のサイト不具合が「直った可能性」があるとき（`test.fail()` が予期せず成功） | 閉じない。open の `site-defect` の Issue（常設）に、コメントを追記する。同じ内容のコメントは、重ねて追記しない。常設の Issue が無いときは、コメントは投稿されず、何もしない | 開発者: 実際に直っているか確認し、直っていれば `test.fail()` を外す（[docs/known-site-issues.md](docs/known-site-issues.md)） |
+| `site-defect` | 既知のサイト不具合が「直った可能性」があるとき（`test.fail()` が予期せず成功） | 閉じない。親の一覧 #97（常設。`scripts/notify-site-fixed.js` の `SITE_DEFECT_ISSUE`）に、コメントを追記する。同じ内容のコメントは、重ねて追記しない。#97 が取得できないときは、投稿せず、エラーで終了する | 開発者: 実際に直っているか確認し、直っていれば `test.fail()` を外す（[docs/known-site-issues.md](docs/known-site-issues.md)） |
 | `test-viewpoint` | テスト観点の Issue（親とサブ）。デプロイのたびに、本文の「テストケースの表」を更新する | 閉じない（本文だけを書き換える） | 開発者: 観点ごとのテストケースを確認する |
 | `daily-report` | 日次レポート。open の 1 件に、毎日コメントを追記する | 閉じない | 人: 毎朝、PR・Issue の状況を確認する |
 | `dependency-review` | 依存関係レビュー（毎週月曜）。open の 1 件に、提案を追記する | 閉じない | 人: 更新の提案を判断し、PR で行う |
