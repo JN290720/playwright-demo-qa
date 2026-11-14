@@ -90,7 +90,7 @@ npx playwright show-report
 | `test-viewpoint` | テスト観点の Issue（親とサブ）。デプロイのたびに、本文の「テストケースの表」を更新する | 閉じない（本文だけを書き換える） | 開発者: 観点ごとのテストケースを確認する |
 | `daily-report` | 日次レポート。open の 1 件に、毎日コメントを追記する | 閉じない | 人: 毎朝、PR・Issue の状況を確認する |
 | `dependency-review` | 依存関係レビュー（毎週月曜）。open の 1 件に、提案を追記する | 閉じない | 人: 更新の提案を判断し、PR で行う |
-| `needs-user-decision` / `blocked-by-merge` / `ready-for-pr` / `backlog` | 運用ラベル（スクリプトは読むだけ。日次レポートが一覧にする）。`needs-user-decision` は、相談のテンプレート（`.github/ISSUE_TEMPLATE/consultation.yml`）から作ると、自動で付く | 人が外す（ほかのラベルの付け方は運用に従う） | 人: ユーザーの判断が要るもの・マージ待ち・PR を作れるもの・保留かを判断する |
+| `needs-user-decision` / `blocked-by-merge` / `ready-for-pr` / `backlog` | 運用ラベル（スクリプトは読むだけ。日次レポートが一覧にする）。`needs-user-decision` は、相談のテンプレート（`.github/ISSUE_TEMPLATE/consultation.yml`）から作ると、自動で付く（課題の相談・提案は、今は Backlog（PWQA）で行う。このテンプレートは従来の運用向け） | 人が外す（ほかのラベルの付け方は運用に従う） | 人: ユーザーの判断が要るもの・マージ待ち・PR を作れるもの・保留かを判断する |
 
 - 優先度 `P0`〜`P3` は、人が Issue に付ける（[CONTRIBUTING.md](CONTRIBUTING.md)）。自動で作られる失敗の Issue だけ、`P1` が付く
 - 「閉じない」ものは、スクリプトが閉じない。閉じるかどうかは、人が判断する
