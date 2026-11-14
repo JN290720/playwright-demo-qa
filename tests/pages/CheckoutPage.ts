@@ -9,7 +9,9 @@ export class CheckoutPage {
   readonly page: Page;
 
   // カート画面
+  readonly cartList: Locator;        // カート一覧の枠（商品が 0 件でも出る）
   readonly cartItems: Locator;       // カート内の商品行
+  readonly cartBadge: Locator;       // カートアイコンのバッジ（件数が 0 のときは出ない）
   readonly checkoutButton: Locator;  // 「Checkout」ボタン
   readonly cancelButton: Locator;    // 「Cancel」ボタン（購入手続きの途中で、前の画面に戻る）
 
@@ -38,7 +40,9 @@ export class CheckoutPage {
   constructor(page: Page) {
     this.page = page;
 
+    this.cartList = page.locator('.cart_list');
     this.cartItems = page.locator('.cart_item');
+    this.cartBadge = page.locator('.shopping_cart_badge');
     this.checkoutButton = page.locator('[data-test="checkout"]');
     this.cancelButton = page.locator('[data-test="cancel"]');
 
@@ -56,6 +60,22 @@ export class CheckoutPage {
 
     this.completeHeader = page.locator('[data-test="complete-header"]');
     this.backHomeButton = page.locator('[data-test="back-to-products"]');
+  }
+
+  /**
+   * ブラウザの保存（localStorage の `cart-contents`）を、指定した文字列に書き換える（カートの書き換えテスト用）。
+   * 書き換えたあとは、`/cart.html` を新しく開くこと（再読み込みでは、サイトが保存を書き戻すことがある）
+   */
+  async rewriteCartContents(raw: string) {
+    await this.page.evaluate((value) => localStorage.setItem('cart-contents', value), raw);
+  }
+
+  /**
+   * バッジの件数を数える（バッジが無ければ 0）。バッジの出現は待たない（呼ぶ前に、描画の完了を別の要素で待つこと）
+   */
+  async readBadgeCount(): Promise<number> {
+    if ((await this.cartBadge.count()) === 0) return 0;
+    return Number(await this.cartBadge.first().innerText());
   }
 
   /**
