@@ -9,7 +9,15 @@
 // 同じ日（JST）のレポートが投稿済みなら、定時実行（schedule）は投稿しない（予備の実行との重複を防ぐ）。手動実行は常に投稿する。
 //
 // 環境変数: GH_TOKEN（必須）, REPO_QA, REPO_MAIN, REPORT_LABEL（既定 daily-report）, WINDOW_HOURS（既定 24）
+//
+// 書き先（PWQA-42。課題管理を Backlog へ移す段階 5 の 2）:
+//   NOTIFY_TARGETS=github,backlog で、Backlog の月ごとの固定の課題「日次レポート YYYY-MM（自動）」にも同じ本文をコメントする（既定は github だけ）。
+//   Backlog の設定: BACKLOG_API_KEY・BACKLOG_SPACE（scripts/lib/backlog.js を参照）と、BACKLOG_PROJECT_KEY（プロジェクトキー。変数）。
+//   移行の間は GitHub 側が正。Backlog への投稿の失敗は、警告だけで、GitHub への投稿は止めない。
 'use strict';
+
+const { parseTargets, missingConfig, createClient } = require('./lib/backlog');
+const { postDailyReport } = require('./lib/backlog-daily');
 
 const TOKEN = process.env.GH_TOKEN || process.env.GITHUB_TOKEN;
 const REPO_QA = process.env.REPO_QA || 'JN290720/playwright-demo-qa';
@@ -194,6 +202,16 @@ async function main() {
     process.stdout.write(body);
     return;
   }
+  const targets = parseTargets();
+  // Backlog 側は、GitHub への投稿の成否にかかわらず、最後に試す（GitHub 側が止まっても、Backlog には書く／逆も、失敗は警告に留める）
+  try {
+    if (targets.has('github')) await postToGitHub(body, marker, jstDate, now);
+  } finally {
+    if (targets.has('backlog')) await postToBacklog(body, marker, jstDate);
+  }
+}
+
+async function postToGitHub(body, marker, jstDate, now) {
   const issue = await findOrCreateReportIssue();
   if (process.env.GITHUB_EVENT_NAME === 'schedule') {
     // 予備の実行との重複を防ぐ: 今日（JST）のレポートが投稿済みなら、投稿しない
@@ -206,6 +224,28 @@ async function main() {
   }
   const posted = await api(`/repos/${REPO_QA}/issues/${issue}/comments`, { method: 'POST', body: JSON.stringify({ body }) });
   console.log(`投稿しました: ${posted.html_url}`);
+}
+
+// Backlog の月ごとの固定の課題にコメントする（PWQA-42）。失敗しても、ワークフローは失敗にせず、警告だけを出す
+async function postToBacklog(body, marker, jstDate) {
+  const missing = missingConfig(process.env, ['BACKLOG_PROJECT_KEY']);
+  if (missing) {
+    console.log(`::warning::${missing}。Backlog には投稿しません。`);
+    return;
+  }
+  try {
+    const r = await postDailyReport({
+      client: createClient(),
+      projectKey: process.env.BACKLOG_PROJECT_KEY.trim(),
+      jstDate,
+      body,
+      marker,
+      dedupe: process.env.GITHUB_EVENT_NAME === 'schedule',
+    });
+    console.log(r.posted ? `Backlog に投稿しました: ${r.issueKey}（コメント ${r.commentId}）` : `Backlog: ${r.reason}（${r.issueKey}）。投稿しません。`);
+  } catch (e) {
+    console.log(`::warning::Backlog への投稿に失敗しました（GitHub への投稿はそのまま）: ${e.message}`);
+  }
 }
 
 main().catch((e) => {
