@@ -5,7 +5,7 @@ SauceDemo には、標準ユーザー以外に、**意図的に不具合や遅�
 サイトが直ったときに、気づけるようにするため。
 
 - **`test.fail()`**: Playwright の機能で、「このテストは失敗するはず」と宣言する。失敗すれば「成功」扱い（CI は赤くならない）。**予期せず成功したら、テストが失敗として報告される** → サイトが直ったと分かる
-- 対象のテストは、1〜8 が `tests/saucedemo-user-types.spec.ts`（#15）、9 が `tests/saucedemo-sidebar-logout.spec.ts`（#57）、10 が `tests/saucedemo-protected-pages.spec.ts`（#130）、11・12 が `tests/saucedemo-cart-checkout.spec.ts`（#132）、14〜16 が `tests/saucedemo-cart-rewrite.spec.ts`（#307）。ユーザー判断（#15）: 既知の不具合は `test.fail()` で記録し、CI を不安定にしない
+- 対象のテストは、1〜8 が `tests/saucedemo-user-types.spec.ts`（#15）、9 が `tests/saucedemo-sidebar-logout.spec.ts`（#57）、10 が `tests/saucedemo-protected-pages.spec.ts`（#130）、17 が `tests/saucedemo-checkout-skip-step.spec.ts`（PWQA-51）、11・12 が `tests/saucedemo-cart-checkout.spec.ts`（#132）、14〜16 が `tests/saucedemo-cart-rewrite.spec.ts`（#307）。ユーザー判断（#15）: 既知の不具合は `test.fail()` で記録し、CI を不安定にしない
 - a11y（アクセシビリティ）の不備は `docs/a11y-known-issues.md` に別に記録
 - 各不具合の詳細（事象・再現手順・発生率・発生デバイス・期待値）は、表の Issue（サブ Issue。親は #97）。**期待値は、外部サイトで仕様書が無いため「不明」が基本**
 
@@ -27,6 +27,7 @@ SauceDemo には、標準ユーザー以外に、**意図的に不具合や遅�
 | 14 | 全ユーザー（標準ユーザーでも発生） | ブラウザの保存 `cart-contents` を存在しない商品 ID（`[99]`）に書き換えて `/cart.html` を開くと、**バッジ 1・カート一覧 0 件**（件数が一致しない）。読み取りは、描画の完了を別の要素で待ったあとにバッジを数える条件（2026-11-10 に、3 ブラウザ × 5 回で 15/15 の再現）。 | バッジの件数とカート一覧の件数が一致する（期待値は不明。一般的な購入サイトの振る舞い） | 2026-11-10 | `saucedemo-cart-rewrite.spec.ts` › SauceDemo カートの書き換え（cart-contents） › W1: [既知の不具合] 存在しない商品 ID（99）に書き換えても、バッジの件数とカート一覧の件数が一致すること | #307（親 #97） |
 | 15 | 全ユーザー（標準ユーザーでも発生） | `cart-contents` を小数の商品 ID（`[1.5]`）に書き換えると、**バッジ 1・カート一覧 0 件**。#280（商品詳細の id の扱い）と関連するが、カート画面での事象は別。読み取りは、描画の完了を別の要素で待ったあとにバッジを数える条件（2026-11-10 に、3 ブラウザ × 5 回で 15/15 の再現）。 | 同上 | 2026-11-10 | `saucedemo-cart-rewrite.spec.ts` › SauceDemo カートの書き換え（cart-contents） › W2: [既知の不具合] 小数の商品 ID（1.5）に書き換えても、バッジの件数とカート一覧の件数が一致すること | #307（親 #97） |
 | 16 | 全ユーザー（標準ユーザーでも発生） | `cart-contents` を JSON でない値（`not-json{`）に書き換えて `/cart.html` を開くと、**画面が白く（本文 0 文字）、ページ上に JSON の parse エラーが出る**（load のみ待って確認。15/15 の再現） | 画面が表示され、カートは空として扱われ、ページ上の例外が出ない（期待値は不明） | 2026-11-10 | `saucedemo-cart-rewrite.spec.ts` › SauceDemo カートの書き換え（cart-contents） › W3: [既知の不具合] JSON でない値に書き換えても、画面が表示され、カートは空として扱われ、ページ上の例外が出ないこと（前提: 同 describe の「W3 前提」） | #307（親 #97） |
+| 17 | 全ユーザー（標準ユーザーでも発生） | 購入者情報を入れずに `/checkout-step-two.html`（購入確認）を直接開くと、**エラーなしで確認画面が表示され、Finish で購入を完了できる**（HTTP 応答は 404 だが、画面は表示される。2026-11-15 に 3 ブラウザ × 3 回で 9/9。PWQA-50）。ログイン済み・カートに商品あり、の条件 | 購入者情報が無いときは、購入の確定に進めない（期待値は不明。一般的な購入サイトの振る舞い。台帳 11 と同じ型） | 2026-11-15 | `saucedemo-checkout-skip-step.spec.ts` › SauceDemo 購入手順の飛ばし（購入確認の直接アクセス） › X1: [既知の不具合] 購入者情報を入れずに購入確認の画面を直接開いても、購入の確定（Finish）ボタンが表示されないこと。**限界**: テストは「Finish が表示されない」ことだけを見る。Finish が残ったまま押すと止まる形や、step-one 以外の画面（カート・商品一覧など）へ戻す形で直った場合は、テストでは気づけない（後者は Cancel が無く、待ちが時間切れになる） | PWQA-51（実測 PWQA-50） |
 
 `performance_glitch_user`（ログインに約 5 秒の遅延）は、遅延があっても購入完了まで行えるため、通常のテストとして確認している（不具合ではない）。
 
