@@ -50,7 +50,13 @@ jobs:
           [ -n "$AWS_ACCESS_KEY_ID" ] || { echo "::error::シークレット R2_ACCESS_KEY_ID が未設定です"; exit 1; }
           [ -n "$AWS_SECRET_ACCESS_KEY" ] || { echo "::error::シークレット R2_SECRET_ACCESS_KEY が未設定です"; exit 1; }
           [ -n "$R2_ENDPOINT" ] || { echo "::error::シークレット R2_ENDPOINT が未設定です"; exit 1; }
+          # エラーの文面に、エンドポイントのホスト名やアカウント ID（<ID>.r2.cloudflarestorage.com の <ID>）が出ても、公開ログに残らないよう伏せる。
+          # 切り出した値そのものは、echo しない（add-mask の行だけを出す）
           echo "::add-mask::$R2_ENDPOINT"
+          R2_HOST="${R2_ENDPOINT#*://}"; R2_HOST="${R2_HOST%%/*}"; R2_HOST="${R2_HOST%%:*}"
+          R2_LABEL="${R2_HOST%%.*}"
+          if [ -n "$R2_HOST" ]; then echo "::add-mask::$R2_HOST"; fi
+          if [ "${#R2_LABEL}" -ge 8 ]; then echo "::add-mask::$R2_LABEL"; fi
           S3=(aws s3 --endpoint-url "$R2_ENDPOINT")
           KEY="_check/access-check-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}.txt"
           URI="s3://${BUCKET}/${KEY}"
