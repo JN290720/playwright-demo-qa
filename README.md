@@ -58,7 +58,7 @@ npx playwright show-report
 
 ## 🔄 CI/CD パイプライン (GitHub Actions)
 
-本リポジトリでは、用途に応じて 9 本のワークフロー（`.github/workflows/`）を自動実行しています。「副作用」列は、そのワークフローが外部に書き込むもの（コミット・Issue・削除）です。
+本リポジトリでは、用途に応じて 10 本のワークフロー（`.github/workflows/`）を自動実行しています。「副作用」列は、そのワークフローが外部に書き込むもの（コミット・Issue・削除）です。
 
 | ワークフロー（ファイル） | 発火タイミング | 目的 | 副作用（書き込み先） | 結果を見る人（想定） |
 | :--- | :--- | :--- | :--- | :--- |
@@ -71,6 +71,7 @@ npx playwright show-report
 | **Daily Report** (`daily-report.yml`) | 毎朝 05:17 JST（予備 07:43 JST）／ 手動 | 日次のレポートを投稿する | 日次レポート用の Issue を作成・コメント | 担当（毎朝の `daily-report` の Issue） |
 | **Dependency Review** (`dependency-review.yml`) | 毎週月曜 09:23 JST ／ 手動 | 依存関係の更新提案（`npm audit` など）を確認する | 提案の Issue（`dependency-review` ラベル）を作成・コメント。移行の間は、Backlog の課題（変数 `BACKLOG_DEPENDENCY_ISSUE`）にも同じ本文をコメント（失敗は警告だけ） | 担当（`dependency-review` の Issue。更新の判断） |
 | **Cleanup gh-pages Reports** (`cleanup-gh-pages.yml`) | 毎週月曜 03:00 JST（自動実行は**常に dry-run**）／ 手動 | 古いテストレポートを整理する。`main-test-*` は新しい順に `keep`（既定 10）件残す | 手動で `dry_run` を `false` にしたときだけ削除: 削除前に GitHub Release へアーカイブし、`gh-pages` から削除コミット（手動の既定は `dry_run = true`） | 担当（手動実行のときの Actions のログ・Release） |
+| **R2 Access Check** (`r2-access-check.yml`) | 手動のみ（入力: `bucket`） | Cloudflare R2（VRT の基準画像の置き場所の候補）に、シークレットでアクセスできるかを確かめる | R2 の `_check/` の下に小さなファイルを 1 つ置いて、取得して比べ、その 1 ファイルだけ削除する（ほかのキーには触らない） | 担当（手動実行のときの Actions のログ） |
 
 > 「結果を見る人」の列は、ワークフローの YAML からは確定できない。通知先（Issue のラベル）から推定した運用の想定。
 

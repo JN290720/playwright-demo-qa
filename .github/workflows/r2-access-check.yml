@@ -1,0 +1,76 @@
+name: R2 Access Check
+
+# Cloudflare R2（VRT の基準画像の置き場所の候補。PWQA-6）に、このリポジトリのシークレットでアクセスできるかを確かめます。
+# 手動実行のみ（push・PR では動きません）。ユーザーの指示のあとに実行します。
+# 手順: 一覧（ls）→ `_check/` の下に小さなファイルを置く（put）→ 取得して中身を比べる（get）→ その 1 ファイルだけ削除（rm）。
+# 本番の画像・ほかのキーには触りません。キー・エンドポイントの値は、ログに出しません。
+# 必要なシークレット: R2_ACCESS_KEY_ID / R2_SECRET_ACCESS_KEY / R2_ENDPOINT
+on:
+  workflow_dispatch:
+    inputs:
+      bucket:
+        description: 'R2 のバケット名（英小文字・数字・ハイフン。3〜63 文字）'
+        required: true
+        type: string
+
+permissions: {}
+
+concurrency:
+  group: r2-access-check
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read # ジョブの標準の権限（リポジトリのコードは取得しない。AWS CLI は runner に入っている）
+    env:
+      # シークレットは、使うステップの環境変数だけで渡す（コマンドラインに直接書かない）
+      BUCKET: ${{ inputs.bucket }}
+      AWS_DEFAULT_REGION: auto
+      # R2 は、新しい AWS CLI の既定のチェックサム送信に対応しないことがあるため、必要なときだけにする
+      AWS_REQUEST_CHECKSUM_CALCULATION: when_required
+      AWS_RESPONSE_CHECKSUM_VALIDATION: when_required
+    steps:
+      - name: Validate bucket name
+        run: |
+          if ! [[ "$BUCKET" =~ ^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$ ]]; then
+            echo "::error::bucket の形式が正しくありません（英小文字・数字・ハイフン。3〜63 文字）"
+            exit 1
+          fi
+
+      - name: Check R2 access (ls, put, get, rm)
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+        run: |
+          set -euo pipefail
+          [ -n "$AWS_ACCESS_KEY_ID" ] || { echo "::error::シークレット R2_ACCESS_KEY_ID が未設定です"; exit 1; }
+          [ -n "$AWS_SECRET_ACCESS_KEY" ] || { echo "::error::シークレット R2_SECRET_ACCESS_KEY が未設定です"; exit 1; }
+          [ -n "$R2_ENDPOINT" ] || { echo "::error::シークレット R2_ENDPOINT が未設定です"; exit 1; }
+          echo "::add-mask::$R2_ENDPOINT"
+          S3=(aws s3 --endpoint-url "$R2_ENDPOINT")
+          KEY="_check/access-check-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}.txt"
+          URI="s3://${BUCKET}/${KEY}"
+          WORK="$(mktemp -d)"
+          echo "access-check run=${GITHUB_RUN_ID} attempt=${GITHUB_RUN_ATTEMPT}" > "$WORK/put.txt"
+
+          # 途中で失敗しても、この 1 ファイルだけは消す（ほかのキーには触らない）
+          cleanup() { "${S3[@]}" rm "$URI" >/dev/null 2>&1 || true; }
+          trap cleanup EXIT
+
+          echo "1/4 ls（バケットの一覧。先頭 10 行）"
+          LS_OUT="$("${S3[@]}" ls "s3://${BUCKET}/")"
+          echo "$LS_OUT" | head -n 10
+          echo "2/4 put（${KEY}）"
+          "${S3[@]}" cp "$WORK/put.txt" "$URI"
+          echo "3/4 get して、中身を比べる"
+          "${S3[@]}" cp "$URI" "$WORK/get.txt"
+          cmp "$WORK/put.txt" "$WORK/get.txt"
+          echo "中身が一致しました"
+          echo "4/4 rm（${KEY} だけ）"
+          "${S3[@]}" rm "$URI"
+          trap - EXIT
+          echo "::notice::R2 にアクセスできました（ls・put・get・rm）"
