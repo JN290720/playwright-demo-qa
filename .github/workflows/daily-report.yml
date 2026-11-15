@@ -1,7 +1,7 @@
 name: Daily Report
 
 # 毎朝 8:00 JST に、本体 playwright-demo と QA playwright-demo-qa の状況を、
-# 日次レポート用の Issue（ラベル daily-report）にコメントとして自動投稿します（#13）。
+# Backlog の月ごとの課題「日次レポート YYYY-MM（自動）」にコメントとして自動投稿します（#13 / PWQA-42。GitHub の Issue には書きません）。
 # 事実（CI の状況・PR・Issue・ラベル）は、scripts/daily-report.js が GitHub API から機械的に取得します。
 #
 # 【定時実行の遅れ対策】GitHub の定時実行（schedule）は、混雑時に数十分〜数時間遅れたり、実行されないことがある
@@ -27,7 +27,7 @@ jobs:
     timeout-minutes: 10
     permissions:
       contents: read       # スクリプトの取得
-      issues: write        # 日次レポート用 Issue の作成・コメント投稿
+      issues: read         # Issue の一覧の取得（GitHub の Issue には書かない）
       pull-requests: read  # PR の一覧・CI の状況の取得
       actions: read        # ワークフローの実行状況の取得
       checks: read         # PR の CI（check-runs）の取得
@@ -40,10 +40,9 @@ jobs:
       - name: Post daily report
         env:
           GH_TOKEN: ${{ github.token }}
-          # 課題管理を Backlog へ移す段階 5（PWQA-42）。1 週間は GitHub と Backlog の両方に書く（GitHub 側が正）。
-          # Backlog への投稿の失敗・設定の未登録は、警告だけでワークフローを失敗にしない。
+          # 課題管理は Backlog に一本化した（PWQA-42）。書き先は Backlog だけ。
+          # Backlog への投稿に失敗したとき・設定が未登録のときは、黙って飛ばさず、エラーでワークフローを失敗にする。
           # API キーは、定時・手動の実行だけのこのジョブに渡す（PR のジョブには渡さない）。スペースの URL はシークレット、プロジェクトキーは変数で渡す。
-          NOTIFY_TARGETS: github,backlog
           BACKLOG_API_KEY: ${{ secrets.BACKLOG_API_KEY }}
           BACKLOG_SPACE: ${{ secrets.BACKLOG_SPACE }}
           BACKLOG_PROJECT_KEY: ${{ vars.BACKLOG_PROJECT_KEY }}
