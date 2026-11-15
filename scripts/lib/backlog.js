@@ -2,7 +2,7 @@
 //
 // 設定は環境変数で渡す（公開のリポジトリなので、スペースの URL や課題キーはコードに書かない）:
 //   BACKLOG_API_KEY  … シークレット。発行したユーザーの権限をそのまま持つため、PR のジョブには渡さない
-//   BACKLOG_SPACE    … 変数。スペースの URL（例 https://xxx.backlog.com）。ホスト名だけでもよい
+//   BACKLOG_SPACE    … シークレット（変数の値は公開のログにそのまま出るため）。スペースの URL（例 https://xxx.backlog.com）。ホスト名だけでもよい
 //   NOTIFY_TARGETS   … 書き先。カンマ区切りで github / backlog（既定は github だけ）
 //
 // 移行の間（1 週間）は GitHub と両方に書く。GitHub 側が正なので、Backlog への書き込みの失敗は、呼び出し側で警告に留める。
