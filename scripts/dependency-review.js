@@ -10,10 +10,15 @@
 // 使い方:
 //   node scripts/dependency-review.js          # Markdown を標準出力へ（投稿はしない）
 //   GH_TOKEN=... node scripts/dependency-review.js --post   # 提案があれば Issue（ラベル dependency-review）にコメント投稿
+//
+// 書き先（PWQA-41。課題管理を Backlog へ移す段階 5）:
+//   NOTIFY_TARGETS=github,backlog で、Backlog の課題（BACKLOG_DEPENDENCY_ISSUE）にも同じ本文をコメントする（既定は github だけ）。
+//   Backlog の設定（BACKLOG_API_KEY・BACKLOG_SPACE）は scripts/lib/backlog.js を参照
 'use strict';
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
+const { parseTargets, missingConfig, createClient } = require('./lib/backlog');
 
 const COOLDOWN_DAYS = Number(process.env.COOLDOWN_DAYS || 14);
 const REPO = process.env.GITHUB_REPOSITORY || process.env.REPO || 'JN290720/playwright-demo-qa';
@@ -153,11 +158,34 @@ async function main() {
     process.stdout.write(body + '\n');
     return;
   }
-  if (!TOKEN) throw new Error('GH_TOKEN が必要です');
   if (proposals === 0 && audit && Object.values(audit).every((v) => v === 0 || typeof v !== 'number')) {
     console.log('提案なし。投稿しません。');
     return;
   }
+  const targets = parseTargets();
+  if (targets.has('github')) await postToGitHub(body);
+  if (targets.has('backlog')) await postToBacklog(body);
+}
+
+// Backlog の固定の課題（変数 BACKLOG_DEPENDENCY_ISSUE の課題キー）にコメントする（PWQA-41）。
+// 移行の間は GitHub 側が正なので、失敗してもワークフローは失敗にせず、警告だけを出す
+async function postToBacklog(body) {
+  const missing = missingConfig(process.env, ['BACKLOG_DEPENDENCY_ISSUE']);
+  if (missing) {
+    console.log(`::warning::${missing}。Backlog には投稿しません。`);
+    return;
+  }
+  try {
+    const issueKey = process.env.BACKLOG_DEPENDENCY_ISSUE.trim();
+    const comment = await createClient().addComment(issueKey, body);
+    console.log(`Backlog に投稿しました: ${issueKey}（コメント ${comment.id}）`);
+  } catch (e) {
+    console.log(`::warning::Backlog への投稿に失敗しました（GitHub への投稿はそのまま）: ${e.message}`);
+  }
+}
+
+async function postToGitHub(body) {
+  if (!TOKEN) throw new Error('GH_TOKEN が必要です');
   const found = await gh(`/repos/${REPO}/issues?state=open&labels=${LABEL}&per_page=1`);
   let number = found[0]?.number;
   if (!number) {

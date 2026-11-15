@@ -33,4 +33,12 @@ jobs:
       - name: Post dependency review
         env:
           GH_TOKEN: ${{ github.token }}
+          # 課題管理を Backlog へ移す段階 5（PWQA-41）。1 週間は GitHub と Backlog の両方に書く（GitHub 側が正）。
+          # Backlog への投稿の失敗・設定の未登録は、警告だけでワークフローを失敗にしない。
+          # API キーは発行したユーザーの権限をそのまま持つため、定時・手動の実行だけのこのジョブに渡す（PR のジョブには渡さない）。
+          # スペースの URL は、公開のログに出ないようシークレットで渡す（変数の値はログにそのまま出る）。課題キーは変数（Variables）で渡す。
+          NOTIFY_TARGETS: github,backlog
+          BACKLOG_API_KEY: ${{ secrets.BACKLOG_API_KEY }}
+          BACKLOG_SPACE: ${{ secrets.BACKLOG_SPACE }}
+          BACKLOG_DEPENDENCY_ISSUE: ${{ vars.BACKLOG_DEPENDENCY_ISSUE }}
         run: node scripts/dependency-review.js --post
