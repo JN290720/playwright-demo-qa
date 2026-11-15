@@ -50,6 +50,15 @@ function createClient({ apiKey = process.env.BACKLOG_API_KEY, space = process.en
     request,
     // 課題にコメントする。戻り値は作られたコメント（id など）
     addComment: (issueKey, content) => request('POST', `/issues/${encodeURIComponent(issueKey)}/comments`, { content }),
+    // 課題の一覧・作成・更新、プロジェクトの設定（種別・優先度・状態・完了理由・カスタム属性）の取得。名前から ID を引くために使う（ID をコードに書かない）
+    getProject: (projectKey) => request('GET', `/projects/${encodeURIComponent(projectKey)}`),
+    getSpaceList: (name) => request('GET', `/${name}`), // priorities・resolutions（スペース共通）
+    getProjectList: (projectKey, name) => request('GET', `/projects/${encodeURIComponent(projectKey)}/${name}`),
+    listIssues: (query) => request('GET', `/issues?${new URLSearchParams(query).toString()}`),
+    getComments: (issueKey, query = [['count', '100'], ['order', 'desc']]) =>
+      request('GET', `/issues/${encodeURIComponent(issueKey)}/comments?${new URLSearchParams(query).toString()}`),
+    addIssue: (form) => request('POST', '/issues', form),
+    updateIssue: (issueKey, form) => request('PATCH', `/issues/${encodeURIComponent(issueKey)}`, form),
   };
 }
 
