@@ -242,6 +242,7 @@ async function postToBacklog(body, marker, jstDate) {
       marker,
       dedupe: process.env.GITHUB_EVENT_NAME === 'schedule',
     });
+    for (const w of r.warnings || []) console.log(`::warning::${w}`);
     console.log(r.posted ? `Backlog に投稿しました: ${r.issueKey}（コメント ${r.commentId}）` : `Backlog: ${r.reason}（${r.issueKey}）。投稿しません。`);
   } catch (e) {
     console.log(`::warning::Backlog への投稿に失敗しました（GitHub への投稿はそのまま）: ${e.message}`);

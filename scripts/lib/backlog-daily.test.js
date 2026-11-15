@@ -11,7 +11,7 @@ const MARKER = '<!-- daily-report:2026-11-16 -->';
 const BODY = `# 日次レポート\n${MARKER}\n`;
 
 // 簡易の偽サーバー。呼ばれた (method, path) を記録し、状態（issues・comments）を持つ
-function fake({ issues = [], comments = [] } = {}) {
+function fake({ issues = [], comments = [], failClose = false } = {}) {
   const calls = [];
   const state = { issues: [...issues], comments: [...comments], nextId: 100 };
   const lists = {
@@ -31,7 +31,7 @@ function fake({ issues = [], comments = [] } = {}) {
     const path = u.pathname.replace('/api/v2', '');
     const method = init.method || 'GET';
     const form = init.body ? new URLSearchParams(init.body) : null;
-    calls.push({ method, path, form: form && [...form.entries()] });
+    calls.push({ method, path, query: u.search, form: form && [...form.entries()] });
     const ok = (data) => ({ ok: true, status: 200, json: async () => data });
     if (method === 'GET' && lists[path]) return ok(lists[path]);
     if (method === 'GET' && path === '/issues') return ok(state.issues);
@@ -41,6 +41,7 @@ function fake({ issues = [], comments = [] } = {}) {
       return ok(issue);
     }
     if (method === 'PATCH' && path.startsWith('/issues/')) {
+      if (failClose && form.get('statusId') === '4') return { ok: false, status: 500, json: async () => ({}) };
       const issue = state.issues.find((i) => `/issues/${i.issueKey}` === path);
       issue.status = { id: Number(form.get('statusId')) };
       return ok(issue);
@@ -86,6 +87,7 @@ test('前の月の未完了の課題は、完了（完了理由: 対応済み）
       { issueKey: 'PWQA-40', summary: '日次レポート 2026-09（自動）', status: { id: 4 } },
       { issueKey: 'PWQA-60', summary: '日次レポート 2026-11（自動）', status: { id: 2 } },
       { issueKey: 'PWQA-70', summary: '別の課題（日次レポートの話）', status: { id: 2 } },
+      { issueKey: 'PWQA-80', summary: '日次レポート 2026-12（自動）', status: { id: 2 } }, // 先の月（今の月より後）は閉じない
     ],
   });
   await run(f);
@@ -111,4 +113,24 @@ test('名前が見つからないとき: 例外にする（呼び出し側で警
   const f = fake();
   const bad = { ...f, client: { ...f.client, getProjectList: async (k, n) => (n === 'issueTypes' ? [] : f.client.getProjectList(k, n)) } };
   await assert.rejects(() => run(bad), (e) => /種別「記録」/.test(e.message) && !/apiKey|=k/.test(e.message));
+});
+
+test('一覧の条件: 種別「記録」で絞り、keyword は使わない（作った直後に見つからず 2 つできるのを避ける）', async () => {
+  const f = fake();
+  await run(f);
+  const list = f.calls.find((c) => c.method === 'GET' && c.path === '/issues');
+  assert.strictEqual(new URLSearchParams(list.query).get('issueTypeId[]'), '7');
+  assert.ok(!list.query.includes('keyword'));
+});
+
+test('前の月を閉じる処理の失敗: 今日の投稿は残り、警告に入る（例外にしない）。投稿は、閉じる処理より先', async () => {
+  const f = fake({ issues: [{ issueKey: 'PWQA-50', summary: '日次レポート 2026-10（自動）', status: { id: 2 } }, { issueKey: 'PWQA-60', summary: '日次レポート 2026-11（自動）', status: { id: 2 } }], failClose: true });
+  const r = await run(f);
+  assert.strictEqual(r.posted, true);
+  assert.strictEqual(f.state.comments.length, 1);
+  assert.strictEqual(r.warnings.length, 1);
+  assert.match(r.warnings[0], /前の月の課題を完了にできませんでした/);
+  const iComment = f.calls.findIndex((c) => c.method === 'POST' && c.path.endsWith('/comments'));
+  const iClose = f.calls.findIndex((c) => c.method === 'PATCH' && c.path === '/issues/PWQA-50');
+  assert.ok(iComment < iClose);
 });

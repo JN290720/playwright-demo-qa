@@ -20,26 +20,30 @@ const idByName = (list, name, what) => {
   return found.id;
 };
 
-// 戻り値: { issueKey, posted, reason }。失敗は例外（呼び出し側で警告に留める）
+// 戻り値: { issueKey, posted, reason, warnings }。投稿の失敗は例外（呼び出し側で警告に留める）。
+// 前の月の課題を閉じる処理は、今日の投稿のあとに、別に試す。失敗しても、今日の記録は残り、warnings に入る
 async function postDailyReport({ client, projectKey, jstDate, body, marker, dedupe }) {
   const month = jstDate.slice(0, 7);
   const summary = summaryOf(month);
   const project = await client.getProject(projectKey);
   const statuses = await client.getProjectList(projectKey, 'statuses');
   const doneId = idByName(statuses, STATUS_DONE, '状態');
+  const types = await client.getProjectList(projectKey, 'issueTypes');
+  const typeId = idByName(types, TYPE_NAME, '種別');
 
-  // 今の月の課題と、前の月までの未完了の課題を探す（件名は完全一致。keyword は本文・コメントにも当たるため）
-  const found = (await client.listIssues([['projectId[]', String(project.id)], ['keyword', '日次レポート'], ['count', '100']])).filter((i) => SUMMARY_RE.test(i.summary));
+  // 月の課題を探す: 種別「記録」で絞り、件名の完全一致で選ぶ（keyword は、作った直後に引っかからないことがあるため使わない）
+  const found = (
+    await client.listIssues([['projectId[]', String(project.id)], ['issueTypeId[]', String(typeId)], ['sort', 'created'], ['order', 'desc'], ['count', '100']])
+  ).filter((i) => SUMMARY_RE.test(i.summary));
   let current = found.find((i) => i.summary === summary);
 
   if (!current) {
-    const types = await client.getProjectList(projectKey, 'issueTypes');
     const priorities = await client.getSpaceList('priorities');
     const fields = await client.getProjectList(projectKey, 'customFields');
     const form = [
       ['projectId', String(project.id)],
       ['summary', summary],
-      ['issueTypeId', String(idByName(types, TYPE_NAME, '種別'))],
+      ['issueTypeId', String(typeId)],
       ['priorityId', String(idByName(priorities, PRIORITY_NAME, '優先度'))],
       ['description', `[自動]\n## 何の記録か\n${month} の日次レポート（scripts/daily-report.js が毎朝コメントとして書く）。月が変わると、新しい課題が作られ、この課題は完了になる。同じ日の二重の投稿は、目印（<!-- daily-report:日付 -->）で防ぐ。`],
     ];
@@ -53,21 +57,29 @@ async function postDailyReport({ client, projectKey, jstDate, body, marker, dedu
     current = created;
   }
 
-  // 前の月までの課題は完了にする（今の月でない・未完了のもの）
-  for (const issue of found) {
-    if (issue.summary === summary || (issue.status && issue.status.id === doneId)) continue;
-    const resolutions = await client.getSpaceList('resolutions');
-    await client.updateIssue(issue.issueKey, [['statusId', String(doneId)], ['resolutionId', String(idByName(resolutions, RESOLUTION_DONE, '完了理由'))]]);
+  let result;
+  const comments = dedupe ? await client.getComments(current.issueKey) : [];
+  if (dedupe && comments.some((c) => (c.content || '').includes(marker))) {
+    result = { issueKey: current.issueKey, posted: false, reason: `今日（${jstDate}）のレポートは投稿済み` };
+  } else {
+    const comment = await client.addComment(current.issueKey, `[自動]\n${body}`);
+    result = { issueKey: current.issueKey, posted: true, commentId: comment.id };
   }
 
-  if (dedupe) {
-    const comments = await client.getComments(current.issueKey);
-    if (comments.some((c) => (c.content || '').includes(marker))) {
-      return { issueKey: current.issueKey, posted: false, reason: `今日（${jstDate}）のレポートは投稿済み` };
+  // 前の月までの未完了の課題を完了にする（件名の月が、今の月より前のものだけ。先の月は閉じない）。失敗は警告に留める
+  const warnings = [];
+  try {
+    const resolutions = await client.getSpaceList('resolutions');
+    const resolutionId = idByName(resolutions, RESOLUTION_DONE, '完了理由');
+    for (const issue of found) {
+      const issueMonth = issue.summary.match(/\d{4}-\d{2}/)[0];
+      if (issueMonth >= month || (issue.status && issue.status.id === doneId)) continue;
+      await client.updateIssue(issue.issueKey, [['statusId', String(doneId)], ['resolutionId', String(resolutionId)]]);
     }
+  } catch (e) {
+    warnings.push(`前の月の課題を完了にできませんでした（今日の記録は投稿済み）: ${e.message}`);
   }
-  const comment = await client.addComment(current.issueKey, `[自動]\n${body}`);
-  return { issueKey: current.issueKey, posted: true, commentId: comment.id };
+  return { ...result, warnings };
 }
 
 module.exports = { postDailyReport, summaryOf };
