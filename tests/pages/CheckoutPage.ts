@@ -28,6 +28,7 @@ export class CheckoutPage {
   readonly taxLabel: Locator;          // 税
   readonly totalLabel: Locator;        // 合計
   readonly finishButton: Locator;      // 「Finish」ボタン
+  readonly pageTitle: Locator;         // 画面の見出し（購入者情報・購入確認の画面に出る。描画の完了を待つ目印）
 
   // 購入完了画面
   readonly completeHeader: Locator;    // 完了メッセージ
@@ -57,6 +58,7 @@ export class CheckoutPage {
     this.taxLabel = page.locator('[data-test="tax-label"]');
     this.totalLabel = page.locator('[data-test="total-label"]');
     this.finishButton = page.locator('[data-test="finish"]');
+    this.pageTitle = page.locator('[data-test="title"]');
 
     this.completeHeader = page.locator('[data-test="complete-header"]');
     this.backHomeButton = page.locator('[data-test="back-to-products"]');
