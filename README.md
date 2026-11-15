@@ -69,7 +69,7 @@ npx playwright show-report
 | **Android Emulator Test** (`android-test.yml`) | 毎日 03:00 JST（夜間）／ 手動実行／ Android 関連ファイルを変えた `main` 向け PR（PR では失敗の通知は送らない） | エミュレータ上の Chrome で、VRT と購入 1 件を確認 | 夜間・手動実行の失敗は Issue を作成し、成功に戻ったら閉じる（PR では作らない）。手動で `update_snapshots` を付けたときだけ、選んだブランチへ基準画像をコミット（`main` は不可。下の「Android の基準画像を更新したい場合」を参照） | 開発者（失敗時は `android-failure` の Issue） |
 | **Weekly Full Test** (`weekly-full-test.yml`) | 毎週月曜 03:37 JST ／ 手動 ／ 該当ファイルを変えた `main` 向け PR | 全テスト（`ENV=staging`）。サイト側の変化を、PR を待たずに検知する | 失敗時は Issue（`weekly-failure`）を作成し、復旧したら閉じる。`test.fail()` の既知の不具合が予期せず成功したら、サイト不具合の Issue にコメント | 開発者（失敗時は `weekly-failure` の Issue） |
 | **Daily Report** (`daily-report.yml`) | 毎朝 05:17 JST（予備 07:43 JST）／ 手動 | 日次のレポートを投稿する | 日次レポート用の Issue を作成・コメント。あわせて、Backlog の月ごとの課題「日次レポート YYYY-MM（自動）」にもコメント（〜11-22 は両方。前の月は完了に） | 担当（毎朝の `daily-report` の Issue・Backlog の月の課題） |
-| **Dependency Review** (`dependency-review.yml`) | 毎週月曜 09:23 JST ／ 手動 | 依存関係の更新提案（`npm audit` など）を確認する | 提案の Issue（`dependency-review` ラベル）を作成・コメント。移行の間は、Backlog の課題（変数 `BACKLOG_DEPENDENCY_ISSUE`）にも同じ本文をコメント（失敗は警告だけ） | 担当（`dependency-review` の Issue。更新の判断） |
+| **Dependency Review** (`dependency-review.yml`) | 毎週月曜 09:23 JST ／ 手動 | 依存関係の更新提案（`npm audit` など）を確認する | Backlog の固定の課題（変数 `BACKLOG_DEPENDENCY_ISSUE`）にコメント。GitHub の Issue には書かない。設定が無い・投稿に失敗したときは、エラーでワークフローを失敗にする | 担当（Backlog の固定の課題。更新の判断） |
 | **Cleanup gh-pages Reports** (`cleanup-gh-pages.yml`) | 毎週月曜 03:00 JST（自動実行は**常に dry-run**）／ 手動 | 古いテストレポートを整理する。`main-test-*` は新しい順に `keep`（既定 10）件残す | 手動で `dry_run` を `false` にしたときだけ削除: 削除前に GitHub Release へアーカイブし、`gh-pages` から削除コミット（手動の既定は `dry_run = true`） | 担当（手動実行のときの Actions のログ・Release） |
 | **R2 Access Check** (`r2-access-check.yml`) | 手動のみ（入力: `bucket`） | Cloudflare R2（VRT の基準画像の置き場所の候補）に、シークレットでアクセスできるかを確かめる | R2 の `_check/` の下に小さなファイルを 1 つ置いて、取得して比べ、その 1 ファイルだけ削除する（ほかのキーには触らない） | 担当（手動実行のときの Actions のログ） |
 
@@ -90,7 +90,7 @@ npx playwright show-report
 | `site-defect` | 既知のサイト不具合が「直った可能性」があるとき（`test.fail()` が予期せず成功） | 閉じない。親の一覧 #97（常設。`scripts/notify-site-fixed.js` の `SITE_DEFECT_ISSUE`）に、コメントを追記する。同じ内容のコメントは、重ねて追記しない。#97 が取得できないときは、投稿せず、エラーで終了する | 開発者: 実際に直っているか確認し、直っていれば `test.fail()` を外す（[docs/known-site-issues.md](docs/known-site-issues.md)） |
 | `test-viewpoint` | テスト観点の Issue（親とサブ）。デプロイのたびに、本文の「テストケースの表」を更新する | 閉じない（本文だけを書き換える） | 開発者: 観点ごとのテストケースを確認する |
 | `daily-report` | 日次レポート。open の 1 件に、毎日コメントを追記する | 閉じない | 人: 毎朝、PR・Issue の状況を確認する |
-| `dependency-review` | 依存関係レビュー（毎週月曜）。open の 1 件に、提案を追記する | 閉じない | 人: 更新の提案を判断し、PR で行う |
+| `dependency-review` | 依存関係レビュー（毎週月曜）の、従来の GitHub の Issue（#67）。今は Backlog の課題に書き、新しい追記はない | 閉じない（Backlog だけに届くと確かめたあとに整理） | 人: 更新の提案を判断し、PR で行う |
 | `needs-user-decision` / `blocked-by-merge` / `ready-for-pr` / `backlog` | 運用ラベル（スクリプトは読むだけ。日次レポートが一覧にする）。`needs-user-decision` は、相談のテンプレート（`.github/ISSUE_TEMPLATE/consultation.yml`）から作ると、自動で付く（課題の相談・提案は、今は Backlog（PWQA）で行う。このテンプレートは従来の運用向け） | 人が外す（ほかのラベルの付け方は運用に従う） | 人: ユーザーの判断が要るもの・マージ待ち・PR を作れるもの・保留かを判断する |
 
 - 優先度 `P0`〜`P3` は、人が Issue に付ける（[CONTRIBUTING.md](CONTRIBUTING.md)）。自動で作られる失敗の Issue だけ、`P1` が付く

@@ -9,20 +9,20 @@
 //
 // 使い方:
 //   node scripts/dependency-review.js          # Markdown を標準出力へ（投稿はしない）
-//   GH_TOKEN=... node scripts/dependency-review.js --post   # 提案があれば Issue（ラベル dependency-review）にコメント投稿
+//   BACKLOG_API_KEY=... BACKLOG_SPACE=... BACKLOG_DEPENDENCY_ISSUE=PWQA-n node scripts/dependency-review.js --post   # 提案があれば Backlog の固定の課題にコメント投稿
 //
-// 書き先（PWQA-41。課題管理を Backlog へ移す段階 5）:
-//   NOTIFY_TARGETS=github,backlog で、Backlog の課題（BACKLOG_DEPENDENCY_ISSUE）にも同じ本文をコメントする（既定は github だけ）。
-//   Backlog の設定（BACKLOG_API_KEY・BACKLOG_SPACE）は scripts/lib/backlog.js を参照
+// 書き先（PWQA-41。課題管理は Backlog に一本化した）:
+//   Backlog の固定の課題（変数 BACKLOG_DEPENDENCY_ISSUE の課題キー）にコメントする。GitHub の Issue には書かない。
+//   Backlog の設定（BACKLOG_API_KEY・BACKLOG_SPACE）は scripts/lib/backlog.js を参照。
+//   設定が無いとき・投稿に失敗したときは、黙って飛ばさず、エラーで終了する（ワークフローが失敗になり、見える）。
 'use strict';
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
-const { parseTargets, missingConfig, createClient } = require('./lib/backlog');
+const { missingConfig, createClient } = require('./lib/backlog');
 
 const COOLDOWN_DAYS = Number(process.env.COOLDOWN_DAYS || 14);
 const REPO = process.env.GITHUB_REPOSITORY || process.env.REPO || 'JN290720/playwright-demo-qa';
-const LABEL = 'dependency-review';
 const POST = process.argv.includes('--post');
 const TOKEN = process.env.GH_TOKEN || process.env.GITHUB_TOKEN;
 const now = Date.now();
@@ -162,49 +162,21 @@ async function main() {
     console.log('提案なし。投稿しません。');
     return;
   }
-  const targets = parseTargets();
-  if (targets.has('github')) await postToGitHub(body);
-  if (targets.has('backlog')) await postToBacklog(body);
+  await postToBacklog(body);
 }
 
 // Backlog の固定の課題（変数 BACKLOG_DEPENDENCY_ISSUE の課題キー）にコメントする（PWQA-41）。
-// 移行の間は GitHub 側が正なので、失敗してもワークフローは失敗にせず、警告だけを出す
+// 唯一の書き先のため、設定が無い・投稿に失敗したときは、例外にする（呼び出し側で ::error:: を出して、終了コード 1）
 async function postToBacklog(body) {
   const missing = missingConfig(process.env, ['BACKLOG_DEPENDENCY_ISSUE']);
-  if (missing) {
-    console.log(`::warning::${missing}。Backlog には投稿しません。`);
-    return;
-  }
-  try {
-    const issueKey = process.env.BACKLOG_DEPENDENCY_ISSUE.trim();
-    const comment = await createClient().addComment(issueKey, body);
-    console.log(`Backlog に投稿しました: ${issueKey}（コメント ${comment.id}）`);
-  } catch (e) {
-    console.log(`::warning::Backlog への投稿に失敗しました（GitHub への投稿はそのまま）: ${e.message}`);
-  }
-}
-
-async function postToGitHub(body) {
-  if (!TOKEN) throw new Error('GH_TOKEN が必要です');
-  const found = await gh(`/repos/${REPO}/issues?state=open&labels=${LABEL}&per_page=1`);
-  let number = found[0]?.number;
-  if (!number) {
-    try {
-      await gh(`/repos/${REPO}/labels`, { method: 'POST', body: JSON.stringify({ name: LABEL, color: 'C2E0C6', description: '週次の依存関係レビュー' }) });
-    } catch {
-      /* 既にあれば無視 */
-    }
-    const created = await gh(`/repos/${REPO}/issues`, {
-      method: 'POST',
-      body: JSON.stringify({ title: '依存関係レビュー（週次・自動）', labels: [LABEL, 'P3'], body: '毎週月曜に、依存関係の更新の提案を自動で投稿する Issue です（`scripts/dependency-review.js`）。更新するかどうかの判断は、ここへコメントしてください。' }),
-    });
-    number = created.number;
-  }
-  const posted = await gh(`/repos/${REPO}/issues/${number}/comments`, { method: 'POST', body: JSON.stringify({ body }) });
-  console.log(`投稿しました: ${posted.html_url}`);
+  if (missing) throw new Error(`${missing}。Backlog に投稿できません`);
+  const issueKey = process.env.BACKLOG_DEPENDENCY_ISSUE.trim();
+  const comment = await createClient().addComment(issueKey, body);
+  console.log(`Backlog に投稿しました: ${issueKey}（コメント ${comment.id}）`);
 }
 
 main().catch((e) => {
+  console.log(`::error::${e.message}`);
   console.error(e);
   process.exit(1);
 });

@@ -1,6 +1,6 @@
 name: Dependency Review
 
-# 毎週月曜 9:00 JST に、依存関係の更新の「提案」を Issue（ラベル dependency-review）へ自動投稿します（#20 / #35）。
+# 毎週月曜 9:00 JST に、依存関係の更新の「提案」を Backlog の固定の課題へ自動投稿します（PWQA-41。GitHub の Issue には書きません）（#20 / #35）。
 # Dependabot のバージョン更新 PR の代わりです（脆弱性アラートは、リポジトリ設定の Dependabot alerts で別に有効）。
 # 選定基準: 公開から 14 日以上たった安定版 / メジャーは手動 / セキュリティ修正は例外。
 on:
@@ -20,7 +20,6 @@ jobs:
     timeout-minutes: 10
     permissions:
       contents: read # リポジトリの取得
-      issues: write  # 提案の Issue（ラベル dependency-review）の作成・コメント投稿
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
@@ -33,11 +32,10 @@ jobs:
       - name: Post dependency review
         env:
           GH_TOKEN: ${{ github.token }}
-          # 課題管理を Backlog へ移す段階 5（PWQA-41）。1 週間は GitHub と Backlog の両方に書く（GitHub 側が正）。
-          # Backlog への投稿の失敗・設定の未登録は、警告だけでワークフローを失敗にしない。
+          # 課題管理は Backlog に一本化した（PWQA-41）。書き先は Backlog だけ。
+          # Backlog への投稿に失敗したとき・設定が未登録のときは、黙って飛ばさず、エラーでワークフローを失敗にする。
           # API キーは発行したユーザーの権限をそのまま持つため、定時・手動の実行だけのこのジョブに渡す（PR のジョブには渡さない）。
           # スペースの URL は、公開のログに出ないようシークレットで渡す（変数の値はログにそのまま出る）。課題キーは変数（Variables）で渡す。
-          NOTIFY_TARGETS: github,backlog
           BACKLOG_API_KEY: ${{ secrets.BACKLOG_API_KEY }}
           BACKLOG_SPACE: ${{ secrets.BACKLOG_SPACE }}
           BACKLOG_DEPENDENCY_ISSUE: ${{ vars.BACKLOG_DEPENDENCY_ISSUE }}
