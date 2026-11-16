@@ -10,7 +10,6 @@ test.describe('SauceDemo 購入の途中のカート初期化（Reset App State�
   test('RS1: [既知の不具合] 購入の途中（step-two）でサイドメニューの Reset App State を押したあと、購入の確定（Finish）ボタンが表示されないこと', async ({ page }) => {
     // 現象（2026-11-16 実測。3 ブラウザ × 3 回で 9/9）: Reset のあと、バッジは 0 になるが、購入確認の画面に商品の行と Finish が残り、Finish で完了画面まで進める。台帳: docs/known-site-issues.md #18（関連: 9・11・17）
     // 限界: 期待値は「Finish が表示されない」だけ。①Finish が残ったまま、押すと止まる形で直った場合 ②Finish が残ったまま、押せなくなる（disabled）形で直った場合は、このテストでは気づけない
-    test.fail(true, '購入の途中で Reset App State を押しても、Finish が表示されたまま（PWQA-61 / docs/known-site-issues.md #18。限界: 押すと止まる形・押せなくなる形で直った場合は気づけない）');
     const { loginPage, inventoryPage } = await loginAndShowInventory(page);
     await inventoryPage.addItemToCart('add-to-cart-sauce-labs-backpack');
     await expect(inventoryPage.cartBadge).toHaveText('1');
@@ -37,6 +36,9 @@ test.describe('SauceDemo 購入の途中のカート初期化（Reset App State�
     await expect(checkout.pageTitle).toBeVisible();
     await expect(checkout.finishButton).toBeVisible();
     await expect(checkout.cartBadge).toHaveText('1');
+
+    // ここから先だけを「失敗すること」を期待する（test.fail）。前提（ここまで）が崩れたときは、期待どおりの失敗に紛れず、ふつうの失敗として赤く見える（PR #339 のレビュー）
+    test.fail(true, '購入の途中で Reset App State を押しても、Finish が表示されたまま（PWQA-61 / docs/known-site-issues.md #18。限界: 押すと止まる形・押せなくなる形で直った場合は気づけない）');
 
     // サイドメニューを開いて Reset App State を押し、メニューを × で閉じる（スマホでは、メニューが画面を覆うため）
     await openSideMenu(loginPage);
