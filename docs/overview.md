@@ -41,3 +41,4 @@
 - 手順（VRT の更新・Android の基準画像）は [README](../README.md)
 - 作業のルール（ブランチ・コミット・PR）は [CONTRIBUTING.md](../CONTRIBUTING.md)
 - AI への作業ルールは [CLAUDE.md](../CLAUDE.md)
+

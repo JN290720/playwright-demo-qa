@@ -59,6 +59,7 @@ jobs:
             [ -z "$f" ] && continue
             count=$((count + 1))
             case "$f" in
+              .github/workflows/pull-request.yml) ;; # 【検証用の枝だけ】このファイル自身を文書として扱う
               .github/*) docs_only=false ;; # ワークフロー・テンプレートは、飛ばさない
               CLAUDE.md|*/CLAUDE.md) docs_only=false ;; # 作業の規則は、飛ばさない
               docs/*) ;;
