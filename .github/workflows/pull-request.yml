@@ -22,7 +22,56 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  # ---------------------------------------------------------------------------
+  # 変わったファイルが「文書だけ」かを調べる（PWQA-62）。文書だけの PR では、下の test ジョブ（E2E・VRT）を飛ばす。
+  #   文書だけ = 変わったファイルが、すべて「docs/ の下」か「*.md」で、かつ .github/ の下と CLAUDE.md を含まない。
+  #   リネームは、元の名前（previous_filename）も調べる（コードを docs/ へ移す変更を、文書だけと取り違えないため）。
+  #   調べられなかったとき・ファイルが 0 件のときは、文書だけではないとして、全部動かす（安全側）。
+  #   方式: トリガーの paths-ignore は使わない（飛ばした必須のチェックが Pending のまま残り、マージを妨げるため）。
+  #   ジョブの条件（if）で飛ばしたジョブは、成功として報告される（GitHub の資料: Troubleshooting required status checks）。
+  #   push・定時・手動の実行には影響しない（このワークフローは pull_request と issue_comment だけ）。
+  # ---------------------------------------------------------------------------
+  changes:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      pull-requests: read # PR の変更ファイルの一覧の取得
+    outputs:
+      docs_only: ${{ steps.detect.outputs.docs_only }}
+    steps:
+      - name: Detect docs-only changes
+        id: detect
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          set -uo pipefail
+          if ! files="$(gh api --paginate "repos/${REPO}/pulls/${PR}/files" -q '.[] | .filename, (.previous_filename // empty)')"; then
+            echo "::warning::変更ファイルの一覧を取得できなかったため、全部のテストを動かします"
+            echo "docs_only=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          docs_only=true
+          count=0
+          while IFS= read -r f; do
+            [ -z "$f" ] && continue
+            count=$((count + 1))
+            case "$f" in
+              .github/*) docs_only=false ;; # ワークフロー・テンプレートは、飛ばさない
+              CLAUDE.md|*/CLAUDE.md) docs_only=false ;; # 作業の規則は、飛ばさない
+              docs/*) ;;
+              *.md) ;;
+              *) docs_only=false ;;
+            esac
+          done <<< "$files"
+          if [ "$count" -eq 0 ]; then docs_only=false; fi
+          echo "変更ファイル ${count} 件 → 文書だけ: ${docs_only}"
+          echo "docs_only=${docs_only}" >> "$GITHUB_OUTPUT"
+
   test:
+    needs: changes
     permissions:
       contents: write      # VRT更新画像のGit Commit & Push、およびHTMLレポート（gh-pages）のデプロイ権限
       pull-requests: write # PR画面へのステータスコメント投稿・更新権限
@@ -35,11 +84,15 @@ jobs:
     # ※無関係なIssueコメントや通常のPRコメントでの無駄なActions起動を防ぎます
     # ※書き込み権限のない第三者のコメントで、書き込み権限つきのトークンが動くことを防ぎます
     # -------------------------------------------------------------------------
+    # 文書だけの PR（上の changes ジョブの判定）では、このジョブを飛ばす。飛ばしたジョブは成功として報告されるため、必須のチェック（test）は通る。
+    # !cancelled(): changes が飛ばされた（コメントのイベント）・失敗したときも、判定の出力が空になるだけで、このジョブは従来どおり動く。
     if: |
-      github.event_name == 'pull_request' ||
-      (github.event.issue.pull_request &&
-       contains(github.event.comment.body, '/update-vrt') &&
-       contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association))
+      !cancelled() &&
+      needs.changes.outputs.docs_only != 'true' &&
+      (github.event_name == 'pull_request' ||
+       (github.event.issue.pull_request &&
+        contains(github.event.comment.body, '/update-vrt') &&
+        contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)))
 
     # 35 分（install-deps の延長に合わせて延長。元は #19 で 20 分。[監査] 承認と追認の扱いは #321 6825272092）
     timeout-minutes: 35
