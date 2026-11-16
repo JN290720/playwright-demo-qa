@@ -37,6 +37,7 @@ const FILE_INFO = {
   'saucedemo-checkout-reload.spec.ts': { site: 'SauceDemo', viewpoint: '異常系' },
   'saucedemo-cart-rewrite.spec.ts': { site: 'SauceDemo', viewpoint: '異常系' },
   'saucedemo-checkout-skip-step.spec.ts': { site: 'SauceDemo', viewpoint: '異常系' },
+  'saucedemo-checkout-reset.spec.ts': { site: 'SauceDemo', viewpoint: '異常系' },
   'saucedemo-product-detail-errors.spec.ts': { site: 'SauceDemo', viewpoint: '異常系' },
   'saucedemo-product-detail-invalid-id.spec.ts': { site: 'SauceDemo', viewpoint: '異常系' },
   'saucedemo-qa-destructive.spec.ts': { site: 'SauceDemo', viewpoint: '異常系・破壊的操作' },

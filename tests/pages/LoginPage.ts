@@ -16,6 +16,10 @@ export class LoginPage {
   readonly menuButton: Locator;    // 左上のハンバーガーメニューボタン（スマホ表示時など）
   readonly sideMenu: Locator;      // 開いたサイドナビゲーションメニュー
   readonly logoutLink: Locator;    // サイドメニュー内の「Logout」リンク
+  readonly allItemsLink: Locator;  // サイドメニュー内の「All Items」リンク
+  readonly aboutLink: Locator;     // サイドメニュー内の「About」リンク
+  readonly resetLink: Locator;     // サイドメニュー内の「Reset App State」リンク
+  readonly closeMenuButton: Locator; // サイドメニューを閉じる「×」ボタン
 
   /**
    * コンストラクタ：ページ上の各要素の識別子（ロケータ）を定義
@@ -32,6 +36,10 @@ export class LoginPage {
     this.menuButton = page.locator('#react-burger-menu-btn');
     this.sideMenu = page.locator('.bm-menu-wrap');
     this.logoutLink = page.locator('#logout_sidebar_link');
+    this.allItemsLink = page.locator('[data-test="inventory-sidebar-link"]');
+    this.aboutLink = page.locator('[data-test="about-sidebar-link"]');
+    this.resetLink = page.locator('[data-test="reset-sidebar-link"]');
+    this.closeMenuButton = page.locator('#react-burger-cross-btn');
   }
 
   /**

@@ -10,20 +10,13 @@ import { TIMEOUTS } from './helpers/timeouts';
  * PC とスマホ（`mobile-chrome`）の両方で実行される。
  */
 
-const sideMenuLinks = {
-  allItems: '[data-test="inventory-sidebar-link"]',
-  about: '[data-test="about-sidebar-link"]',
-  logout: '[data-test="logout-sidebar-link"]',
-  reset: '[data-test="reset-sidebar-link"]',
-} as const;
-
 test.describe('サイドメニューとログアウト', () => {
   test('メニューに、All Items / About / Logout / Reset App State のリンクが表示されること', async ({ page }) => {
     const { loginPage } = await loginAndShowInventory(page);
     await openSideMenu(loginPage);
 
-    for (const selector of Object.values(sideMenuLinks)) {
-      await expect(page.locator(selector)).toBeVisible();
+    for (const link of [loginPage.allItemsLink, loginPage.aboutLink, loginPage.logoutLink, loginPage.resetLink]) {
+      await expect(link).toBeVisible();
     }
   });
 
@@ -33,7 +26,7 @@ test.describe('サイドメニューとログアウト', () => {
     await expect(new CheckoutPage(page).checkoutButton).toBeVisible();
 
     await openSideMenu(loginPage);
-    await page.locator(sideMenuLinks.allItems).click();
+    await loginPage.allItemsLink.click();
 
     await expect(page).toHaveURL(/inventory\.html/);
     await expect(inventoryPage.title).toHaveText('Products');
@@ -45,15 +38,15 @@ test.describe('サイドメニューとログアウト', () => {
     const { loginPage } = await loginAndShowInventory(page);
     await openSideMenu(loginPage);
 
-    await expect(page.locator(sideMenuLinks.about)).toHaveAttribute('href', 'https://saucelabs.com/');
-    await page.locator(sideMenuLinks.about).click();
+    await expect(loginPage.aboutLink).toHaveAttribute('href', 'https://saucelabs.com/');
+    await loginPage.aboutLink.click();
     await expect(page).toHaveURL('https://saucelabs.com/');
   });
 
   test('Logout: ログイン画面に戻り、入力欄が空で、直接アクセスしても商品一覧が見られないこと', async ({ page }) => {
     const { loginPage } = await loginAndShowInventory(page);
     await openSideMenu(loginPage);
-    await page.locator(sideMenuLinks.logout).click();
+    await loginPage.logoutLink.click();
 
     // ログイン画面に戻り、前のユーザー名が残っていない
     await expect(loginPage.loginButton).toBeVisible();
@@ -73,7 +66,7 @@ test.describe('サイドメニューとログアウト', () => {
     await expect(inventoryPage.cartBadge).toHaveText('2');
 
     await openSideMenu(loginPage);
-    await page.locator(sideMenuLinks.reset).click();
+    await loginPage.resetLink.click();
 
     // Reset の後も、メニューは開いたまま（スマホでは画面を覆うため、閉じてから操作する）
     await page.locator('#react-burger-cross-btn').click();
@@ -94,7 +87,7 @@ test.describe('サイドメニューとログアウト', () => {
     await expect(page.locator('[data-test="remove-sauce-labs-backpack"]')).toBeVisible();
 
     await openSideMenu(loginPage);
-    await page.locator(sideMenuLinks.reset).click();
+    await loginPage.resetLink.click();
 
     await expect(page.locator('[data-test="add-to-cart-sauce-labs-backpack"]')).toBeVisible({ timeout: TIMEOUTS.SHORT });
   });
