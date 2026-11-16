@@ -153,7 +153,7 @@ test.describe('SauceDemo 商品詳細ページ（不正な ID）検証', () => {
     }
   });
 
-  test('B-3: 一覧にない ID で開いたときの価格の欄の表示を記録する', async ({ page }, testInfo) => {
+  test('B-3: 一覧にない ID で開いたときの商品詳細の価格の欄の表示を記録する', async ({ page }, testInfo) => {
     await login(page);
     for (const id of ['99', 'abc']) {
       const observed = await openDetail(page, id);

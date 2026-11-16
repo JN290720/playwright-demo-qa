@@ -39,7 +39,7 @@ test.describe('SauceDemo 購入手続き入力の異常系（項目ごとの欠�
     });
   }
 
-  test('入力欄に日本語（全角）の氏名・郵便番号を入れても、確認画面へ進めること', async ({ page }) => {
+  test('購入手続きの入力欄に日本語（全角）の氏名・郵便番号を入れても、次の画面へ進めること', async ({ page }) => {
     const checkoutPage = new CheckoutPage(page);
     await goToCheckoutStepOne(page);
 
