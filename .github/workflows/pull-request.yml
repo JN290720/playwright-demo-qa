@@ -67,7 +67,13 @@ jobs:
             esac
           done <<< "$files"
           if [ "$count" -eq 0 ]; then docs_only=false; fi
+          # 変更ファイルの一覧の上限は 3,000 件（API の上限）。それ以上は、一覧が欠けるため、飛ばさない
+          if [ "$count" -ge 3000 ]; then docs_only=false; fi
           echo "変更ファイル ${count} 件 → 文書だけ: ${docs_only}"
+          if [ "$docs_only" = true ]; then
+            echo "文書だけの変更のため、test ジョブ（E2E・VRT）を飛ばします" | tee -a "$GITHUB_STEP_SUMMARY"
+            echo "::notice::文書だけの変更のため、test ジョブ（E2E・VRT）を飛ばします"
+          fi
           echo "docs_only=${docs_only}" >> "$GITHUB_OUTPUT"
 
   test:
