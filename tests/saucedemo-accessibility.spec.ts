@@ -122,7 +122,7 @@ test.describe('SauceDemo Accessibility (a11y) Tests', () => {
     await expect(new InventoryPage(page).title).toBeVisible();
     await loginPage.openSideMenu();
     await expect.poll(async () => (await loginPage.sideMenu.boundingBox())?.x).toBe(0);
-    await page.locator('[data-test="reset-sidebar-link"]').hover();
+    await loginPage.resetLink.hover();
     await expectNoA11yViolations(page, testInfo);
   });
 

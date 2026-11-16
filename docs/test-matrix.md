@@ -21,7 +21,7 @@
 | 購入手続き入力 | ✅ 日本語の氏名・郵便番号で確認へ進む（`checkout-validation`）、C2（Cancel。`cart-checkout`）、K4（キーボードで完走）、problem の入力欄（名・姓）まで進む（`user-types` 前提 P2） | ✅ 項目ごとの欠落（`checkout-validation`）、全項目未入力（`qa-destructive` P11）。空のカートで進める既知の不具合（C1） | ✅ 姓・名・郵便番号へのインジェクション風文字列 4 種で、ダイアログ・注入要素が 0 件（`checkout-injection`。#169） | ✅ `accessibility` P5・P5b（入力エラー表示）・K4 | ✅ VRT P5・P11 | ─ |
 | 購入確認 | ✅ 小計・税・合計と、各商品の価格（`checkout-totals` の全ケース。`e2e-purchase` の 5）、C3（Cancel。`cart-checkout`）、error で確認画面（`checkout-step-two`）まで進み Finish が見える（`user-types` 前提 E2。Finish の不具合はサイト不具合の台帳 7） | ✅ X1（購入者情報なしで直接開く。既知の不具合として記録。台帳 17。`checkout-skip-step`） | △ `protected-pages` S3（未ログインの直リンク） | ✅ `accessibility` P6 | ✅ VRT P6 | ─ |
 | 購入完了 | ✅ 注文完了まで（`e2e-purchase`。`@prd`）、完了後に「戻る」で一覧まで戻ってもカートが空（`checkout-after-purchase`。#168）、「Back Home」で一覧に戻る（`back-navigation` B1） | ✅ `qa-destructive` P12（完了画面の直リンク） | △ 直リンクの扱い（`qa-destructive` P12） | ✅ `accessibility` P7 | ✅ VRT P7 | ─ |
-| サイドメニュー | ✅ 各リンク（All Items / About / Logout / Reset App State）、閉じる（×・Esc）（`sidebar-logout`） | ❌ | ❌ | ✅ `accessibility` P8・K3（キーボードで開閉） | ✅ VRT P8 | ─（対象外）※1 |
+| サイドメニュー | ✅ 各リンク（All Items / About / Logout / Reset App State）、閉じる（×・Esc）（`sidebar-logout`） | △ RS1（購入の途中で Reset App State を押したあと。既知の不具合として記録。台帳 18。`checkout-reset`） | ❌ | ✅ `accessibility` P8・K3（キーボードで開閉） | ✅ VRT P8 | ─（対象外）※1 |
 | ログアウト | ✅ ログイン画面に戻る・入力欄が空（`sidebar-logout`） | ✅ 戻るボタン後の保護（`qa-destructive` P7）、ログアウト後の直リンクの保護（`checkout-validation`。認可の検証） | △ Cookie の操作（`protected-pages` S6・S7。S8 は既知の不具合） | ❌※2 | ❌ | ─（対象外）※1 |
 
 補足:

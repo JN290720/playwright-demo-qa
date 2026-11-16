@@ -36,6 +36,7 @@
 | `R` | `saucedemo-checkout-reload`（購入手続きの途中の再読み込み） | R1 |
 | `W` | `saucedemo-cart-rewrite`（カートの保存〈cart-contents〉の書き換え） | W1・W2・W3 前提・W3・W4 |
 | `X` | `saucedemo-checkout-skip-step`（購入手順の飛ばし） | X1 |
+| `RS` | `saucedemo-checkout-reset`（購入の途中のカート初期化） | RS1 |
 | 番号 | `todomvc-basic` | 1〜6（接頭辞ではなく、番号だけ） |
 
 ## 4. テスト ID 台帳（`tests/` の spec、`origin/main` の宣言から実測）
@@ -57,10 +58,11 @@
 | `saucedemo-checkout-reload.spec.ts` | R | 1 | R1（購入の途中の再読み込み。現状の記録） |
 | `saucedemo-cart-rewrite.spec.ts` | W | 5 | W1・W2（test.fail）・W3 前提（ID は「W3 前提」）・W3（test.fail）・W4。基準の W0 は各テストの前提（beforeEach）で、件数に入れない |
 | `saucedemo-checkout-skip-step.spec.ts` | X | 1 | X1（test.fail。購入者情報なしで購入確認を直接開く） |
+| `saucedemo-checkout-reset.spec.ts` | RS | 1 | RS1（test.fail。購入の途中で Reset App State を押したあと） |
 
 **ID の無い spec（11 件）**: `login`・`saucedemo-checkout-after-purchase`・`saucedemo-checkout-injection`・`saucedemo-checkout-validation`・`saucedemo-e2e-purchase`・`saucedemo-inventory-cart`・`saucedemo-security-input`・`saucedemo-sidebar-logout`・`saucedemo-user-types`・`todomvc-smoke`・`api-demo`。ID は任意（新しく書く場合は、規則 2 に従う）。
 
-**合計**: ID の付いた 14 spec で 102 件（1 プロジェクトあたり。件数の列の合計）。
+**合計**: ID の付いた 15 spec で 103 件（1 プロジェクトあたり。件数の列の合計）。
 
 ## 5. 参照の例
 
